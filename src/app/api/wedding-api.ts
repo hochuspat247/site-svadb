@@ -1,29 +1,12 @@
+import type {
+  GiftBooking,
+  GiftCategory,
+  Guest,
+  MusicWish,
+  WeddingGift,
+} from "../shared/wedding-types";
+
 const API_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
-
-interface Guest {
-  id: string;
-  name: string;
-  side: string;
-  phone: string;
-  email: string;
-  willAttend: boolean;
-  attendanceLabel: string;
-  guestsCount: number;
-  guestNames: string;
-  drink: string;
-  allergy: string;
-  photo: string | null;
-  createdAt: string;
-}
-
-interface GiftBooking {
-  id?: string;
-  giftId: number;
-  guestId: string;
-  guestName: string;
-  selectedCountry?: string;
-  bookedAt: string;
-}
 
 export async function registerGuest(data: {
   name: string;
@@ -78,11 +61,35 @@ export async function fetchGuests(): Promise<Guest[]> {
   }
 }
 
+export async function fetchGiftCatalog(): Promise<{
+  categories: GiftCategory[];
+  gifts: WeddingGift[];
+}> {
+  try {
+    const response = await fetch(`${API_URL}/gifts`);
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error("Error fetching gifts:", result);
+      return { categories: [], gifts: [] };
+    }
+
+    return {
+      categories: result.categories || [],
+      gifts: result.gifts || [],
+    };
+  } catch (error) {
+    console.error("Network error fetching gifts:", error);
+    return { categories: [], gifts: [] };
+  }
+}
+
 export async function bookGift(data: {
   giftId: number;
   guestId: string;
   guestName: string;
   selectedCountry?: string;
+  contributionAmount?: number | null;
 }): Promise<{ success: boolean; booking?: GiftBooking; error?: string; bookedBy?: string }> {
   try {
     const response = await fetch(`${API_URL}/gift/book`, {
@@ -109,7 +116,7 @@ export async function bookGift(data: {
 
 export async function fetchGiftBookings(): Promise<GiftBooking[]> {
   try {
-    const response = await fetch(`${API_URL}/gifts`);
+    const response = await fetch(`${API_URL}/gift-bookings`);
     const result = await response.json();
 
     if (!response.ok) {
@@ -122,14 +129,6 @@ export async function fetchGiftBookings(): Promise<GiftBooking[]> {
     console.error("Network error fetching gift bookings:", error);
     return [];
   }
-}
-
-interface MusicWish {
-  id: string;
-  song: string;
-  guestId?: string | null;
-  guestName: string;
-  createdAt: string;
 }
 
 export async function addMusicWish(data: {

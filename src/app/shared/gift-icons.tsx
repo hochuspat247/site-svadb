@@ -1,0 +1,68 @@
+import {
+  Battery,
+  Box,
+  Camera,
+  Car,
+  CircleDollarSign,
+  Coffee,
+  Compass,
+  Dumbbell,
+  Gamepad2,
+  Gift,
+  Globe,
+  Heart,
+  Home,
+  Monitor,
+  Mouse,
+  Music,
+  Plane,
+  ShoppingBag,
+  Sofa,
+  Sparkles,
+  Smartphone,
+  Store,
+  Ticket,
+  Tv,
+  Utensils,
+  UtensilsCrossed,
+  Wine,
+  Wrench,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+export const giftIconMap: Record<string, LucideIcon> = {
+  Battery,
+  Box,
+  Camera,
+  Car,
+  CircleDollarSign,
+  Coffee,
+  Compass,
+  Dumbbell,
+  Gamepad2,
+  Gift,
+  Globe,
+  Heart,
+  Home,
+  Monitor,
+  Mouse,
+  Music,
+  Plane,
+  ShoppingBag,
+  Sofa,
+  Sparkles,
+  Smartphone,
+  Store,
+  Ticket,
+  Tv,
+  Utensils,
+  UtensilsCrossed,
+  Wine,
+  Wrench,
+};
+
+export const giftIconOptions = Object.keys(giftIconMap).sort();
+
+export function getGiftIconByKey(iconKey: string) {
+  return giftIconMap[iconKey] || Gift;
+}
