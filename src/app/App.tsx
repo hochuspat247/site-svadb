@@ -1,9 +1,39 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
 import { Heart, Gift, Utensils, Cake, Sparkles, MapPin, Calendar, Upload, Check, Plane, BedDouble, Coffee, UtensilsCrossed, ChefHat, Wine, ArrowUpRight, Users, Camera, Compass, Home, Car, Sofa, Tv, Music, Gamepad2, Package, BookHeart, Palette, HelpCircle, ListMusic, ImageIcon, Smartphone, Mouse, Battery, ShoppingBag, Wrench, Monitor, Ticket, Mountain, CircleDollarSign, Dumbbell, Store, Globe, Wallet, Palette as PaletteIcon, Box, Bike, X } from "lucide-react";
-import { registerGuest, fetchGiftCatalog, fetchGuests, bookGift, fetchGiftBookings, addMusicWish, fetchMusicWishes } from "./api/wedding-api";
+import {
+  registerGuest,
+  fetchGiftCatalog,
+  fetchGuests,
+  bookGift,
+  fetchGiftBookings,
+  addMusicWish,
+  fetchMusicWishes,
+  fetchSiteSections,
+} from "./api/wedding-api";
+import { defaultSiteSections } from "./data/site-builder-defaults.js";
 import { getGiftIconByKey } from "./shared/gift-icons";
-import type { GiftBooking, GiftCategory, Guest, MusicWish, TravelOption, WeddingGift } from "./shared/wedding-types";
+import {
+  buildSiteContentMap,
+  getDressColors,
+  getFaqItems,
+  getGallerySlides,
+  getScheduleItems,
+  getSection,
+  getStorySlides,
+  sectionSettings,
+  splitCoupleNames,
+} from "./shared/site-content";
+import { resolveSiteImage } from "./shared/site-photos";
+import type {
+  GiftBooking,
+  GiftCategory,
+  Guest,
+  MusicWish,
+  SiteSection,
+  TravelOption,
+  WeddingGift,
+} from "./shared/wedding-types";
 import photo01 from "../assets/photos/photo_2026-05-22_13-58-55.jpg";
 import photo02 from "../assets/photos/photo_2026-05-22_13-59-02.jpg";
 import photo03 from "../assets/photos/photo_2026-05-22_13-59-06.jpg";
@@ -22,55 +52,6 @@ import photo15 from "../assets/photos/photo_2026-05-22_13-59-50.jpg";
 import photo16 from "../assets/photos/photo_2026-05-22_13-59-54.jpg";
 import photo17 from "../assets/photos/photo_2026-05-22_14-00-00.jpg";
 import photo18 from "../assets/photos/photo_2026-05-22_14-00-04.jpg";
-
-const BG = photo10;
-const DANCE = photo04;
-const VENUE = photo18;
-const FAMILY = photo17;
-const DRESS2 = photo01;
-const DRESS3 = photo18;
-
-const MOOD_IMAGES = [
-  photo01,
-  photo02,
-  photo03,
-  photo04,
-  photo05,
-  photo06,
-  photo07,
-  photo08,
-  photo09,
-  photo10,
-  photo11,
-  photo12,
-  photo13,
-  photo14,
-  photo15,
-  photo16,
-  photo17,
-  photo18,
-];
-
-const MOOD_LABELS = [
-  "Нежность",
-  "Взгляд",
-  "Рядом",
-  "Закат",
-  "Улыбки",
-  "Тепло",
-  "Объятия",
-  "Свет",
-  "История",
-  "Магия",
-  "Момент",
-  "Тишина",
-  "Искры",
-  "Романтика",
-  "Чувства",
-  "Память",
-  "Семья",
-  "Любовь",
-];
 
 const CORAL = "#E85A4F";
 const CORAL_DARK = "#D14A40";
@@ -296,6 +277,7 @@ export default function App() {
   const [activeTravelGiftId, setActiveTravelGiftId] = useState<number | null>(null);
   const [showAllGifts, setShowAllGifts] = useState(false);
   const [giftPreviewLimit, setGiftPreviewLimit] = useState(6);
+  const [siteSections, setSiteSections] = useState<SiteSection[]>(defaultSiteSections);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -334,11 +316,12 @@ export default function App() {
   }, [giftCategories, selectedCategory]);
 
   const loadData = async () => {
-    const [guests, bookings, wishes, catalog] = await Promise.all([
+    const [guests, bookings, wishes, catalog, sections] = await Promise.all([
       fetchGuests(),
       fetchGiftBookings(),
       fetchMusicWishes(),
       fetchGiftCatalog(),
+      fetchSiteSections(),
     ]);
 
     setAllGuests(guests);
@@ -346,7 +329,62 @@ export default function App() {
     setMusicWishes(wishes);
     setGiftCategories(catalog.categories);
     setGiftCatalog(catalog.gifts);
+
+    if (sections.length) {
+      setSiteSections(
+        sections
+          .filter((section) => section.isActive)
+          .sort((a, b) => a.sortOrder - b.sortOrder),
+      );
+    }
   };
+
+  const sectionMap = useMemo(
+    () => buildSiteContentMap(siteSections),
+    [siteSections],
+  );
+
+  const heroSettings = sectionSettings(getSection(sectionMap, "hero"));
+  const welcomeSettings = sectionSettings(getSection(sectionMap, "welcome"));
+  const locationSettings = sectionSettings(getSection(sectionMap, "location"));
+  const scheduleSettings = sectionSettings(getSection(sectionMap, "schedule"));
+  const dressSettings = sectionSettings(getSection(sectionMap, "dress-code"));
+  const storySettings = sectionSettings(getSection(sectionMap, "story"));
+  const gallerySettings = sectionSettings(getSection(sectionMap, "gallery"));
+  const giftsSettings = sectionSettings(getSection(sectionMap, "gifts"));
+  const rsvpSettings = sectionSettings(getSection(sectionMap, "rsvp"));
+  const musicSettings = sectionSettings(getSection(sectionMap, "music"));
+  const faqSettings = sectionSettings(getSection(sectionMap, "faq"));
+  const closingSettings = sectionSettings(getSection(sectionMap, "closing"));
+
+  const coupleNames = useMemo(
+    () => splitCoupleNames(heroSettings.title),
+    [heroSettings.title],
+  );
+
+  const BG = resolveSiteImage(heroSettings.primaryImage) || photo10;
+  const DANCE = resolveSiteImage(heroSettings.secondaryImage) || photo04;
+  const VENUE = resolveSiteImage(locationSettings.primaryImage) || photo18;
+  const FAMILY = resolveSiteImage(closingSettings.primaryImage) || photo17;
+  const DRESS2 = resolveSiteImage(dressSettings.primaryImage) || photo01;
+  const DRESS3 = resolveSiteImage(dressSettings.secondaryImage) || photo18;
+  const moodSlides = useMemo(
+    () => getGallerySlides(gallerySettings),
+    [gallerySettings],
+  );
+  const storySlides = useMemo(
+    () => getStorySlides(storySettings.items),
+    [storySettings.items],
+  );
+  const scheduleItems = useMemo(
+    () => getScheduleItems(scheduleSettings.items),
+    [scheduleSettings.items],
+  );
+  const dressColors = useMemo(
+    () => getDressColors(dressSettings.items),
+    [dressSettings.items],
+  );
+  const faqItems = useMemo(() => getFaqItems(faqSettings.items), [faqSettings.items]);
 
   const categories = useMemo(
     () => [
@@ -692,7 +730,12 @@ export default function App() {
           <Flower size={90} color={PINK_LIGHT} className="hidden lg:block absolute top-56 left-12 xl:left-20" rotate={-15} />
           <div className="max-w-2xl mx-auto">
             <h1 style={{ fontWeight: 900, fontSize: "clamp(36px, 6vw, 88px)", lineHeight: 0.95, letterSpacing: "-0.02em" }}>
-              РЎР’РђР”Р•Р‘РќРћР•<br/>РџР РР“Р›РђРЁР•РќРР•
+              {(heroSettings.note || "Свадебное приглашение").split(" ").map((word, index, words) => (
+                <React.Fragment key={`${word}-${index}`}>
+                  {index > 0 && index === Math.ceil(words.length / 2) ? <br /> : null}
+                  {word}{index < words.length - 1 ? " " : ""}
+                </React.Fragment>
+              ))}
             </h1>
           </div>
         </section>
@@ -723,18 +766,32 @@ export default function App() {
                   className="absolute right-4 sm:right-6 lg:right-12 xl:right-16 bottom-4 sm:bottom-6 lg:bottom-12 xl:bottom-16 w-32 h-32 sm:w-36 sm:h-36 lg:w-44 lg:h-44 xl:w-48 xl:h-48 rounded-full flex flex-col items-center justify-center text-white text-center"
                   style={{ background: CORAL, fontWeight: 800, boxShadow: "0 12px 32px rgba(0,0,0,0.3)", padding: "12px" }}
                 >
-                  <div style={{ fontSize: "clamp(16px, 1.8vw, 22px)", lineHeight: 1.1, marginBottom: "4px", fontWeight: 900 }}>5-6</div>
-                  <div style={{ fontSize: "clamp(14px, 1.5vw, 18px)", lineHeight: 1, fontWeight: 800, letterSpacing: "0.05em" }}>РЎР•РќРў.</div>
-                  <div style={{ fontSize: "clamp(16px, 1.8vw, 22px)", lineHeight: 1.1, marginTop: "4px", fontWeight: 900 }}>2026</div>
+                  {(heroSettings.subtitle || "5-6 сентября 2026").split(/\s+/).map((part, index) => (
+                    <div
+                      key={`${part}-${index}`}
+                      style={{
+                        fontSize: index === 1 ? "clamp(14px, 1.5vw, 18px)" : "clamp(16px, 1.8vw, 22px)",
+                        lineHeight: index === 1 ? 1 : 1.1,
+                        marginBottom: index === 0 ? "4px" : undefined,
+                        marginTop: index === 2 ? "4px" : undefined,
+                        fontWeight: index === 1 ? 800 : 900,
+                        letterSpacing: index === 1 ? "0.05em" : undefined,
+                      }}
+                    >
+                      {part}
+                    </div>
+                  ))}
                 </div>
               </div>
 
               <div className="lg:col-span-5 px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12 xl:px-12 xl:py-14 flex flex-col justify-center relative">
                 <Flower size={90} color={PINK_LIGHT} className="hidden lg:block absolute top-8 right-8 pointer-events-none" rotate={20} style={{ opacity: 0.7 }} />
                 <div className="relative max-w-full">
-                  <div style={{ color: CORAL, fontWeight: 800, letterSpacing: "0.2em", fontSize: "clamp(12px, 1.4vw, 15px)", lineHeight: 1.4 }}>5-6 РЎР•РќРўРЇР‘Р РЇ 2026</div>
+                  <div style={{ color: CORAL, fontWeight: 800, letterSpacing: "0.2em", fontSize: "clamp(12px, 1.4vw, 15px)", lineHeight: 1.4 }}>
+                    {heroSettings.subtitle || "5-6 сентября 2026"}
+                  </div>
                   <h1 className="mt-4 sm:mt-6 lg:mt-8" style={{ fontWeight: 900, fontSize: "clamp(44px, 5.5vw, 82px)", lineHeight: 0.95, letterSpacing: "-0.03em" }}>
-                    РР’РђРќ
+                    {coupleNames.groom}
                   </h1>
                   <div className="my-2 sm:my-3 lg:my-4 flex items-center gap-2 sm:gap-3 lg:gap-4">
                     <div className="h-px flex-1" style={{ background: INK }} />
@@ -742,10 +799,10 @@ export default function App() {
                     <div className="h-px flex-1" style={{ background: INK }} />
                   </div>
                   <h1 style={{ fontWeight: 900, fontSize: "clamp(38px, 4.8vw, 72px)", lineHeight: 0.95, letterSpacing: "-0.03em" }}>
-                    РђРќРђРЎРўРђРЎРРЇ
+                    {coupleNames.bride}
                   </h1>
                   <p className="mt-6 sm:mt-8 lg:mt-10" style={{ fontSize: "clamp(15px, 1.4vw, 17px)", color: "#555", lineHeight: 1.6 }}>
-                    Р‘СѓРґРµРј СЃС‡Р°СЃС‚Р»РёРІС‹ РІРёРґРµС‚СЊ РІР°СЃ РІ СЌС‚РѕС‚ РґРµРЅСЊ СЂСЏРґРѕРј.
+                    {heroSettings.description || "Будем счастливы видеть вас в этот день рядом."}
                   </p>
                 </div>
               </div>
@@ -758,11 +815,18 @@ export default function App() {
                   <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-2xl flex items-center justify-center shrink-0" style={{ background: PINK_LIGHT }}>
                     <Heart size={24} style={{ color: CORAL }} fill={CORAL} />
                   </div>
-                  <div style={{ fontWeight: 900, fontSize: "clamp(22px, 2.5vw, 36px)", letterSpacing: "-0.01em", lineHeight: 1.1 }}>Р”РћР РћР“РР• Р”Р РЈР—Р¬РЇ!</div>
+                  <div style={{ fontWeight: 900, fontSize: "clamp(22px, 2.5vw, 36px)", letterSpacing: "-0.01em", lineHeight: 1.1 }}>
+                    {welcomeSettings.title || "Дорогие друзья!"}
+                  </div>
                 </div>
                 <p style={{ fontSize: "clamp(15px, 1.3vw, 17px)", lineHeight: 1.7, color: "#555" }}>
-                  РЎ СЂР°РґРѕСЃС‚СЊСЋ Рё С‚СЂРµРїРµС‚РѕРј РїСЂРёРіР»Р°С€Р°РµРј РІР°СЃ СЂР°Р·РґРµР»РёС‚СЊ СЃ РЅР°РјРё РѕРґРёРЅ РёР· СЃР°РјС‹С… СЃС‡Р°СЃС‚Р»РёРІС‹С… РґРЅРµР№ РЅР°С€РµР№ Р¶РёР·РЅРё вЂ” РґРµРЅСЊ РЅР°С€РµР№ СЃРІР°РґСЊР±С‹. Р‘СѓРґРµРј СЃС‡Р°СЃС‚Р»РёРІС‹ РІРёРґРµС‚СЊ РІР°СЃ СЂСЏРґРѕРј, С‡С‚РѕР±С‹ РІРјРµСЃС‚Рµ СЃРѕР·РґР°С‚СЊ РІРѕСЃРїРѕРјРёРЅР°РЅРёСЏ, РєРѕС‚РѕСЂС‹Рµ РѕСЃС‚Р°РЅСѓС‚СЃСЏ СЃ РЅР°РјРё РЅР°РІСЃРµРіРґР°.
+                  {welcomeSettings.description}
                 </p>
+                {welcomeSettings.note ? (
+                  <p className="mt-4" style={{ fontSize: "clamp(14px, 1.2vw, 15px)", lineHeight: 1.65, color: "#777" }}>
+                    {welcomeSettings.note}
+                  </p>
+                ) : null}
               </div>
 
               <div className="p-6 sm:p-8 lg:p-12 xl:p-16 border-t lg:border-t-0" style={{ borderColor: "#F0E8E8" }}>
@@ -770,20 +834,27 @@ export default function App() {
                   <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-2xl flex items-center justify-center shrink-0" style={{ background: PINK_LIGHT }}>
                     <MapPin size={24} style={{ color: CORAL }} />
                   </div>
-                  <div style={{ fontWeight: 900, fontSize: "clamp(20px, 2.5vw, 34px)", letterSpacing: "-0.01em", lineHeight: 1.1 }}>РњР•РЎРўРћ РџР РћР’Р•Р”Р•РќРРЇ</div>
+                  <div style={{ fontWeight: 900, fontSize: "clamp(20px, 2.5vw, 34px)", letterSpacing: "-0.01em", lineHeight: 1.1 }}>
+                    {locationSettings.title || "Место проведения"}
+                  </div>
                 </div>
-                <p style={{ fontSize: "clamp(14px, 1.2vw, 16px)", color: "#666", lineHeight: 1.7 }}>
-                  Рі. РљСЂР°СЃРЅРѕРґР°СЂ<br/>РўРѕС‡РЅС‹Р№ Р°РґСЂРµСЃ РїРѕСЏРІРёС‚СЃСЏ РїРѕР·РґРЅРµРµ РЅР° СЃР°Р№С‚Рµ
+                <p style={{ fontSize: "clamp(14px, 1.2vw, 16px)", color: "#666", lineHeight: 1.7, whiteSpace: "pre-line" }}>
+                  {locationSettings.description}
                 </p>
+                {locationSettings.note ? (
+                  <p className="mt-3" style={{ fontSize: "clamp(13px, 1.1vw, 15px)", color: "#888", lineHeight: 1.6 }}>
+                    {locationSettings.note}
+                  </p>
+                ) : null}
                 <div className="mt-6 lg:mt-7 rounded-2xl lg:rounded-3xl overflow-hidden aspect-[16/9]">
                   <ImageWithFallback src={VENUE} alt="" className="w-full h-full object-cover" style={{ filter: "grayscale(40%)" }} />
                 </div>
                 <button
                   className="mt-5 lg:mt-6 px-6 sm:px-8 lg:px-10 py-3 sm:py-3.5 lg:py-4 rounded-full text-white transition active:scale-[0.98] inline-flex items-center gap-2"
                   style={{ background: CORAL, fontWeight: 800, letterSpacing: "0.08em", fontSize: "clamp(11px, 1.2vw, 13px)" }}
-                  onClick={() => window.open("https://maps.google.com", "_blank")}
+                  onClick={() => window.open(locationSettings.buttonHref || "https://maps.google.com", "_blank")}
                 >
-                  РџРћРЎРњРћРўР Р•РўР¬ РќРђ РљРђР РўР• в†’
+                  {locationSettings.buttonLabel || "Посмотреть на карте →"}
                 </button>
               </div>
             </div>
@@ -795,22 +866,50 @@ export default function App() {
                   <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-2xl flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.18)" }}>
                     <Calendar size={24} color="white" />
                   </div>
-                  <div style={{ fontWeight: 900, fontSize: "clamp(24px, 3.5vw, 52px)", letterSpacing: "-0.02em" }}>Р РђРЎРџРћР РЇР”РћРљ Р”РќРЇ</div>
-                </div>
-
-                <div className="max-w-3xl mx-auto text-center">
-                  <div className="rounded-3xl p-8 sm:p-10 lg:p-12 xl:p-14" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)" }}>
-                    <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-white flex items-center justify-center mx-auto mb-6 lg:mb-8" style={{ color: CORAL }}>
-                      <Calendar size={32} />
-                    </div>
-                    <div style={{ fontWeight: 900, fontSize: "clamp(24px, 3vw, 36px)", lineHeight: 1.2, letterSpacing: "-0.02em", marginBottom: "16px" }}>
-                      РЎРєРѕСЂРѕ Р±СѓРґРµС‚ РѕРїСѓР±Р»РёРєРѕРІР°РЅ
-                    </div>
-                    <p style={{ fontSize: "clamp(15px, 1.4vw, 18px)", opacity: 0.9, lineHeight: 1.6 }}>
-                      Р”РµС‚Р°Р»СЊРЅРѕРµ СЂР°СЃРїРёСЃР°РЅРёРµ С†РµСЂРµРјРѕРЅРёРё, Р±Р°РЅРєРµС‚Р° Рё СЂР°Р·РІР»РµС‡РµРЅРёР№ РїРѕСЏРІРёС‚СЃСЏ РїРѕР·РґРЅРµРµ.<br/>РЎР»РµРґРёС‚Рµ Р·Р° РѕР±РЅРѕРІР»РµРЅРёСЏРјРё РЅР° СЃР°Р№С‚Рµ!
-                    </p>
+                  <div style={{ fontWeight: 900, fontSize: "clamp(24px, 3.5vw, 52px)", letterSpacing: "-0.02em" }}>
+                    {scheduleSettings.title || "Расписание дня"}
                   </div>
                 </div>
+
+                {scheduleItems.length ? (
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    {scheduleItems.map((item) => (
+                      <div
+                        key={`${item.time}-${item.title}`}
+                        className="rounded-3xl p-6 sm:p-7"
+                        style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)" }}
+                      >
+                        <div style={{ fontWeight: 900, fontSize: "clamp(24px, 3vw, 36px)", lineHeight: 1.1 }}>
+                          {item.time}
+                        </div>
+                        <div className="mt-2" style={{ fontWeight: 800, fontSize: "clamp(18px, 2vw, 24px)" }}>
+                          {item.title}
+                        </div>
+                        {item.text ? (
+                          <p className="mt-3" style={{ fontSize: "clamp(15px, 1.4vw, 17px)", opacity: 0.9, lineHeight: 1.6 }}>
+                            {item.text}
+                          </p>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="max-w-3xl mx-auto text-center">
+                    <div className="rounded-3xl p-8 sm:p-10 lg:p-12 xl:p-14" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)" }}>
+                      <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-white flex items-center justify-center mx-auto mb-6 lg:mb-8" style={{ color: CORAL }}>
+                        <Calendar size={32} />
+                      </div>
+                      <div style={{ fontWeight: 900, fontSize: "clamp(24px, 3vw, 36px)", lineHeight: 1.2, letterSpacing: "-0.02em", marginBottom: "16px" }}>
+                        {scheduleSettings.description || "Скоро будет опубликовано"}
+                      </div>
+                      {scheduleSettings.note ? (
+                        <p style={{ fontSize: "clamp(15px, 1.4vw, 18px)", opacity: 0.9, lineHeight: 1.6 }}>
+                          {scheduleSettings.note}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+                )}
               </div>
               <ScallopedBottom color={CORAL} />
             </div>
@@ -821,19 +920,18 @@ export default function App() {
               <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16">
                 <div className="lg:col-span-5 xl:col-span-4">
                   <div style={{ fontWeight: 900, fontSize: "clamp(28px, 3.5vw, 56px)", letterSpacing: "-0.02em", lineHeight: 1 }}>
-                    Р”Р Р•РЎРЎ<br/>вЂ” РљРћР”
+                    {(dressSettings.title || "Дресс-код").split(" ").map((word, index, words) => (
+                      <React.Fragment key={`${word}-${index}`}>
+                        {word}
+                        {index < words.length - 1 ? <br /> : null}
+                      </React.Fragment>
+                    ))}
                   </div>
                   <p className="mt-5 lg:mt-6" style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#666", lineHeight: 1.65 }}>
-                    РџСЂРѕСЃРёРј РїСЂРёРґРµСЂР¶РёРІР°С‚СЊСЃСЏ РЅРµР¶РЅРѕР№ РїР°Р»РёС‚СЂС‹: РїС‹Р»СЊРЅРѕ-СЂРѕР·РѕРІС‹Р№, РєРѕСЂР°Р»Р»РѕРІС‹Р№, РєСЂРµРјРѕРІС‹Р№, Р±РµР¶РµРІС‹Р№. РР·Р±РµРіР°Р№С‚Рµ Р±РµР»РѕРіРѕ Рё С‡С‘СЂРЅРѕРіРѕ.
+                    {dressSettings.description}
                   </p>
                   <div className="mt-6 lg:mt-8 flex gap-2 lg:gap-2.5 flex-wrap">
-                    {[
-                      { c: "#F4B6BE", n: "Р РѕР·РѕРІС‹Р№" },
-                      { c: "#E85A4F", n: "РљРѕСЂР°Р»Р»" },
-                      { c: "#F4E1D2", n: "РљСЂРµРј" },
-                      { c: "#D9A89A", n: "Р‘РµР¶" },
-                      { c: "#8A8F7A", n: "РЁР°Р»С„РµР№" },
-                    ].map((p) => (
+                    {dressColors.map((p) => (
                       <div key={p.c} className="flex items-center gap-2 px-3 lg:px-3.5 py-2 rounded-full" style={{ background: "#FBF6F4" }}>
                         <div className="w-5 h-5 lg:w-6 lg:h-6 rounded-full border-2 border-white" style={{ background: p.c, boxShadow: "0 1px 4px rgba(0,0,0,0.15)" }} />
                         <span style={{ fontSize: "clamp(10px, 1.1vw, 12px)", fontWeight: 700, color: "#444" }}>{p.n}</span>
@@ -864,10 +962,12 @@ export default function App() {
                     <div className="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center" style={{ background: PINK_LIGHT }}>
                       <BookHeart size={24} style={{ color: CORAL }} />
                     </div>
-                    <div style={{ fontWeight: 900, fontSize: "clamp(26px, 3.5vw, 56px)", letterSpacing: "-0.02em" }}>РќРђРЁРђ РРЎРўРћР РРЇ</div>
+                    <div style={{ fontWeight: 900, fontSize: "clamp(26px, 3.5vw, 56px)", letterSpacing: "-0.02em" }}>
+                      {storySettings.title || "Наша история"}
+                    </div>
                   </div>
                   <p className="max-w-2xl mx-auto px-4" style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#666", lineHeight: 1.6 }}>
-                    РџСѓС‚СЊ РѕС‚ РїРµСЂРІРѕР№ РІСЃС‚СЂРµС‡Рё РґРѕ В«Р”Р°В»
+                    {storySettings.description || "Путь от первой встречи до «Да»"}
                   </p>
                 </div>
 
@@ -895,7 +995,7 @@ export default function App() {
                   <div className="lg:hidden absolute left-5 top-5 bottom-5 border-l-4 border-dotted" style={{ borderColor: PINK }} />
 
                   <div className="space-y-8 lg:space-y-10 xl:space-y-12">
-                    {[
+                    {(storySlides.length ? storySlides : [
                       {
                         date: "2 РєСѓСЂСЃ",
                         title: "РЁР°С…РјР°С‚С‹",
@@ -938,7 +1038,7 @@ export default function App() {
                         text: "Р РІРѕС‚ РјС‹ Р·РґРµСЃСЊ вЂ” РіРѕС‚РѕРІС‹ РѕС‚РїСЂР°Р·РґРЅРѕРІР°С‚СЊ РЅР°С€Сѓ Р»СЋР±РѕРІСЊ РІРјРµСЃС‚Рµ СЃРѕ РІСЃРµРјРё, РєС‚Рѕ РЅР°Рј РґРѕСЂРѕРі. РќР°С€Р° РёСЃС‚РѕСЂРёСЏ вЂ” СЌС‚Рѕ Р»СЋР±РѕРІСЊ, РѕР±С‰РёРµ РјРµС‡С‚С‹, РїРѕР±РµРґС‹ Рё РІРµСЂР° РІ С‚Рѕ, С‡С‚Рѕ РІРјРµСЃС‚Рµ РјС‹ РјРѕР¶РµРј РІСЃС‘. РЎРїР°СЃРёР±Рѕ, С‡С‚Рѕ СЂР°Р·РґРµР»РёС‚Рµ СЃ РЅР°РјРё СЌС‚РѕС‚ РґРµРЅСЊ!",
                         image: "https://images.unsplash.com/photo-1606800052052-a08af7148866?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
                       },
-                    ].map((story, i) => {
+                    ]).map((story, i) => {
                       const isRight = i % 2 === 1;
 
                       return (
@@ -1032,25 +1132,27 @@ export default function App() {
                     <div className="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center" style={{ background: PINK_LIGHT }}>
                       <Palette size={24} style={{ color: CORAL }} />
                     </div>
-                    <div style={{ fontWeight: 900, fontSize: "clamp(26px, 3.5vw, 56px)", letterSpacing: "-0.02em" }}>РђРўРњРћРЎР¤Р•Р Рђ</div>
+                    <div style={{ fontWeight: 900, fontSize: "clamp(26px, 3.5vw, 56px)", letterSpacing: "-0.02em" }}>
+                      {gallerySettings.title || "Атмосфера"}
+                    </div>
                   </div>
                   <p className="max-w-2xl mx-auto px-4" style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#666", lineHeight: 1.6 }}>
-                    Р§РµРіРѕ РѕР¶РёРґР°С‚СЊ: СЂРѕРјР°РЅС‚РёРєР°, С‚РµРїР»Рѕ Рё РЅР°СЃС‚РѕСЏС‰РёРµ СЌРјРѕС†РёРё
+                    {gallerySettings.description}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6 mb-10 lg:mb-12">
-                  {MOOD_IMAGES.map((src, i) => (
-                    <div key={i} className="aspect-square rounded-2xl lg:rounded-3xl flex items-center justify-center text-center transition-transform duration-300 hover:scale-105 overflow-hidden relative group">
+                  {moodSlides.map((slide, i) => (
+                    <div key={`${slide.src}-${i}`} className="aspect-square rounded-2xl lg:rounded-3xl flex items-center justify-center text-center transition-transform duration-300 hover:scale-105 overflow-hidden relative group">
                       <ImageWithFallback
-                        src={src}
-                        alt={MOOD_LABELS[i] || "Любовь"}
+                        src={slide.src}
+                        alt={slide.label}
                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         style={{ filter: "grayscale(30%) brightness(0.7)" }}
                       />
                       <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(232,90,79,0.2) 0%, rgba(244,182,190,0.3) 100%)" }} />
                       <div className="relative z-10 px-4" style={{ fontWeight: 800, fontSize: "clamp(16px, 2vw, 22px)", color: "white", letterSpacing: "-0.01em", textShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
-                        {MOOD_LABELS[i] || "Любовь"}
+                        {slide.label}
                       </div>
                     </div>
                   ))}
@@ -1103,10 +1205,12 @@ export default function App() {
                       <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-2xl flex items-center justify-center shrink-0" style={{ background: PINK_LIGHT }}>
                         <Gift size={24} style={{ color: CORAL }} />
                       </div>
-                      <div style={{ fontWeight: 900, fontSize: "clamp(26px, 3.5vw, 56px)", letterSpacing: "-0.02em" }}>РџРћР–Р•Р›РђРќРРЇ</div>
+                      <div style={{ fontWeight: 900, fontSize: "clamp(26px, 3.5vw, 56px)", letterSpacing: "-0.02em" }}>
+                        {giftsSettings.title || "Пожелания"}
+                      </div>
                     </div>
                     <p className="mt-4 lg:mt-5 max-w-xl" style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#666", lineHeight: 1.65 }}>
-                      Р’Р°С€Рµ РїСЂРёСЃСѓС‚СЃС‚РІРёРµ вЂ” Р»СѓС‡С€РёР№ РїРѕРґР°СЂРѕРє. Р•СЃР»Рё С…РѕС‚РёС‚Рµ Р±РѕР»СЊС€РµРіРѕ вЂ” РІС‹Р±РµСЂРёС‚Рµ РёРґРµСЋ РёР· СЃРїРёСЃРєР°.
+                      {giftsSettings.description}
                     </p>
                     <div className="mt-4 lg:mt-5 max-w-xl px-4 py-3 rounded-2xl flex items-start gap-3" style={{ background: "#FFF9F8", border: `2px solid ${CORAL}` }}>
                       <Sparkles size={20} style={{ color: CORAL, flexShrink: 0, marginTop: "2px" }} />
@@ -1386,11 +1490,16 @@ export default function App() {
               <div className="relative max-w-4xl mx-auto">
                 <div className="text-center">
                   <div style={{ fontWeight: 900, fontSize: "clamp(28px, 4vw, 64px)", letterSpacing: "-0.02em", lineHeight: 1 }}>
-                    РђРќРљР•РўРђ Р“РћРЎРўРЇ
+                    {rsvpSettings.title || "Анкета гостя"}
                   </div>
                   <p className="mt-4 lg:mt-5" style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#666", lineHeight: 1.6 }}>
-                    РџРѕР¶Р°Р»СѓР№СЃС‚Р°, Р·Р°РїРѕР»РЅРёС‚Рµ РґРѕ 1 СЃРµРЅС‚СЏР±СЂСЏ. РџРѕСЃР»Рµ СЂРµРіРёСЃС‚СЂР°С†РёРё РѕС‚РєСЂРѕРµС‚СЃСЏ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёРµ РїРѕРґР°СЂРєР°.
+                    {rsvpSettings.description}
                   </p>
+                  {rsvpSettings.note ? (
+                    <p className="mt-3" style={{ fontSize: "clamp(13px, 1.2vw, 15px)", color: "#888", lineHeight: 1.6 }}>
+                      {rsvpSettings.note}
+                    </p>
+                  ) : null}
                 </div>
 
                 {isRegistered && (
@@ -1595,10 +1704,12 @@ export default function App() {
                     <div className="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center" style={{ background: PINK_LIGHT }}>
                       <ListMusic size={24} style={{ color: CORAL }} />
                     </div>
-                    <div style={{ fontWeight: 900, fontSize: "clamp(26px, 3.5vw, 56px)", letterSpacing: "-0.02em" }}>Р’РђРЁРђ РџР•РЎРќРЇ</div>
+                    <div style={{ fontWeight: 900, fontSize: "clamp(26px, 3.5vw, 56px)", letterSpacing: "-0.02em" }}>
+                      {musicSettings.title || "Ваша песня"}
+                    </div>
                   </div>
                   <p className="max-w-2xl mx-auto px-4" style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#666", lineHeight: 1.6 }}>
-                    РљР°РєСѓСЋ РїРµСЃРЅСЋ РІС‹ С…РѕС‚РёС‚Рµ СѓСЃР»С‹С€Р°С‚СЊ РЅР° РЅР°С€РµР№ СЃРІР°РґСЊР±Рµ?
+                    {musicSettings.description}
                   </p>
                 </div>
 
@@ -1641,19 +1752,21 @@ export default function App() {
                     <div className="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center" style={{ background: PINK_LIGHT }}>
                       <HelpCircle size={24} style={{ color: CORAL }} />
                     </div>
-                    <div style={{ fontWeight: 900, fontSize: "clamp(26px, 3.5vw, 56px)", letterSpacing: "-0.02em" }}>Р’РћРџР РћРЎР« Р РћРўР’Р•РўР«</div>
+                    <div style={{ fontWeight: 900, fontSize: "clamp(26px, 3.5vw, 56px)", letterSpacing: "-0.02em" }}>
+                      {faqSettings.title || "Вопросы и ответы"}
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  {[
+                  {(faqItems.length ? faqItems : [
                     { q: "РњРѕР¶РЅРѕ Р»Рё СЃ РґРµС‚СЊРјРё?", a: "Р”Р°, РґРµС‚Рё РїСЂРёРІРµС‚СЃС‚РІСѓСЋС‚СЃСЏ! Р”Р»СЏ РЅРёС… Р±СѓРґРµС‚ РѕСЂРіР°РЅРёР·РѕРІР°РЅР° РѕС‚РґРµР»СЊРЅР°СЏ Р·РѕРЅР° СЃ СЂР°Р·РІР»РµС‡РµРЅРёСЏРјРё." },
                     { q: "РњРѕР¶РЅРѕ Р»Рё РїСЂРёРІРµСЃС‚Рё +1?", a: "РџРѕР¶Р°Р»СѓР№СЃС‚Р°, СѓРєР°Р¶РёС‚Рµ РєРѕР»РёС‡РµСЃС‚РІРѕ РіРѕСЃС‚РµР№ РїСЂРё СЂРµРіРёСЃС‚СЂР°С†РёРё. РњС‹ Р±СѓРґРµРј СЂР°РґС‹ РІСЃРµРј!" },
                     { q: "Р‘СѓРґРµС‚ Р»Рё С‚СЂР°РЅСЃС„РµСЂ?", a: "РРЅС„РѕСЂРјР°С†РёСЏ Рѕ С‚СЂР°РЅСЃС„РµСЂРµ РїРѕСЏРІРёС‚СЃСЏ РїРѕР·РґРЅРµРµ РЅР° СЌС‚РѕРј СЃР°Р№С‚Рµ." },
                     { q: "Р’Рѕ СЃРєРѕР»СЊРєРѕ Р·Р°РєР°РЅС‡РёРІР°РµС‚СЃСЏ РїСЂР°Р·РґРЅРёРє?", a: "РћС„РёС†РёР°Р»СЊРЅР°СЏ С‡Р°СЃС‚СЊ Р·Р°РІРµСЂС€РёС‚СЃСЏ РѕРєРѕР»Рѕ 23:00, РЅРѕ РІРµСЃРµР»СЊРµ РјРѕР¶РµС‚ РїСЂРѕРґРѕР»Р¶РёС‚СЊСЃСЏ!" },
                     { q: "РњРѕР¶РЅРѕ Р»Рё РґР°СЂРёС‚СЊ С†РІРµС‚С‹?", a: "РњС‹ Р±СѓРґРµРј СЂР°РґС‹ Р»СЋР±С‹Рј С†РІРµС‚Р°Рј, РЅРѕ РјРѕР¶РµС‚Рµ РІС‹Р±СЂР°С‚СЊ РїРѕРґР°СЂРѕРє РёР· РЅР°С€РµРіРѕ СЃРїРёСЃРєР° РїРѕР¶РµР»Р°РЅРёР№." },
                     { q: "Р“РґРµ РѕСЃС‚Р°РЅРѕРІРёС‚СЊСЃСЏ?", a: "Р РµРєРѕРјРµРЅРґР°С†РёРё РїРѕ РѕС‚РµР»СЏРј РІ РљСЂР°СЃРЅРѕРґР°СЂРµ РїРѕСЏРІСЏС‚СЃСЏ РїРѕР·РґРЅРµРµ." },
-                  ].map((faq, i) => (
+                  ]).map((faq, i) => (
                     <details key={i} className="group rounded-2xl lg:rounded-3xl overflow-hidden transition-all" style={{ background: "#FBF6F4", border: "1px solid #F0E8E8" }}>
                       <summary className="px-6 py-5 lg:px-8 lg:py-6 cursor-pointer list-none flex items-center justify-between" style={{ fontWeight: 700, fontSize: "clamp(15px, 1.4vw, 18px)" }}>
                         <span>{faq.q}</span>
@@ -1681,8 +1794,18 @@ export default function App() {
             <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-12">
               <div className="text-center text-white max-w-2xl">
                 <div style={{ fontWeight: 900, fontSize: "clamp(28px, 5vw, 72px)", lineHeight: 0.95, letterSpacing: "-0.02em" }}>
-                  Р‘РЈР”Р•Рњ Р–Р”РђРўР¬ Р’РђРЎ<br/>РЎ РќР•РўР•Р РџР•РќРР•Рњ!
+                  {(closingSettings.title || "Будем ждать вас с нетерпением!").split(" ").map((word, index, words) => (
+                    <React.Fragment key={`${word}-${index}`}>
+                      {index > 0 && index === Math.ceil(words.length / 2) ? <br /> : null}
+                      {word}{index < words.length - 1 ? " " : ""}
+                    </React.Fragment>
+                  ))}
                 </div>
+                {closingSettings.description ? (
+                  <p className="mt-6" style={{ fontSize: "clamp(16px, 2vw, 20px)", lineHeight: 1.6, opacity: 0.9 }}>
+                    {closingSettings.description}
+                  </p>
+                ) : null}
               </div>
             </div>
           </div>

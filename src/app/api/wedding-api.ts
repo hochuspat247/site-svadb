@@ -3,6 +3,7 @@ import type {
   GiftCategory,
   Guest,
   MusicWish,
+  SiteSection,
   WeddingGift,
 } from "../shared/wedding-types";
 
@@ -81,6 +82,23 @@ export async function fetchGiftCatalog(): Promise<{
   } catch (error) {
     console.error("Network error fetching gifts:", error);
     return { categories: [], gifts: [] };
+  }
+}
+
+export async function fetchSiteSections(): Promise<SiteSection[]> {
+  try {
+    const response = await fetch(`${API_URL}/site-builder`);
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error("Error fetching site sections:", result);
+      return [];
+    }
+
+    return result.sections || [];
+  } catch (error) {
+    console.error("Network error fetching site sections:", error);
+    return [];
   }
 }
 

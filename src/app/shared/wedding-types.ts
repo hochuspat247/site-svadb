@@ -66,3 +66,52 @@ export interface MusicWish {
   guestName: string;
   createdAt: string;
 }
+
+export type SiteSectionType =
+  | "hero"
+  | "text"
+  | "location"
+  | "schedule"
+  | "dress-code"
+  | "story"
+  | "gallery"
+  | "person"
+  | "gifts"
+  | "rsvp"
+  | "guests"
+  | "music"
+  | "faq"
+  | "closing";
+
+export interface SiteSectionItem {
+  title: string;
+  subtitle?: string;
+  text?: string;
+  extra?: string;
+  image?: string;
+}
+
+export interface SiteSectionSettings {
+  badge?: string;
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  note?: string;
+  primaryImage?: string | null;
+  secondaryImage?: string | null;
+  buttonLabel?: string;
+  buttonHref?: string;
+  galleryImages?: string[];
+  items?: SiteSectionItem[];
+}
+
+export interface SiteSection {
+  id: string;
+  name: string;
+  type: SiteSectionType;
+  sortOrder: number;
+  isActive: boolean;
+  settings: SiteSectionSettings;
+  createdAt?: string;
+  updatedAt?: string;
+}

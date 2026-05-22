@@ -155,6 +155,19 @@ function mapMusicWish(row) {
   };
 }
 
+function mapSiteSection(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    type: row.type,
+    sortOrder: row.sort_order,
+    isActive: row.is_active,
+    settings: row.settings && typeof row.settings === "object" ? row.settings : {},
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 async function getGuests() {
   const result = await query(
     `
@@ -220,6 +233,19 @@ async function getMusicWishes() {
   return result.rows.map(mapMusicWish);
 }
 
+async function getSiteSections({ includeInactive = false } = {}) {
+  const result = await query(
+    `
+      select *
+      from site_sections
+      ${includeInactive ? "" : "where is_active = true"}
+      order by sort_order asc, id asc
+    `,
+  );
+
+  return result.rows.map(mapSiteSection);
+}
+
 async function getGiftById(id) {
   const result = await query(
     `
@@ -278,12 +304,13 @@ app.post("/api/admin/login", (req, res) => {
 
 app.get("/api/admin/bootstrap", requireAdminAuth, async (_req, res) => {
   try {
-    const [guests, categories, gifts, bookings, wishes] = await Promise.all([
+    const [guests, categories, gifts, bookings, wishes, sections] = await Promise.all([
       getGuests(),
       getGiftCategories(),
       getGifts({ includeInactive: true }),
       getGiftBookings(),
       getMusicWishes(),
+      getSiteSections({ includeInactive: true }),
     ]);
 
     res.json({
@@ -292,10 +319,22 @@ app.get("/api/admin/bootstrap", requireAdminAuth, async (_req, res) => {
       gifts,
       bookings,
       wishes,
+      sections,
     });
   } catch (error) {
     console.error("Admin bootstrap error", error);
     res.status(500).json({ error: "Failed to load admin data" });
+  }
+});
+
+app.get("/api/site-builder", async (_req, res) => {
+  try {
+    res.json({
+      sections: await getSiteSections(),
+    });
+  } catch (error) {
+    console.error("Site builder fetch error", error);
+    res.status(500).json({ error: "Failed to fetch site sections" });
   }
 });
 
@@ -799,6 +838,144 @@ app.delete("/api/admin/gifts/:id", requireAdminAuth, async (req, res) => {
   } catch (error) {
     console.error("Gift delete error", error);
     res.status(500).json({ error: "Не удалось удалить подарок" });
+  }
+});
+
+app.post("/api/admin/sections", requireAdminAuth, async (req, res) => {
+  const id = slugifyId(req.body?.id || req.body?.name);
+  const name = safeText(req.body?.name);
+  const type = safeText(req.body?.type);
+  const sortOrder = Number(req.body?.sortOrder ?? 0);
+  const isActive = Boolean(req.body?.isActive ?? true);
+  const settings =
+    req.body?.settings && typeof req.body.settings === "object"
+      ? req.body.settings
+      : {};
+
+  if (!id || !name || !type) {
+    res.status(400).json({ error: "Section id, name and type are required" });
+    return;
+  }
+
+  try {
+    const result = await query(
+      `
+        insert into site_sections (
+          id,
+          name,
+          type,
+          sort_order,
+          is_active,
+          settings
+        )
+        values ($1, $2, $3, $4, $5, $6::jsonb)
+        returning *
+      `,
+      [
+        id,
+        name,
+        type,
+        Number.isFinite(sortOrder) ? sortOrder : 0,
+        isActive,
+        JSON.stringify(settings),
+      ],
+    );
+
+    res.status(201).json({ section: mapSiteSection(result.rows[0]) });
+  } catch (error) {
+    console.error("Section create error", error);
+    res.status(500).json({ error: "Failed to create section" });
+  }
+});
+
+app.put("/api/admin/sections/:id", requireAdminAuth, async (req, res) => {
+  const id = req.params.id;
+  const name = safeText(req.body?.name);
+  const type = safeText(req.body?.type);
+  const sortOrder = Number(req.body?.sortOrder ?? 0);
+  const isActive = Boolean(req.body?.isActive ?? true);
+  const settings =
+    req.body?.settings && typeof req.body.settings === "object"
+      ? req.body.settings
+      : {};
+
+  if (!id || !name || !type) {
+    res.status(400).json({ error: "Section name and type are required" });
+    return;
+  }
+
+  try {
+    const result = await query(
+      `
+        update site_sections
+        set
+          name = $2,
+          type = $3,
+          sort_order = $4,
+          is_active = $5,
+          settings = $6::jsonb,
+          updated_at = now()
+        where id = $1
+        returning *
+      `,
+      [
+        id,
+        name,
+        type,
+        Number.isFinite(sortOrder) ? sortOrder : 0,
+        isActive,
+        JSON.stringify(settings),
+      ],
+    );
+
+    if (!result.rowCount) {
+      res.status(404).json({ error: "Section not found" });
+      return;
+    }
+
+    res.json({ section: mapSiteSection(result.rows[0]) });
+  } catch (error) {
+    console.error("Section update error", error);
+    res.status(500).json({ error: "Failed to update section" });
+  }
+});
+
+app.post("/api/admin/sections/reorder", requireAdminAuth, async (req, res) => {
+  const sectionIds = Array.isArray(req.body?.sectionIds)
+    ? req.body.sectionIds.map((value) => safeText(value)).filter(Boolean)
+    : [];
+
+  if (sectionIds.length === 0) {
+    res.status(400).json({ error: "Section ids are required" });
+    return;
+  }
+
+  try {
+    for (const [index, sectionId] of sectionIds.entries()) {
+      await query(
+        `
+          update site_sections
+          set sort_order = $2, updated_at = now()
+          where id = $1
+        `,
+        [sectionId, index + 1],
+      );
+    }
+
+    res.json({ sections: await getSiteSections({ includeInactive: true }) });
+  } catch (error) {
+    console.error("Section reorder error", error);
+    res.status(500).json({ error: "Failed to reorder sections" });
+  }
+});
+
+app.delete("/api/admin/sections/:id", requireAdminAuth, async (req, res) => {
+  try {
+    await query("delete from site_sections where id = $1", [req.params.id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Section delete error", error);
+    res.status(500).json({ error: "Failed to delete section" });
   }
 });
 

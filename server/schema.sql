@@ -91,3 +91,16 @@ create table if not exists music_wishes (
 );
 
 create index if not exists music_wishes_created_at_idx on music_wishes (created_at desc);
+
+create table if not exists site_sections (
+  id text primary key,
+  name text not null,
+  type text not null,
+  sort_order integer not null default 0,
+  is_active boolean not null default true,
+  settings jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists site_sections_sort_idx on site_sections (sort_order asc);

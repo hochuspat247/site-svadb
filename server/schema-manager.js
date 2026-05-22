@@ -1,4 +1,8 @@
-import { defaultGiftCategories, defaultWeddingGifts } from "./default-data.js";
+import {
+  defaultGiftCategories,
+  defaultSiteSections,
+  defaultWeddingGifts,
+} from "./default-data.js";
 import { query, withTransaction } from "./db.js";
 
 const schemaStatements = [
@@ -95,6 +99,19 @@ const schemaStatements = [
     )
   `,
   "create index if not exists music_wishes_created_at_idx on music_wishes (created_at desc)",
+  `
+    create table if not exists site_sections (
+      id text primary key,
+      name text not null,
+      type text not null,
+      sort_order integer not null default 0,
+      is_active boolean not null default true,
+      settings jsonb not null default '{}'::jsonb,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    )
+  `,
+  "create index if not exists site_sections_sort_idx on site_sections (sort_order asc)",
 ];
 
 export async function ensureSchema() {
@@ -175,6 +192,37 @@ export async function ensureSeedData() {
             JSON.stringify(gift.travelOptions ?? []),
             gift.isActive,
             gift.sortOrder,
+          ],
+        );
+      }
+    }
+
+    const sectionsCount = await client.query(
+      "select count(*)::int as count from site_sections",
+    );
+
+    if (sectionsCount.rows[0].count === 0) {
+      for (const section of defaultSiteSections) {
+        await client.query(
+          `
+            insert into site_sections (
+              id,
+              name,
+              type,
+              sort_order,
+              is_active,
+              settings
+            )
+            values ($1, $2, $3, $4, $5, $6::jsonb)
+            on conflict (id) do nothing
+          `,
+          [
+            section.id,
+            section.name,
+            section.type,
+            section.sortOrder,
+            section.isActive,
+            JSON.stringify(section.settings ?? {}),
           ],
         );
       }

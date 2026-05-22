@@ -3,6 +3,7 @@ import type {
   GiftCategory,
   Guest,
   MusicWish,
+  SiteSection,
   WeddingGift,
 } from "../shared/wedding-types";
 
@@ -18,6 +19,16 @@ function getHeaders() {
     "Content-Type": "application/json",
     Authorization: `Bearer ${getToken()}`,
   };
+}
+
+async function readJson(response: Response) {
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.error || "Произошла ошибка");
+  }
+
+  return result;
 }
 
 export function persistAdminToken(token: string) {
@@ -41,12 +52,7 @@ export async function loginAdmin(password: string) {
     body: JSON.stringify({ password }),
   });
 
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw new Error(result.error || "Не удалось войти");
-  }
-
+  const result = await readJson(response);
   return result.token as string;
 }
 
@@ -56,18 +62,13 @@ export async function fetchAdminBootstrap(): Promise<{
   gifts: WeddingGift[];
   bookings: GiftBooking[];
   wishes: MusicWish[];
+  sections: SiteSection[];
 }> {
   const response = await fetch(`${API_URL}/admin/bootstrap`, {
     headers: getHeaders(),
   });
 
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw new Error(result.error || "Не удалось загрузить данные");
-  }
-
-  return result;
+  return readJson(response);
 }
 
 export async function createGuest(payload: Omit<Guest, "id" | "createdAt">) {
@@ -76,27 +77,22 @@ export async function createGuest(payload: Omit<Guest, "id" | "createdAt">) {
     headers: getHeaders(),
     body: JSON.stringify(payload),
   });
-  const result = await response.json();
 
-  if (!response.ok) {
-    throw new Error(result.error || "Не удалось создать гостя");
-  }
-
+  const result = await readJson(response);
   return result.guest as Guest;
 }
 
-export async function updateGuest(id: string, payload: Omit<Guest, "id" | "createdAt">) {
+export async function updateGuest(
+  id: string,
+  payload: Omit<Guest, "id" | "createdAt">,
+) {
   const response = await fetch(`${API_URL}/admin/guests/${id}`, {
     method: "PUT",
     headers: getHeaders(),
     body: JSON.stringify(payload),
   });
-  const result = await response.json();
 
-  if (!response.ok) {
-    throw new Error(result.error || "Не удалось обновить гостя");
-  }
-
+  const result = await readJson(response);
   return result.guest as Guest;
 }
 
@@ -105,13 +101,8 @@ export async function deleteGuest(id: string) {
     method: "DELETE",
     headers: getHeaders(),
   });
-  const result = await response.json();
 
-  if (!response.ok) {
-    throw new Error(result.error || "Не удалось удалить гостя");
-  }
-
-  return result;
+  return readJson(response);
 }
 
 export async function createCategory(payload: {
@@ -125,31 +116,26 @@ export async function createCategory(payload: {
     headers: getHeaders(),
     body: JSON.stringify(payload),
   });
-  const result = await response.json();
 
-  if (!response.ok) {
-    throw new Error(result.error || "Не удалось создать категорию");
-  }
-
+  const result = await readJson(response);
   return result.category as GiftCategory;
 }
 
-export async function updateCategory(id: string, payload: {
-  name: string;
-  description: string;
-  sortOrder: number;
-}) {
+export async function updateCategory(
+  id: string,
+  payload: {
+    name: string;
+    description: string;
+    sortOrder: number;
+  },
+) {
   const response = await fetch(`${API_URL}/admin/categories/${id}`, {
     method: "PUT",
     headers: getHeaders(),
     body: JSON.stringify(payload),
   });
-  const result = await response.json();
 
-  if (!response.ok) {
-    throw new Error(result.error || "Не удалось обновить категорию");
-  }
-
+  const result = await readJson(response);
   return result.category as GiftCategory;
 }
 
@@ -158,27 +144,20 @@ export async function deleteCategory(id: string) {
     method: "DELETE",
     headers: getHeaders(),
   });
-  const result = await response.json();
 
-  if (!response.ok) {
-    throw new Error(result.error || "Не удалось удалить категорию");
-  }
-
-  return result;
+  return readJson(response);
 }
 
-export async function createGift(payload: Omit<WeddingGift, "id" | "categoryName" | "categoryDescription">) {
+export async function createGift(
+  payload: Omit<WeddingGift, "id" | "categoryName" | "categoryDescription">,
+) {
   const response = await fetch(`${API_URL}/admin/gifts`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify(payload),
   });
-  const result = await response.json();
 
-  if (!response.ok) {
-    throw new Error(result.error || "Не удалось создать подарок");
-  }
-
+  const result = await readJson(response);
   return result.gift as WeddingGift;
 }
 
@@ -191,12 +170,8 @@ export async function updateGift(
     headers: getHeaders(),
     body: JSON.stringify(payload),
   });
-  const result = await response.json();
 
-  if (!response.ok) {
-    throw new Error(result.error || "Не удалось обновить подарок");
-  }
-
+  const result = await readJson(response);
   return result.gift as WeddingGift;
 }
 
@@ -205,11 +180,64 @@ export async function deleteGift(id: number) {
     method: "DELETE",
     headers: getHeaders(),
   });
-  const result = await response.json();
 
-  if (!response.ok) {
-    throw new Error(result.error || "Не удалось удалить подарок");
-  }
+  return readJson(response);
+}
 
-  return result;
+export async function createSection(payload: {
+  id?: string;
+  name: string;
+  type: SiteSection["type"];
+  sortOrder: number;
+  isActive: boolean;
+  settings: SiteSection["settings"];
+}) {
+  const response = await fetch(`${API_URL}/admin/sections`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  const result = await readJson(response);
+  return result.section as SiteSection;
+}
+
+export async function updateSection(
+  id: string,
+  payload: {
+    name: string;
+    type: SiteSection["type"];
+    sortOrder: number;
+    isActive: boolean;
+    settings: SiteSection["settings"];
+  },
+) {
+  const response = await fetch(`${API_URL}/admin/sections/${id}`, {
+    method: "PUT",
+    headers: getHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  const result = await readJson(response);
+  return result.section as SiteSection;
+}
+
+export async function reorderSections(sectionIds: string[]) {
+  const response = await fetch(`${API_URL}/admin/sections/reorder`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({ sectionIds }),
+  });
+
+  const result = await readJson(response);
+  return result.sections as SiteSection[];
+}
+
+export async function deleteSection(id: string) {
+  const response = await fetch(`${API_URL}/admin/sections/${id}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
+
+  return readJson(response);
 }
