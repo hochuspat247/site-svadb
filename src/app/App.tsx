@@ -813,11 +813,11 @@ export default function App() {
 
               <div className="flex min-h-0 flex-1 flex-col gap-2 max-lg:px-3 max-lg:pb-3 sm:max-lg:px-4 sm:max-lg:pb-4 lg:grid lg:grid-rows-[1.15fr_0.85fr] lg:gap-0 lg:p-0">
                 <div className="max-lg:pt-1 sm:max-lg:pt-2 lg:pt-0">
-                  <div className="overflow-hidden rounded-[20px] bg-[#F6E8E4] sm:rounded-[24px] lg:min-h-[300px] lg:rounded-none">
+                  <div className="flex items-center justify-center overflow-hidden rounded-[20px] bg-[#F6E8E4] sm:rounded-[24px] lg:min-h-[300px] lg:rounded-none">
                     <ImageWithFallback
                       src={siteImages.heroSecondary}
                       alt=""
-                      className="min-h-[220px] w-full object-cover sm:min-h-[240px] lg:min-h-[300px] lg:h-full"
+                      className="block h-auto w-full max-h-[min(52vh,440px)] object-contain object-center lg:h-full lg:min-h-[280px] lg:max-h-[300px]"
                     />
                   </div>
                 </div>
