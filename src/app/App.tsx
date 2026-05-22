@@ -101,13 +101,13 @@ function ScallopedBottom({ color }: { color: string }) {
   );
 }
 
-// РџСЂРёРјРµСЂС‹ РіРѕСЃС‚РµР№ (Р·Р°РјРµРЅРёС‚Рµ РЅР° СЂРµР°Р»СЊРЅС‹С… РїРѕСЃР»Рµ СЂРµРіРёСЃС‚СЂР°С†РёРё)
+// Примеры гостей (замените на реальных после регистрации)
 const GROOM_GUESTS = [
-  // { name: "Р”РјРёС‚СЂРёР№ РћСЂР»РѕРІ", role: "РЎРІРёРґРµС‚РµР»СЊ" },
+  // { name: "Дмитрий Орлов", role: "Свидетель" },
 ];
 
 const BRIDE_GUESTS = [
-  // { name: "Р•РєР°С‚РµСЂРёРЅР° Р›РµР±РµРґРµРІР°", role: "РЎРІРёРґРµС‚РµР»СЊРЅРёС†Р°" },
+  // { name: "Екатерина Лебедева", role: "Свидетельница" },
 ];
 
 const AVATAR_COLORS = ["#F4B6BE", "#FBD3D8", "#F4E1D2", "#D9A89A", "#FFC4B0", "#FFE0DC"];
@@ -181,19 +181,19 @@ function GuestsBlock({ guests, currentGuestId, isRegistered }: { guests: any[]; 
 
   guests.forEach((guest) => {
     const entry = { name: guest.name, role: "Р“РѕСЃС‚СЊ", isYou: guest.id === currentGuestId, photo: guest.photo };
-    if (guest.side === "РЎРѕ СЃС‚РѕСЂРѕРЅС‹ РРІР°РЅР°") groom.push(entry as any);
-    else if (guest.side === "РЎРѕ СЃС‚РѕСЂРѕРЅС‹ РђРЅР°СЃС‚Р°СЃРёРё") bride.push(entry as any);
+    if (guest.side === "Со стороны Ивана") groom.push(entry as any);
+    else if (guest.side === "Со стороны Анастасии") bride.push(entry as any);
   });
 
   const Column = ({ title, who, list, color }: any) => (
     <div className="flex-1">
       <div className="flex items-baseline justify-between mb-6 lg:mb-8">
         <div>
-          <div style={{ fontWeight: 800, fontSize: "clamp(10px, 1vw, 11px)", letterSpacing: "0.25em", color: "#999" }}>РЎРћ РЎРўРћР РћРќР«</div>
+          <div style={{ fontWeight: 800, fontSize: "clamp(10px, 1vw, 11px)", letterSpacing: "0.25em", color: "#999" }}>СО СТОРОНЫ</div>
           <div className="mt-1.5 lg:mt-2" style={{ fontWeight: 900, fontSize: "clamp(22px, 2.5vw, 34px)", letterSpacing: "-0.01em", color: "#1a1a1a" }}>{who}</div>
         </div>
         <div className="px-3 lg:px-4 py-1.5 lg:py-2 rounded-full" style={{ background: "#E85A4F", color: "white", fontWeight: 800, fontSize: "clamp(11px, 1.1vw, 12px)", letterSpacing: "0.05em" }}>
-          {list.length} Р“РћРЎРўР•Р™
+          {list.length} ГОСТЕЙ
         </div>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-7 sm:gap-x-5 sm:gap-y-8 lg:gap-x-6 lg:gap-y-9">
@@ -213,18 +213,18 @@ function GuestsBlock({ guests, currentGuestId, isRegistered }: { guests: any[]; 
               <Users size={24} style={{ color: "#E85A4F" }} />
             </div>
             <div style={{ fontWeight: 900, fontSize: "clamp(26px, 3.5vw, 56px)", letterSpacing: "-0.02em" }}>
-              РќРђРЁР Р“РћРЎРўР
+              НАШИ ГОСТИ
             </div>
           </div>
           <p className="max-w-2xl mx-auto px-4" style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#666", lineHeight: 1.6 }}>
-            РЎР°РјС‹Рµ Р±Р»РёР·РєРёРµ Р»СЋРґРё, РєРѕС‚РѕСЂС‹Рµ СЂР°Р·РґРµР»СЏС‚ СЃ РЅР°РјРё СЌС‚РѕС‚ РґРµРЅСЊ.
+            Самые близкие люди, которые разделят с нами этот день.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-12 lg:gap-12 xl:gap-16 relative">
-          <Column title="Р–РµРЅРёС…" who="РР’РђРќРђ" list={groom} color="#E85A4F" />
+          <Column title="Жених" who="ИВАНА" list={groom} color="#E85A4F" />
           <div className="hidden lg:block absolute left-1/2 top-2 bottom-2 w-px" style={{ background: "#F0E8E8" }} />
-          <Column title="РќРµРІРµСЃС‚Р°" who="РђРќРђРЎРўРђРЎРР" list={bride} color="#F4B6BE" />
+          <Column title="Невеста" who="АНАСТАСИИ" list={bride} color="#F4B6BE" />
         </div>
 
         {!isRegistered && (
@@ -234,7 +234,7 @@ function GuestsBlock({ guests, currentGuestId, isRegistered }: { guests: any[]; 
               className="inline-flex items-center gap-2 px-6 lg:px-8 py-3 lg:py-3.5 rounded-full transition active:scale-95"
               style={{ background: "#FBF6F4", color: "#1a1a1a", fontWeight: 800, fontSize: "clamp(11px, 1.1vw, 13px)", letterSpacing: "0.08em" }}
             >
-              + РџР РРЎРћР•Р”РРќРРўР¬РЎРЇ Рљ РЎРџРРЎРљРЈ
+              + ПРИСОЕДИНИТЬСЯ К СПИСКУ
             </a>
           </div>
         )}
@@ -243,8 +243,8 @@ function GuestsBlock({ guests, currentGuestId, isRegistered }: { guests: any[]; 
   );
 }
 
-type Side = "РЎРѕ СЃС‚РѕСЂРѕРЅС‹ РРІР°РЅР°" | "РЎРѕ СЃС‚РѕСЂРѕРЅС‹ РђРЅР°СЃС‚Р°СЃРёРё" | "";
-type Attend = "РџСЂРёРґСѓ РѕРґРёРЅ/РѕРґРЅР°" | "РџСЂРёРґСѓ СЃ РїР°СЂРѕР№" | "РџСЂРёРґСѓ СЃ СЃРµРјСЊС‘Р№" | "РќРµ СЃРјРѕРіСѓ" | "";
+type Side = "Со стороны Ивана" | "Со стороны Анастасии" | "";
+type Attend = "Приду один/одна" | "Приду с парой" | "Приду с семьёй" | "Не смогу" | "";
 type CatalogGiftCard = WeddingGift & {
   category: string;
   price: string;
@@ -471,13 +471,13 @@ export default function App() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.side || !form.attend) {
-      showToast("Р—Р°РїРѕР»РЅРёС‚Рµ РёРјСЏ, СЃС‚РѕСЂРѕРЅСѓ Рё РїСЂРёСЃСѓС‚СЃС‚РІРёРµ");
+      showToast("Заполните имя, сторону и присутствие");
       return;
     }
 
     setIsLoading(true);
-    const willAttend = form.attend !== "РќРµ СЃРјРѕРіСѓ";
-    const guestsCount = form.attend === "РџСЂРёРґСѓ СЃ СЃРµРјСЊС‘Р№" ? 3 : form.attend === "РџСЂРёРґСѓ СЃ РїР°СЂРѕР№" ? 2 : 1;
+    const willAttend = form.attend !== "Не смогу";
+    const guestsCount = form.attend === "Приду с семьёй" ? 3 : form.attend === "Приду с парой" ? 2 : 1;
 
     const result = await registerGuest({
       name: form.name,
@@ -499,19 +499,19 @@ export default function App() {
       showToast("Р РµРіРёСЃС‚СЂР°С†РёСЏ РїРѕРґС‚РІРµСЂР¶РґРµРЅР°! РўРµРїРµСЂСЊ РјРѕР¶РЅРѕ Р±СЂРѕРЅРёСЂРѕРІР°С‚СЊ РїРѕРґР°СЂРѕРє");
       await loadData();
     } else {
-      showToast(result.error || "РћС€РёР±РєР° СЂРµРіРёСЃС‚СЂР°С†РёРё");
+      showToast(result.error || "Ошибка регистрации");
     }
   };
 
   const handleOpenTravelModal = (id: number) => {
     if (!isRegistered || !currentGuestId) {
-      showToast("РЎРЅР°С‡Р°Р»Р° Р·Р°РїРѕР»РЅРёС‚Рµ С„РѕСЂРјСѓ СЂРµРіРёСЃС‚СЂР°С†РёРё");
+      showToast("Сначала заполните форму регистрации");
       document.getElementById("rsvp")?.scrollIntoView({ behavior: "smooth" });
       return;
     }
 
     if (currentGuestTravelBooking) {
-      showToast(`Р’С‹ СѓР¶Рµ РІС‹Р±СЂР°Р»Рё РЅР°РїСЂР°РІР»РµРЅРёРµ: ${currentGuestTravelBooking.selectedCountry}`);
+      showToast(`Вы уже выбрали направление: ${currentGuestTravelBooking.selectedCountry}`);
       return;
     }
 
@@ -520,7 +520,7 @@ export default function App() {
 
   const handleBook = async (id: number, selectedCountry?: string) => {
     if (!isRegistered || !currentGuestId) {
-      showToast("РЎРЅР°С‡Р°Р»Р° Р·Р°РїРѕР»РЅРёС‚Рµ С„РѕСЂРјСѓ СЂРµРіРёСЃС‚СЂР°С†РёРё");
+      showToast("Сначала заполните форму регистрации");
       document.getElementById("rsvp")?.scrollIntoView({ behavior: "smooth" });
       return;
     }
@@ -531,12 +531,12 @@ export default function App() {
 
     if (isTravelGift) {
       if (!selectedCountry) {
-        showToast("РЎРЅР°С‡Р°Р»Р° РІС‹Р±РµСЂРёС‚Рµ СЃС‚СЂР°РЅСѓ РёР»Рё РЅР°РїСЂР°РІР»РµРЅРёРµ");
+        showToast("Сначала выберите страну или направление");
         return;
       }
 
       if (currentGuestTravelBooking) {
-        showToast(`Р’С‹ СѓР¶Рµ РІС‹Р±СЂР°Р»Рё РЅР°РїСЂР°РІР»РµРЅРёРµ: ${currentGuestTravelBooking.selectedCountry}`);
+        showToast(`Вы уже выбрали направление: ${currentGuestTravelBooking.selectedCountry}`);
         return;
       }
     }
@@ -553,13 +553,13 @@ export default function App() {
     setIsLoading(false);
 
     if (result.success) {
-      showToast(isTravelGift ? "РќР°РїСЂР°РІР»РµРЅРёРµ РІС‹Р±СЂР°РЅРѕ, СЃРїР°СЃРёР±Рѕ!" : "РџРѕРґР°СЂРѕРє Р·Р°Р±СЂРѕРЅРёСЂРѕРІР°РЅ, СЃРїР°СЃРёР±Рѕ!");
+      showToast(isTravelGift ? "Направление выбрано, спасибо!" : "Подарок забронирован, спасибо!");
       await loadData();
     } else if (result.bookedBy) {
-      showToast(`РџРѕРґР°СЂРѕРє СѓР¶Рµ Р·Р°Р±СЂРѕРЅРёСЂРѕРІР°РЅ (${result.bookedBy})`);
+      showToast(`Подарок уже забронирован (${result.bookedBy})`);
       await loadData();
     } else {
-      showToast(result.error || "РћС€РёР±РєР° Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ");
+      showToast(result.error || "Ошибка бронирования");
     }
   };
 
@@ -588,10 +588,10 @@ export default function App() {
 
     if (result.success) {
       setMusicInput("");
-      showToast("РџРѕР¶РµР»Р°РЅРёРµ РѕС‚РїСЂР°РІР»РµРЅРѕ!");
+      showToast("Пожелание отправлено!");
       await loadData();
     } else {
-      showToast(result.error || "РћС€РёР±РєР° РѕС‚РїСЂР°РІРєРё");
+      showToast(result.error || "Ошибка отправки");
     }
   };
 
@@ -616,7 +616,7 @@ export default function App() {
             className="absolute inset-0 w-full h-full"
             style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)" }}
             onClick={() => setActiveTravelGiftId(null)}
-            aria-label="Р—Р°РєСЂС‹С‚СЊ РѕРєРЅРѕ РІС‹Р±РѕСЂР° РЅР°РїСЂР°РІР»РµРЅРёСЏ"
+            aria-label="Закрыть окно выбора направления"
           />
 
           <div
@@ -632,7 +632,7 @@ export default function App() {
                 onClick={() => setActiveTravelGiftId(null)}
                 className="absolute top-4 right-4 w-11 h-11 rounded-full flex items-center justify-center transition active:scale-95"
                 style={{ background: "white", color: INK, boxShadow: "0 6px 18px rgba(0,0,0,0.08)" }}
-                aria-label="Р—Р°РєСЂС‹С‚СЊ"
+                aria-label="Закрыть"
               >
                 <X size={20} />
               </button>
@@ -640,13 +640,13 @@ export default function App() {
               <div className="relative pr-12">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-4" style={{ background: PINK_LIGHT, color: CORAL, fontSize: 11, fontWeight: 900, letterSpacing: "0.12em" }}>
                   <Plane size={14} strokeWidth={2.5} />
-                  РџРЈРўР•РЁР•РЎРўР’РР•
+                  ПУТЕШЕСТВИЕ
                 </div>
                 <div style={{ fontWeight: 900, fontSize: "clamp(26px, 4vw, 46px)", letterSpacing: "-0.03em", lineHeight: 1 }}>
                   {activeTravelGift.name}
                 </div>
                 <p className="mt-3 max-w-2xl" style={{ fontSize: "clamp(14px, 1.5vw, 16px)", color: "#666", lineHeight: 1.65 }}>
-                  Р’С‹Р±РµСЂРёС‚Рµ РѕРґРЅРѕ РЅР°РїСЂР°РІР»РµРЅРёРµ, РєСѓРґР° РЅР°Рј Р±СѓРґРµС‚ РѕСЃРѕР±РµРЅРЅРѕ РїСЂРёСЏС‚РЅРѕ РѕС‚РїСЂР°РІРёС‚СЊСЃСЏ. РџРѕСЃР»Рµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ РёР·РјРµРЅРёС‚СЊ РІС‹Р±РѕСЂ СЃРјРѕР¶РµС‚ С‚РѕР»СЊРєРѕ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ СЃР°Р№С‚Р°.
+                  Выберите одно направление, куда нам будет особенно приятно отправиться. После подтверждения изменить выбор сможет только администратор сайта.
                 </p>
               </div>
             </div>
@@ -692,13 +692,13 @@ export default function App() {
 
               <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
                 <div style={{ fontSize: "clamp(12px, 1.2vw, 14px)", color: "#888", lineHeight: 1.5 }}>
-                  {activeSelectedCountry ? `Р’С‹ РІС‹Р±СЂР°Р»Рё: ${activeSelectedCountry}` : "РЎРЅР°С‡Р°Р»Р° РІС‹Р±РµСЂРёС‚Рµ РЅР°РїСЂР°РІР»РµРЅРёРµ РёР· СЃРїРёСЃРєР°"}
+                  {activeSelectedCountry ? `Вы выбрали: ${activeSelectedCountry}` : "Сначала выберите направление из списка"}
                 </div>
                 <button
                   type="button"
                   onClick={async () => {
                     if (!activeSelectedCountry) {
-                      showToast("РЎРЅР°С‡Р°Р»Р° РІС‹Р±РµСЂРёС‚Рµ СЃС‚СЂР°РЅСѓ РёР»Рё РЅР°РїСЂР°РІР»РµРЅРёРµ");
+                      showToast("Сначала выберите страну или направление");
                       return;
                     }
 
@@ -720,7 +720,7 @@ export default function App() {
                   }}
                 >
                   <Check size={16} strokeWidth={2.8} />
-                  РџРћР”РўР’Р•Р Р”РРўР¬ Р’Р«Р‘РћР 
+                  ПОДТВЕРДИТЬ ВЫБОР
                 </button>
               </div>
             </div>
@@ -762,7 +762,7 @@ export default function App() {
 
           <div className="relative z-10 max-w-7xl mx-auto bg-white overflow-hidden" style={{ borderRadius: "clamp(20px, 3vw, 36px) clamp(20px, 3vw, 36px) 0 0", boxShadow: "0 30px 80px rgba(0,0,0,0.25)" }}>
 
-            {/* HERO: NAMES + DANCE вЂ” wide editorial split */}
+            {/* HERO: NAMES + DANCE — wide editorial split */}
             <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-0">
               <div className="lg:col-span-7 relative aspect-[4/5] sm:aspect-[3/4] lg:aspect-auto lg:min-h-[700px] xl:min-h-[750px] overflow-hidden">
                 <ImageWithFallback src={siteImages.dance} alt="" className="w-full h-full object-cover" style={{ filter: "grayscale(100%) contrast(1.05)" }} />
@@ -771,7 +771,7 @@ export default function App() {
                   className="absolute left-4 sm:left-6 lg:left-12 xl:left-16 top-[42%] px-5 sm:px-7 lg:px-9 py-2.5 sm:py-3 lg:py-3.5 text-white"
                   style={{ background: CORAL, fontWeight: 900, letterSpacing: "0.15em", fontSize: "clamp(13px, 1.6vw, 18px)", transform: "rotate(-10deg)", boxShadow: "0 8px 24px rgba(232,90,79,0.35)", borderRadius: "8px" }}
                 >
-                  РЎР’РђР”Р¬Р‘Рђ
+                  СВАДЬБА
                 </div>
                 <div
                   className="absolute right-4 sm:right-6 lg:right-12 xl:right-16 bottom-4 sm:bottom-6 lg:bottom-12 xl:bottom-16 w-32 h-32 sm:w-36 sm:h-36 lg:w-44 lg:h-44 xl:w-48 xl:h-48 rounded-full flex flex-col items-center justify-center text-white text-center"
@@ -819,7 +819,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Р”РћР РћР“РР• Р”Р РЈР—Р¬РЇ + РњР•РЎРўРћ вЂ” two columns */}
+            {/* ДОРОГИЕ ДРУЗЬЯ + МЕСТО — two columns */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 border-t" style={{ borderColor: "#F0E8E8" }}>
               <div className="p-6 sm:p-8 lg:p-12 xl:p-16 lg:border-r" style={{ borderColor: "#F0E8E8" }}>
                 <div className="flex items-start gap-3 sm:gap-4 lg:gap-5 mb-5 lg:mb-6">
@@ -870,7 +870,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Р РђРЎРџРћР РЇР”РћРљ Р”РќРЇ вЂ” coral wide grid */}
+            {/* РАСПОРЯДОК ДНЯ — coral wide grid */}
             <div style={{ background: CORAL }} className="text-white relative">
               <div className="px-4 sm:px-6 lg:px-12 xl:px-16 py-10 sm:py-14 lg:py-20 xl:py-24">
                 <div className="flex items-center gap-3 sm:gap-4 lg:gap-5 mb-10 lg:mb-14">
@@ -925,7 +925,7 @@ export default function App() {
               <ScallopedBottom color={CORAL} />
             </div>
 
-            {/* Р”Р Р•РЎРЎ-РљРћР” */}
+            {/* ДРЕСС-КОД */}
             <div className="px-4 sm:px-6 lg:px-12 xl:px-16 py-10 sm:py-14 lg:py-20 xl:py-24 relative overflow-hidden">
               <Flower size={110} color={PINK} className="hidden xl:block absolute top-14 right-14 pointer-events-none" rotate={20} style={{ opacity: 0.65 }} />
               <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16">
@@ -962,7 +962,7 @@ export default function App() {
 
             <div className="h-px mx-4 sm:mx-6 md:mx-14" style={{ background: "#F0E8E8" }} />
 
-            {/* РќРђРЁРђ РРЎРўРћР РРЇ */}
+            {/* НАША ИСТОРИЯ */}
             <div className="px-4 sm:px-6 lg:px-12 xl:px-16 py-10 sm:py-14 lg:py-20 xl:py-24 relative overflow-hidden">
               <Flower size={100} color={PINK_LIGHT} className="hidden xl:block absolute top-16 left-12 pointer-events-none" rotate={15} style={{ opacity: 0.7 }} />
               <Flower size={120} color={PINK} className="hidden xl:block absolute bottom-24 right-14 pointer-events-none" rotate={-18} style={{ opacity: 0.55 }} />
@@ -1010,43 +1010,43 @@ export default function App() {
                       {
                         date: "2 РєСѓСЂСЃ",
                         title: "РЁР°С…РјР°С‚С‹",
-                        text: "Р’СЃС‘ РЅР°С‡Р°Р»РѕСЃСЊ РЅР° СЃРµРєС†РёРё С€Р°С…РјР°С‚. РЇ РїСЂРёС€Р»Р° РЅР° Р·Р°РЅСЏС‚РёРµ, Рё РµРґРёРЅСЃС‚РІРµРЅРЅРѕРµ СЃРІРѕР±РѕРґРЅРѕРµ РјРµСЃС‚Рѕ РѕРєР°Р·Р°Р»РѕСЃСЊ РЅР°РїСЂРѕС‚РёРІ РРІР°РЅР°. РњС‹ СЂР°Р·Р»РѕР¶РёР»Рё С„РёРіСѓСЂС‹, РЅР°С‡Р°Р»Рё РїР°СЂС‚РёСЋ вЂ” Рё РЅРµР·Р°РјРµС‚РЅРѕ СЂР°Р·РіРѕРІРѕСЂРёР»РёСЃСЊ. РЇ СЂР°СЃСЃРєР°Р·Р°Р»Р° Рѕ С…Р°РєР°С‚РѕРЅР°С…, РїРѕРєР°Р·Р°Р»Р° С„Р°РєСѓР»СЊС‚РµС‚. Р’Р°РЅСЏ Р·Р°РіРѕСЂРµР»СЃСЏ РёРґРµРµР№ Рё РїРµСЂРµРІС‘Р»СЃСЏ РЅР° СЌРєРѕРЅРѕРјРёС‡РµСЃРєРёР№.",
+                        text: "Всё началось на секции шахмат. Я пришла на занятие, и единственное свободное место оказалось напротив Ивана. Мы разложили фигуры, начали партию — и незаметно разговорились. Я рассказала о хакатонах, показала факультет. Ваня загорелся идеей и перевёлся на экономический.",
                         image: "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
                       },
                       {
                         date: "Р›РµС‚Рѕ 2024",
-                        title: "РђРґР»РµСЂ Рё Р¤РР§Рђ",
-                        text: "Р’РјРµСЃС‚Рµ РїРѕРµС…Р°Р»Рё РІ РђРґР»РµСЂ РїРѕ РїСЂРѕРіСЂР°РјРјРµ РїСЂРѕС„РєРѕРјР°. Рђ РїРѕС‚РѕРј РїСЂРѕС€Р»Рё РѕС‚Р±РѕСЂ РЅР° С„РѕСЂСѓРј В«Р¤РР§РђВ». РќР°С€Р° РєРѕРјР°РЅРґР° Avenir Р·Р°РЅСЏР»Р° РїРµСЂРІРѕРµ РјРµСЃС‚Рѕ РЅР° С…Р°РєР°С‚РѕРЅРµ! РњС‹ СЃС‚Р°Р»Рё РµС‰С‘ Р±Р»РёР¶Рµ.",
+                        title: "Адлер и ФИЧА",
+                        text: "Вместе поехали в Адлер по программе профкома. А потом прошли отбор на форум «ФИЧА». Наша команда Avenir заняла первое место на хакатоне! Мы стали ещё ближе.",
                         image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
                       },
                       {
-                        date: "РЎРµРЅС‚СЏР±СЂСЊ 2024",
+                        date: "Сентябрь 2024",
                         title: "РРґРµР°С‚РѕРЅ",
-                        text: "РџРѕСЃР»Рµ РјРµСЂРѕРїСЂРёСЏС‚РёСЏ В«РРґРµР°С‚РѕРЅВ», РєРѕС‚РѕСЂРѕРµ РјС‹ РѕСЂРіР°РЅРёР·РѕРІР°Р»Рё РІ СѓРЅРёРІРµСЂСЃРёС‚РµС‚Рµ, Р’Р°РЅСЏ РїСЂРµРґР»РѕР¶РёР» РјРЅРµ СЃС‚Р°С‚СЊ РїР°СЂРѕР№. РЇ РЅРµ СЂР°Р·РґСѓРјС‹РІР°Р»Р° РЅРё СЃРµРєСѓРЅРґС‹ вЂ” С‚Р°Рє РЅР°С‡Р°Р»РёСЃСЊ РЅР°С€Рё РѕС‚РЅРѕС€РµРЅРёСЏ.",
+                        text: "После мероприятия «Идеатон», которое мы организовали в университете, Ваня предложил мне стать парой. Я не раздумывала ни секунды — так начались наши отношения.",
                         image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
                       },
                       {
-                        date: "РќРѕСЏР±СЂСЊ 2024",
-                        title: "РџСЂРµРґР»РѕР¶РµРЅРёРµ",
-                        text: "Р’Р°РЅСЏ РІСЃС‚Р°Р» РЅР° РѕРґРЅРѕ РєРѕР»РµРЅРѕ Рё СЃРґРµР»Р°Р» РјРЅРµ РїСЂРµРґР»РѕР¶РµРЅРёРµ СЂСѓРєРё Рё СЃРµСЂРґС†Р°. РљРѕРЅРµС‡РЅРѕ, СЏ СЃРєР°Р·Р°Р»Р° В«Р”Р°!В» РњС‹ СЃС‚СЂРѕРёРј Avenir РІРјРµСЃС‚Рµ Рё РїР»Р°РЅРёСЂСѓРµРј РЅР°С€Сѓ СЃРѕРІРјРµСЃС‚РЅСѓСЋ Р¶РёР·РЅСЊ.",
+                        date: "Ноябрь 2024",
+                        title: "Предложение",
+                        text: "Ваня встал на одно колено и сделал мне предложение руки и сердца. Конечно, я сказала «Да!» Мы строим Avenir вместе и планируем нашу совместную жизнь.",
                         image: "https://images.unsplash.com/photo-1519741497674-611481863552?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
                       },
                       {
                         date: "РСЋРЅСЊ 2025",
-                        title: "РќРѕРІС‹Р№ РґРѕРј",
-                        text: "РњС‹ СЃСЉРµС…Р°Р»РёСЃСЊ Рё РЅР°С‡Р°Р»Рё РґРµР»Р°С‚СЊ СЂРµРјРѕРЅС‚ РІ РЅР°С€РµР№ РїРµСЂРІРѕР№ СЃРѕРІРјРµСЃС‚РЅРѕР№ РєРІР°СЂС‚РёСЂРµ. РљР°Р¶РґС‹Р№ РґРµРЅСЊ вЂ” РЅРѕРІРѕРµ РїСЂРёРєР»СЋС‡РµРЅРёРµ, РєР°Р¶РґРѕРµ СЂРµС€РµРЅРёРµ РїСЂРёРЅРёРјР°РµРј РІРјРµСЃС‚Рµ. РЎС‚СЂРѕРёРј РЅР°С€Рµ СЃРµРјРµР№РЅРѕРµ РіРЅС‘Р·РґС‹С€РєРѕ СЃРІРѕРёРјРё СЂСѓРєР°РјРё.",
+                        title: "Новый дом",
+                        text: "Мы съехались и начали делать ремонт в нашей первой совместной квартире. Каждый день — новое приключение, каждое решение принимаем вместе. Строим наше семейное гнёздышко своими руками.",
                         image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
                       },
                       {
                         date: "28 РѕРєС‚СЏР±СЂСЏ 2025",
                         title: "Р РѕСЃРїРёСЃСЊ",
-                        text: "РћС„РёС†РёР°Р»СЊРЅРѕ СЃС‚Р°Р»Рё РјСѓР¶РµРј Рё Р¶РµРЅРѕР№! Р’ СЌС‚РѕС‚ РґРµРЅСЊ РјС‹ СЂР°СЃРїРёСЃР°Р»РёСЃСЊ Рё СЃРґРµР»Р°Р»Рё РїРµСЂРІС‹Р№ С€Р°Рі Рє РЅР°С€РµР№ Р±РѕР»СЊС€РѕР№ СЃРІР°РґСЊР±Рµ. РўРµРїРµСЂСЊ РјС‹ вЂ” СЃРµРјСЊСЏ РЅРµ С‚РѕР»СЊРєРѕ РїРѕ СЃРµСЂРґС†Сѓ, РЅРѕ Рё РїРѕ РґРѕРєСѓРјРµРЅС‚Р°Рј.",
+                        text: "Официально стали мужем и женой! В этот день мы расписались и сделали первый шаг к нашей большой свадьбе. Теперь мы — семья не только по сердцу, но и по документам.",
                         image: "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
                       },
                       {
-                        date: "РЎРµРЅС‚СЏР±СЂСЊ 2026",
-                        title: "РЎРІР°РґСЊР±Р°",
-                        text: "Р РІРѕС‚ РјС‹ Р·РґРµСЃСЊ вЂ” РіРѕС‚РѕРІС‹ РѕС‚РїСЂР°Р·РґРЅРѕРІР°С‚СЊ РЅР°С€Сѓ Р»СЋР±РѕРІСЊ РІРјРµСЃС‚Рµ СЃРѕ РІСЃРµРјРё, РєС‚Рѕ РЅР°Рј РґРѕСЂРѕРі. РќР°С€Р° РёСЃС‚РѕСЂРёСЏ вЂ” СЌС‚Рѕ Р»СЋР±РѕРІСЊ, РѕР±С‰РёРµ РјРµС‡С‚С‹, РїРѕР±РµРґС‹ Рё РІРµСЂР° РІ С‚Рѕ, С‡С‚Рѕ РІРјРµСЃС‚Рµ РјС‹ РјРѕР¶РµРј РІСЃС‘. РЎРїР°СЃРёР±Рѕ, С‡С‚Рѕ СЂР°Р·РґРµР»РёС‚Рµ СЃ РЅР°РјРё СЌС‚РѕС‚ РґРµРЅСЊ!",
+                        date: "Сентябрь 2026",
+                        title: "Свадьба",
+                        text: "И вот мы здесь — готовы отпраздновать нашу любовь вместе со всеми, кто нам дорог. Наша история — это любовь, общие мечты, победы и вера в то, что вместе мы можем всё. Спасибо, что разделите с нами этот день!",
                         image: "https://images.unsplash.com/photo-1606800052052-a08af7148866?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
                       },
                     ]).map((story, i) => {
@@ -1172,7 +1172,7 @@ export default function App() {
                 <div className="px-6 py-8 rounded-3xl" style={{ background: PINK_LIGHT, border: `2px solid ${PINK}` }}>
                   <div className="text-center mb-6">
                     <Music size={32} style={{ color: CORAL, margin: "0 auto 16px" }} />
-                    <div style={{ fontWeight: 800, fontSize: "clamp(18px, 2vw, 24px)", marginBottom: "8px" }}>РњСѓР·С‹РєР°Р»СЊРЅРѕРµ РЅР°СЃС‚СЂРѕРµРЅРёРµ</div>
+                    <div style={{ fontWeight: 800, fontSize: "clamp(18px, 2vw, 24px)", marginBottom: "8px" }}>Музыкальное настроение</div>
                     <p style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#666", lineHeight: 1.6 }}>
                       Р›РµРіРєРёР№ РґР¶Р°Р· РЅР° С†РµСЂРµРјРѕРЅРёРё, СЂРѕРјР°РЅС‚РёС‡РЅС‹Рµ Р±Р°Р»Р»Р°РґС‹ РЅР° СѓР¶РёРЅРµ, С‚Р°РЅС†РµРІР°Р»СЊРЅС‹Рµ С…РёС‚С‹ РІРµС‡РµСЂРѕРј
                     </p>
@@ -1181,7 +1181,7 @@ export default function App() {
                   {musicWishes.length > 0 && (
                     <div className="mt-6 pt-6 border-t-2" style={{ borderColor: PINK }}>
                       <div style={{ fontWeight: 700, fontSize: "clamp(14px, 1.4vw, 16px)", marginBottom: "12px", color: CORAL }}>
-                        РџРѕР¶РµР»Р°РЅРёСЏ РіРѕСЃС‚РµР№:
+                        Пожелания гостей:
                       </div>
                       <div className="space-y-2 max-h-48 overflow-y-auto">
                         {musicWishes.map((wish: any, i: number) => (
@@ -1206,7 +1206,7 @@ export default function App() {
 
             <div className="h-px mx-4 sm:mx-6 md:mx-14" style={{ background: "#F0E8E8" }} />
 
-            {/* РџРћР–Р•Р›РђРќРРЇ / GIFTS */}
+            {/* ПОЖЕЛАНИЯ / GIFTS */}
             <div id="gifts" className="px-4 sm:px-6 lg:px-12 xl:px-16 py-10 sm:py-14 lg:py-20 xl:py-24 relative overflow-hidden">
               <Flower size={110} color={CORAL} className="hidden xl:block absolute top-12 right-14 pointer-events-none" rotate={-15} style={{ opacity: 0.85 }} />
               <div className="relative">
@@ -1226,20 +1226,20 @@ export default function App() {
                     <div className="mt-4 lg:mt-5 max-w-xl px-4 py-3 rounded-2xl flex items-start gap-3" style={{ background: "#FFF9F8", border: `2px solid ${CORAL}` }}>
                       <Sparkles size={20} style={{ color: CORAL, flexShrink: 0, marginTop: "2px" }} />
                       <p style={{ fontSize: "clamp(13px, 1.2vw, 15px)", color: CORAL_DARK, lineHeight: 1.65, fontWeight: 600 }}>
-                        <strong>Р’Р°Р¶РЅРѕ!</strong> Р•СЃР»Рё С…РѕС‚РёС‚Рµ С‡С‚Рѕ-С‚Рѕ РїРѕРґР°СЂРёС‚СЊ РёР· СЃРїРёСЃРєР° вЂ” РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ Р·Р°Р±СЂРѕРЅРёСЂСѓР№С‚Рµ, РЅР°Р¶Р°РІ РєРЅРѕРїРєСѓ "Р—Р°Р±СЂРѕРЅРёСЂРѕРІР°С‚СЊ РїРѕРґР°СЂРѕРє". Р­С‚Рѕ РїРѕРјРѕР¶РµС‚ РёР·Р±РµР¶Р°С‚СЊ РЅРµР»РѕРІРєРёС… СЃРёС‚СѓР°С†РёР№, РєРѕРіРґР° РЅРµСЃРєРѕР»СЊРєРѕ С‡РµР»РѕРІРµРє РґР°СЂСЏС‚ РѕРґРЅРѕ Рё С‚Рѕ Р¶Рµ.
+                        <strong>Важно!</strong> Если хотите что-то подарить из списка — обязательно забронируйте, нажав кнопку "Забронировать подарок". Это поможет избежать неловких ситуаций, когда несколько человек дарят одно и то же.
                       </p>
                     </div>
                   </div>
                   {!isRegistered && (
                     <div className="inline-flex items-center gap-2 px-4 lg:px-5 py-2.5 lg:py-3 rounded-full shrink-0" style={{ background: "#FFF1F0", border: `1px solid ${PINK}` }}>
                       <span style={{ color: CORAL, fontWeight: 700, fontSize: "clamp(11px, 1.1vw, 12px)", letterSpacing: "0.04em" }}>
-                        вљ  РЎРќРђР§РђР›Рђ Р—РђРџРћР›РќРРўР• Р¤РћР РњРЈ РќРР–Р•
+                        ⚠ СНАЧАЛА ЗАПОЛНИТЕ ФОРМУ НИЖЕ
                       </span>
                     </div>
                   )}
                 </div>
 
-                {/* РљРђРўР•Р“РћР РР Р¤РР›Р¬РўР  */}
+                {/* КАТЕГОРИИ ФИЛЬТР */}
                 <div className="mb-8 lg:mb-10">
                   <div className="flex flex-wrap gap-2 lg:gap-3">
                     {categories.map((cat) => (
@@ -1300,13 +1300,13 @@ export default function App() {
                         {isFeatured && !booked && (
                           <div className="absolute top-4 lg:top-5 left-4 lg:left-5 z-10 px-3 lg:px-3.5 py-1.5 rounded-full flex items-center gap-1.5" style={{ background: CORAL, color: "white" }}>
                             <Sparkles size={12} strokeWidth={3} />
-                            <span style={{ fontSize: "clamp(9px, 1vw, 10px)", fontWeight: 800, letterSpacing: "0.08em" }}>РћРЎРћР‘Р•РќРќРћР•</span>
+                            <span style={{ fontSize: "clamp(9px, 1vw, 10px)", fontWeight: 800, letterSpacing: "0.08em" }}>ОСОБЕННОЕ</span>
                           </div>
                         )}
                         {isUnavailable && (
                           <div className="absolute top-4 lg:top-5 right-4 lg:right-5 z-10 px-3 lg:px-3.5 py-1.5 rounded-full flex items-center gap-1.5" style={{ background: INK, color: "white" }}>
                             <Check size={12} strokeWidth={3} />
-                            <span style={{ fontSize: "clamp(9px, 1vw, 10px)", fontWeight: 800, letterSpacing: "0.08em" }}>Р’Р—РЇРўРћ</span>
+                            <span style={{ fontSize: "clamp(9px, 1vw, 10px)", fontWeight: 800, letterSpacing: "0.08em" }}>ВЗЯТО</span>
                           </div>
                         )}
 
@@ -1340,7 +1340,7 @@ export default function App() {
                                 style={{ background: PINK_LIGHT, color: CORAL, fontSize: "clamp(11px, 1.1vw, 12px)", fontWeight: 700 }}
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <span>РџРћРЎРњРћРўР Р•РўР¬</span>
+                                <span>ПОСМОТРЕТЬ</span>
                                 <ArrowUpRight size={12} strokeWidth={2.5} />
                               </a>
                             )}
@@ -1351,10 +1351,10 @@ export default function App() {
                               <div className="mb-4 flex items-center justify-between gap-3">
                                 <div>
                                   <div style={{ fontSize: "clamp(13px, 1.3vw, 15px)", color: "#666", fontWeight: 700 }}>
-                                    Р’С‹Р±СЂР°Р»Рё {bookingCount} {bookingCount === 1 ? "С‡РµР»РѕРІРµРє" : bookingCount < 5 ? "С‡РµР»РѕРІРµРєР°" : "С‡РµР»РѕРІРµРє"}
+                                    Выбрали {bookingCount} {bookingCount === 1 ? "человек" : bookingCount < 5 ? "человека" : "человек"}
                                   </div>
                                   <div className="mt-1" style={{ fontSize: "clamp(12px, 1.1vw, 13px)", color: "#999", lineHeight: 1.45 }}>
-                                    РћС‚РєСЂРѕР№С‚Рµ СЃРїРёСЃРѕРє РЅР°РїСЂР°РІР»РµРЅРёР№ Рё РІС‹Р±РµСЂРёС‚Рµ РѕРґРЅРѕ.
+                                    Откройте список направлений и выберите одно.
                                   </div>
                                 </div>
                                 <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: PINK_LIGHT }}>
@@ -1365,7 +1365,7 @@ export default function App() {
                               {currentGiftTravelBooking && (
                                 <div className="mb-4 px-4 py-3 rounded-2xl flex items-center gap-2" style={{ background: "#E8F5E9", color: "#2E7D32", fontSize: 13, fontWeight: 800 }}>
                                   <Check size={16} strokeWidth={2.5} />
-                                  <span>Р’Р°С€ РІС‹Р±РѕСЂ: {currentGiftTravelBooking.selectedCountry}</span>
+                                  <span>Ваш выбор: {currentGiftTravelBooking.selectedCountry}</span>
                                 </div>
                               )}
 
@@ -1387,12 +1387,12 @@ export default function App() {
                                 {currentGuestTravelBooking || currentGuestBookedThisTravelGift ? (
                                   <>
                                     <Check size={16} strokeWidth={2.5} />
-                                    <span>РќРђРџР РђР’Р›Р•РќРР• Р’Р«Р‘Р РђРќРћ</span>
+                                    <span>НАПРАВЛЕНИЕ ВЫБРАНО</span>
                                   </>
                                 ) : (
                                   <>
                                     <Compass size={16} strokeWidth={2.5} />
-                                    <span>Р’Р«Р‘Р РђРўР¬ РќРђРџР РђР’Р›Р•РќРР•</span>
+                                    <span>ВЫБРАТЬ НАПРАВЛЕНИЕ</span>
                                   </>
                                 )}
                               </button>
@@ -1401,7 +1401,7 @@ export default function App() {
                             <div className="mt-7 lg:mt-8 pt-5 lg:pt-6" style={{ borderTop: "1px dashed #F0E8E8" }}>
                               <div className="flex items-center justify-between mb-4">
                                 <div style={{ fontSize: "clamp(13px, 1.3vw, 15px)", color: "#666", fontWeight: 600 }}>
-                                  Р’С‹Р±СЂР°Р»Рё {bookingCount} {bookingCount === 1 ? "С‡РµР»РѕРІРµРє" : bookingCount < 5 ? "С‡РµР»РѕРІРµРєР°" : "С‡РµР»РѕРІРµРє"}
+                                  Выбрали {bookingCount} {bookingCount === 1 ? "человек" : bookingCount < 5 ? "человека" : "человек"}
                                 </div>
                               </div>
                               <button
@@ -1420,7 +1420,7 @@ export default function App() {
                                 }}
                               >
                                 <Gift size={16} strokeWidth={2.5} />
-                                <span>Р’Р«Р‘Р РђРўР¬ Р­РўРћРў РџРћР”РђР РћРљ</span>
+                                <span>ВЫБРАТЬ ЭТОТ ПОДАРОК</span>
                               </button>
                             </div>
                           ) : (
@@ -1442,12 +1442,12 @@ export default function App() {
                             {booked ? (
                               <>
                                 <Check size={16} strokeWidth={2.5} />
-                                <span>Р—РђР‘Р РћРќРР РћР’РђРќРћ</span>
+                                <span>ЗАБРОНИРОВАНО</span>
                               </>
                             ) : (
                               <>
                                 <Gift size={16} strokeWidth={2.5} />
-                                <span>Р—РђР‘Р РћРќРР РћР’РђРўР¬ РџРћР”РђР РћРљ</span>
+                                <span>ЗАБРОНИРОВАТЬ ПОДАРОК</span>
                               </>
                             )}
                           </button>
@@ -1480,7 +1480,7 @@ export default function App() {
                         boxShadow: `0 8px 24px ${CORAL}55`,
                       }}
                     >
-                      <span>РџРћРљРђР—РђРўР¬ Р’РЎР• РџРћР”РђР РљР</span>
+                      <span>ПОКАЗАТЬ ВСЕ ПОДАРКИ</span>
                       <span style={{ opacity: 0.85 }}>+{hiddenGiftsCount}</span>
                     </button>
                   </div>
@@ -1511,14 +1511,14 @@ export default function App() {
                 {isRegistered && (
                   <div className="mt-5 flex items-center gap-3 px-4 py-3 rounded-2xl" style={{ background: "#E8F5E9", color: "#2E7D32" }}>
                     <Check size={20} />
-                    <span style={{ fontWeight: 700, fontSize: 13 }}>Р’С‹ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅС‹! РЎРїР°СЃРёР±Рѕ</span>
+                    <span style={{ fontWeight: 700, fontSize: 13 }}>Вы зарегистрированы! Спасибо</span>
                   </div>
                 )}
 
                 <form onSubmit={handleRegister} className="mt-6 space-y-5">
                   <div>
                     <label style={{ fontSize: 11, letterSpacing: "0.08em", fontWeight: 800, color: "#555" }}>
-                      РРњРЇ Р Р¤РђРњРР›РРЇ *
+                      ИМЯ И ФАМИЛИЯ *
                     </label>
                     <input
                       value={form.name}
@@ -1532,10 +1532,10 @@ export default function App() {
 
                   <div>
                     <label style={{ fontSize: 11, letterSpacing: "0.08em", fontWeight: 800, color: "#555" }}>
-                      РЎ Р§Р¬Р•Р™ РЎРўРћР РћРќР« *
+                      С ЧЬЕЙ СТОРОНЫ *
                     </label>
                     <div className="mt-2 grid grid-cols-1 gap-2">
-                      {(["РЎРѕ СЃС‚РѕСЂРѕРЅС‹ РРІР°РЅР°", "РЎРѕ СЃС‚РѕСЂРѕРЅС‹ РђРЅР°СЃС‚Р°СЃРёРё"] as Side[]).map((opt) => (
+                      {(["Со стороны Ивана", "Со стороны Анастасии"] as Side[]).map((opt) => (
                         <button
                           type="button"
                           key={opt}
@@ -1557,10 +1557,10 @@ export default function App() {
 
                   <div>
                     <label style={{ fontSize: 11, letterSpacing: "0.08em", fontWeight: 800, color: "#555" }}>
-                      Р’РђРЁР• РџР РРЎРЈРўРЎРўР’РР• *
+                      ВАШЕ ПРИСУТСТВИЕ *
                     </label>
                     <div className="mt-2 grid grid-cols-2 gap-2">
-                      {(["РџСЂРёРґСѓ РѕРґРёРЅ/РѕРґРЅР°", "РџСЂРёРґСѓ СЃ РїР°СЂРѕР№", "РџСЂРёРґСѓ СЃ СЃРµРјСЊС‘Р№", "РќРµ СЃРјРѕРіСѓ"] as Attend[]).map((opt) => (
+                      {(["Приду один/одна", "Приду с парой", "Приду с семьёй", "Не смогу"] as Attend[]).map((opt) => (
                         <button
                           type="button"
                           key={opt}
@@ -1580,16 +1580,16 @@ export default function App() {
                     </div>
                   </div>
 
-                  {form.attend && form.attend !== "РџСЂРёРґСѓ РѕРґРёРЅ/РѕРґРЅР°" && form.attend !== "РќРµ СЃРјРѕРіСѓ" && (
+                  {form.attend && form.attend !== "Приду один/одна" && form.attend !== "Не смогу" && (
                     <div>
                       <label style={{ fontSize: 11, letterSpacing: "0.08em", fontWeight: 800, color: "#555" }}>
-                        РРњР•РќРђ Р’РђРЁРРҐ Р“РћРЎРўР•Р™
+                        ИМЕНА ВАШИХ ГОСТЕЙ
                       </label>
                       <textarea
                         value={form.guests}
                         onChange={(e) => setForm({ ...form, guests: e.target.value })}
                         disabled={isRegistered}
-                        placeholder="РњР°СЂРёСЏ РРІР°РЅРѕРІР°, РџС‘С‚СЂ РРІР°РЅРѕРІ"
+                        placeholder="Мария Иванова, Пётр Иванов"
                         rows={2}
                         className="w-full mt-2 px-5 py-3.5 rounded-2xl outline-none resize-none border-2"
                         style={{ background: "#FBF6F4", fontSize: 14, borderColor: form.guests ? PINK : "transparent", fontWeight: 500 }}
@@ -1599,7 +1599,7 @@ export default function App() {
 
                   <div>
                     <label style={{ fontSize: 11, letterSpacing: "0.08em", fontWeight: 800, color: "#555" }}>
-                      Р’РђРЁР• Р¤РћРўРћ В· РџРћ Р–Р•Р›РђРќРР®
+                      ВАШЕ ФОТО · ПО ЖЕЛАНИЮ
                     </label>
                     <div className="mt-2 flex items-center gap-4">
                       <label
@@ -1614,7 +1614,7 @@ export default function App() {
                         <input type="file" accept="image/*" disabled={isRegistered} onChange={(e) => onPhoto(e.target.files?.[0] || null)} className="hidden" />
                       </label>
                       <div style={{ fontSize: 13, color: "#666", lineHeight: 1.5 }}>
-                        Р—Р°РіСЂСѓР·РёС‚Рµ РїРѕСЂС‚СЂРµС‚ вЂ” РѕРЅ СѓРєСЂР°СЃРёС‚ СЃС‚РµРЅСѓ РіРѕСЃС‚РµР№ РЅР° РЅР°С€РµРј РїСЂР°Р·РґРЅРёРєРµ.
+                        Загрузите портрет — он украсит стену гостей на нашем празднике.
                       </div>
                     </div>
                   </div>
@@ -1622,20 +1622,20 @@ export default function App() {
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label style={{ fontSize: 11, letterSpacing: "0.08em", fontWeight: 800, color: "#555" }}>
-                        РќРђРџРРўРљР
+                        НАПИТКИ
                       </label>
                       <input
                         value={form.drink}
                         onChange={(e) => setForm({ ...form, drink: e.target.value })}
                         disabled={isRegistered}
-                        placeholder="Р’РёРЅРѕ, РїРёРІРѕвЂ¦"
+                        placeholder="Вино, пиво…"
                         className="w-full mt-2 px-4 py-3 rounded-2xl outline-none border-2"
                         style={{ background: "#FBF6F4", fontSize: 13, borderColor: form.drink ? PINK : "transparent", fontWeight: 500 }}
                       />
                     </div>
                     <div>
                       <label style={{ fontSize: 11, letterSpacing: "0.08em", fontWeight: 800, color: "#555" }}>
-                        РђР›Р›Р•Р Р“РР
+                        АЛЛЕРГИИ
                       </label>
                       <input
                         value={form.allergy}
@@ -1660,7 +1660,7 @@ export default function App() {
                       opacity: isLoading ? 0.7 : 1
                     }}
                   >
-                    {isLoading ? "РћРўРџР РђР’РљРђ..." : isRegistered ? "вњ“ Р’Р« Р—РђР Р•Р“РРЎРўР РР РћР’РђРќР«" : "РћРўРџР РђР’РРўР¬ РћРўР’Р•Рў"}
+                    {isLoading ? "ОТПРАВКА..." : isRegistered ? "✓ ВЫ ЗАРЕГИСТРИРОВАНЫ" : "ОТПРАВИТЬ ОТВЕТ"}
                   </button>
                 </form>
               </div>
@@ -1668,12 +1668,12 @@ export default function App() {
 
             <div className="h-px mx-4 sm:mx-6 md:mx-14" style={{ background: "#F0E8E8" }} />
 
-            {/* Р“РћРЎРўР */}
+            {/* ГОСТИ */}
             <GuestsBlock guests={allGuests} currentGuestId={currentGuestId} isRegistered={isRegistered} />
 
             <div className="h-px mx-4 sm:mx-6 md:mx-14" style={{ background: "#F0E8E8" }} />
 
-            {/* Р“РђР›Р•Р Р•РЇ (РџРѕСЃР»Рµ СЃРІР°РґСЊР±С‹) */}
+            {/* ГАЛЕРЕЯ (После свадьбы) */}
             <div className="px-4 sm:px-6 lg:px-12 xl:px-16 py-10 sm:py-14 lg:py-20 xl:py-24 relative overflow-hidden">
               <Flower size={100} color={PINK_LIGHT} className="hidden xl:block absolute bottom-16 left-12 pointer-events-none" rotate={-15} style={{ opacity: 0.7 }} />
               <div className="relative max-w-5xl mx-auto text-center">
@@ -1681,17 +1681,17 @@ export default function App() {
                   <div className="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center" style={{ background: PINK_LIGHT }}>
                     <ImageIcon size={24} style={{ color: CORAL }} />
                   </div>
-                  <div style={{ fontWeight: 900, fontSize: "clamp(26px, 3.5vw, 56px)", letterSpacing: "-0.02em" }}>Р“РђР›Р•Р Р•РЇ</div>
+                  <div style={{ fontWeight: 900, fontSize: "clamp(26px, 3.5vw, 56px)", letterSpacing: "-0.02em" }}>ГАЛЕРЕЯ</div>
                 </div>
 
                 <p className="max-w-2xl mx-auto px-4 mb-8" style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#666", lineHeight: 1.6 }}>
-                  РџРѕСЃР»Рµ СЃРІР°РґСЊР±С‹ Р·РґРµСЃСЊ РїРѕСЏРІСЏС‚СЃСЏ С„РѕС‚Рѕ Рё РІРёРґРµРѕ СЃ РЅР°С€РµРіРѕ РїСЂР°Р·РґРЅРёРєР°
+                  После свадьбы здесь появятся фото и видео с нашего праздника
                 </p>
 
                 <div className="rounded-3xl p-12 lg:p-16" style={{ background: "linear-gradient(135deg, #FFF9F8 0%, #FFF 100%)", border: `2px dashed ${PINK}` }}>
                   <Camera size={48} style={{ color: CORAL, margin: "0 auto 16px", opacity: 0.5 }} />
                   <div style={{ fontWeight: 800, fontSize: "clamp(18px, 2vw, 24px)", color: "#999", marginBottom: "8px" }}>
-                    РЎРєРѕСЂРѕ Р·РґРµСЃСЊ РїРѕСЏРІСЏС‚СЃСЏ С„РѕС‚РѕРіСЂР°С„РёРё
+                    Скоро здесь появятся фотографии
                   </div>
                   <p style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#aaa", lineHeight: 1.6 }}>
                     5-6 СЃРµРЅС‚СЏР±СЂСЏ 2026
@@ -1701,7 +1701,7 @@ export default function App() {
             </div>
             <div className="h-px mx-4 sm:mx-6 md:mx-14" style={{ background: "#F0E8E8" }} />
 
-            {/* РњРЈР—Р«РљРђР›Р¬РќР«Р• РџРћР–Р•Р›РђРќРРЇ */}
+            {/* МУЗЫКАЛЬНЫЕ ПОЖЕЛАНИЯ */}
             <div className="px-4 sm:px-6 lg:px-12 xl:px-16 py-10 sm:py-14 lg:py-20 xl:py-24 relative overflow-hidden">
               <Flower size={100} color={PINK} className="hidden xl:block absolute top-16 right-12 pointer-events-none" rotate={30} style={{ opacity: 0.7 }} />
               <div className="relative max-w-3xl mx-auto">
@@ -1723,7 +1723,7 @@ export default function App() {
                   <textarea
                     value={musicInput}
                     onChange={(e) => setMusicInput(e.target.value)}
-                    placeholder="РќР°Р·РІР°РЅРёРµ РїРµСЃРЅРё Рё РёСЃРїРѕР»РЅРёС‚РµР»СЊ..."
+                    placeholder="Название песни и исполнитель..."
                     rows={3}
                     className="w-full px-5 py-4 rounded-2xl outline-none resize-none border-2"
                     style={{ background: "white", fontSize: "clamp(14px, 1.3vw, 16px)", borderColor: musicInput ? PINK : "transparent", fontWeight: 500 }}
@@ -1742,7 +1742,7 @@ export default function App() {
                       cursor: isLoading || !musicInput.trim() ? "default" : "pointer"
                     }}
                   >
-                    {isLoading ? "РћРўРџР РђР’РљРђ..." : "РћРўРџР РђР’РРўР¬ РџРћР–Р•Р›РђРќРР•"}
+                    {isLoading ? "ОТПРАВКА..." : "ОТПРАВИТЬ ПОЖЕЛАНИЕ"}
                   </button>
                 </div>
               </div>
@@ -1766,12 +1766,12 @@ export default function App() {
 
                 <div className="space-y-4">
                   {(faqItems.length ? faqItems : [
-                    { q: "РњРѕР¶РЅРѕ Р»Рё СЃ РґРµС‚СЊРјРё?", a: "Р”Р°, РґРµС‚Рё РїСЂРёРІРµС‚СЃС‚РІСѓСЋС‚СЃСЏ! Р”Р»СЏ РЅРёС… Р±СѓРґРµС‚ РѕСЂРіР°РЅРёР·РѕРІР°РЅР° РѕС‚РґРµР»СЊРЅР°СЏ Р·РѕРЅР° СЃ СЂР°Р·РІР»РµС‡РµРЅРёСЏРјРё." },
-                    { q: "РњРѕР¶РЅРѕ Р»Рё РїСЂРёРІРµСЃС‚Рё +1?", a: "РџРѕР¶Р°Р»СѓР№СЃС‚Р°, СѓРєР°Р¶РёС‚Рµ РєРѕР»РёС‡РµСЃС‚РІРѕ РіРѕСЃС‚РµР№ РїСЂРё СЂРµРіРёСЃС‚СЂР°С†РёРё. РњС‹ Р±СѓРґРµРј СЂР°РґС‹ РІСЃРµРј!" },
+                    { q: "Можно ли с детьми?", a: "Да, дети приветствуются! Для них будет организована отдельная зона с развлечениями." },
+                    { q: "Можно ли привести +1?", a: "Пожалуйста, укажите количество гостей при регистрации. Мы будем рады всем!" },
                     { q: "Р‘СѓРґРµС‚ Р»Рё С‚СЂР°РЅСЃС„РµСЂ?", a: "РРЅС„РѕСЂРјР°С†РёСЏ Рѕ С‚СЂР°РЅСЃС„РµСЂРµ РїРѕСЏРІРёС‚СЃСЏ РїРѕР·РґРЅРµРµ РЅР° СЌС‚РѕРј СЃР°Р№С‚Рµ." },
-                    { q: "Р’Рѕ СЃРєРѕР»СЊРєРѕ Р·Р°РєР°РЅС‡РёРІР°РµС‚СЃСЏ РїСЂР°Р·РґРЅРёРє?", a: "РћС„РёС†РёР°Р»СЊРЅР°СЏ С‡Р°СЃС‚СЊ Р·Р°РІРµСЂС€РёС‚СЃСЏ РѕРєРѕР»Рѕ 23:00, РЅРѕ РІРµСЃРµР»СЊРµ РјРѕР¶РµС‚ РїСЂРѕРґРѕР»Р¶РёС‚СЊСЃСЏ!" },
-                    { q: "РњРѕР¶РЅРѕ Р»Рё РґР°СЂРёС‚СЊ С†РІРµС‚С‹?", a: "РњС‹ Р±СѓРґРµРј СЂР°РґС‹ Р»СЋР±С‹Рј С†РІРµС‚Р°Рј, РЅРѕ РјРѕР¶РµС‚Рµ РІС‹Р±СЂР°С‚СЊ РїРѕРґР°СЂРѕРє РёР· РЅР°С€РµРіРѕ СЃРїРёСЃРєР° РїРѕР¶РµР»Р°РЅРёР№." },
-                    { q: "Р“РґРµ РѕСЃС‚Р°РЅРѕРІРёС‚СЊСЃСЏ?", a: "Р РµРєРѕРјРµРЅРґР°С†РёРё РїРѕ РѕС‚РµР»СЏРј РІ РљСЂР°СЃРЅРѕРґР°СЂРµ РїРѕСЏРІСЏС‚СЃСЏ РїРѕР·РґРЅРµРµ." },
+                    { q: "Во сколько заканчивается праздник?", a: "Официальная часть завершится около 23:00, но веселье может продолжиться!" },
+                    { q: "Можно ли дарить цветы?", a: "Мы будем рады любым цветам, но можете выбрать подарок из нашего списка пожеланий." },
+                    { q: "Где остановиться?", a: "Рекомендации по отелям в Краснодаре появятся позднее." },
                   ]).map((faq, i) => (
                     <details key={i} className="group rounded-2xl lg:rounded-3xl overflow-hidden transition-all" style={{ background: "#FBF6F4", border: "1px solid #F0E8E8" }}>
                       <summary className="px-6 py-5 lg:px-8 lg:py-6 cursor-pointer list-none flex items-center justify-between" style={{ fontWeight: 700, fontSize: "clamp(15px, 1.4vw, 18px)" }}>
