@@ -206,7 +206,7 @@ function GuestsBlock({ guests, currentGuestId, isRegistered }: { guests: any[]; 
     <div className="px-4 sm:px-6 lg:px-12 xl:px-16 py-10 sm:py-14 lg:py-20 xl:py-24 relative">
       <div className="relative">
         <div className="text-center mb-10 lg:mb-14">
-          <div className="inline-flex items-center gap-3 lg:gap-4 mb-4 lg:mb-5">
+          <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-center sm:text-left lg:gap-4 mb-4 lg:mb-5">
             <div className="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center" style={{ background: "#FBD3D8" }}>
               <Users size={24} style={{ color: "#E85A4F" }} />
             </div>
@@ -734,31 +734,30 @@ export default function App() {
       {/* CONTENT */}
       <div className="relative z-10 overflow-x-hidden">
         {/* HERO — split cover */}
-        <section id="hero" className="relative px-4 sm:px-5 md:px-6 lg:px-10 pt-6 sm:pt-8 lg:pt-10 pb-4 sm:pb-6">
+        <section id="hero" className="relative px-3 sm:px-5 md:px-6 lg:px-10 pt-4 sm:pt-8 lg:pt-10 pb-4 sm:pb-6">
           <div
             className="relative z-10 mx-auto max-w-7xl overflow-hidden bg-[#FFF8F5]"
             style={{
-              borderRadius: "clamp(24px, 4vw, 40px)",
+              borderRadius: "clamp(20px, 4vw, 40px)",
               boxShadow: "0 40px 100px rgba(100, 37, 21, 0.12)",
             }}
           >
-            <div className="grid max-lg:flex max-lg:min-h-[min(72vh,640px)] max-lg:flex-col lg:min-h-[min(560px,58vh)] lg:grid-cols-[1.15fr_0.85fr] lg:items-stretch lg:gap-5 lg:p-5">
-              <div className="flex max-lg:flex-col max-lg:px-3 max-lg:pt-3 sm:max-lg:px-4 sm:max-lg:pt-4 lg:h-full lg:p-0">
-                <div className="relative min-h-[460px] max-lg:min-h-[360px] w-full overflow-hidden rounded-[20px] sm:rounded-[24px] lg:h-full lg:min-h-0 lg:rounded-2xl xl:rounded-3xl">
-                  <ImageWithFallback
-                    src={siteImages.heroPrimary}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(115deg, rgba(19,12,10,0.82) 0%, rgba(19,12,10,0.45) 48%, rgba(19,12,10,0.2) 100%)",
-                    }}
-                  />
-                  <div className="relative z-10 flex h-full min-h-[380px] flex-col justify-between px-6 py-8 text-white sm:px-8 sm:py-10 lg:min-h-full lg:px-12 lg:py-14">
-                  <div className="inline-flex w-fit rounded-full bg-white/20 px-4 py-2 backdrop-blur">
+            <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4 lg:min-h-[min(560px,58vh)] lg:grid lg:grid-cols-[1.15fr_0.85fr] lg:items-stretch lg:gap-5 lg:p-5">
+              <div className="relative min-h-[min(68vw,300px)] w-full overflow-hidden rounded-[18px] sm:min-h-[340px] sm:rounded-[22px] lg:min-h-0 lg:h-full lg:rounded-2xl xl:rounded-3xl">
+                <ImageWithFallback
+                  src={siteImages.heroPrimary}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(115deg, rgba(19,12,10,0.82) 0%, rgba(19,12,10,0.45) 48%, rgba(19,12,10,0.2) 100%)",
+                  }}
+                />
+                <div className="relative z-10 flex min-h-[min(68vw,300px)] flex-col justify-between p-5 text-white sm:min-h-[340px] sm:p-7 lg:min-h-full lg:px-12 lg:py-14">
+                  <div className="inline-flex w-fit max-w-full rounded-full bg-white/20 px-3 py-1.5 text-xs backdrop-blur sm:px-4 sm:py-2 sm:text-sm">
                     {heroSettings.note || "Свадебное приглашение"}
                   </div>
                   <div className="max-w-xl">
@@ -767,25 +766,25 @@ export default function App() {
                         color: "#FFD6CE",
                         fontWeight: 800,
                         letterSpacing: "0.14em",
-                        fontSize: "clamp(12px, 1.2vw, 14px)",
+                        fontSize: "clamp(11px, 2.8vw, 14px)",
                       }}
                     >
                       {heroSettings.subtitle || "5-6 сентября 2026"}
                     </div>
                     <h1
-                      className="mt-5"
+                      className="mt-3 sm:mt-5"
                       style={{
                         fontWeight: 900,
-                        fontSize: "clamp(36px, 6vw, 72px)",
-                        lineHeight: 0.92,
+                        fontSize: "clamp(28px, 8.5vw, 72px)",
+                        lineHeight: 0.95,
                         letterSpacing: "-0.04em",
                       }}
                     >
                       {heroSettings.title || "Иван и Анастасия"}
                     </h1>
                     <p
-                      className="mt-6 max-w-lg"
-                      style={{ lineHeight: 1.7, color: "rgba(255,255,255,0.88)", fontSize: "clamp(15px, 1.4vw, 17px)" }}
+                      className="mt-4 max-w-lg sm:mt-6"
+                      style={{ lineHeight: 1.65, color: "rgba(255,255,255,0.88)", fontSize: "clamp(14px, 3.6vw, 17px)" }}
                     >
                       {heroSettings.description ||
                         "Мы будем счастливы провести этот день вместе с вами и собрать вокруг себя самых близких людей."}
@@ -793,8 +792,8 @@ export default function App() {
                     {heroSettings.buttonLabel ? (
                       <a
                         href={heroSettings.buttonHref || "#schedule"}
-                        className="mt-8 inline-flex items-center gap-2 rounded-full px-6 py-4 transition active:scale-[0.98]"
-                        style={{ background: CORAL, color: "white", fontWeight: 800 }}
+                        className="mt-5 flex w-full max-w-sm items-center justify-center gap-2 rounded-full px-5 py-3.5 transition active:scale-[0.98] sm:mt-8 sm:inline-flex sm:w-auto sm:px-6 sm:py-4"
+                        style={{ background: CORAL, color: "white", fontWeight: 800, fontSize: "clamp(13px, 3.2vw, 16px)" }}
                       >
                         {heroSettings.buttonLabel}
                         <ArrowRight size={18} />
@@ -802,36 +801,31 @@ export default function App() {
                     ) : null}
                   </div>
                 </div>
-                </div>
               </div>
 
-              <div className="flex min-h-0 flex-1 flex-col gap-2 max-lg:px-3 max-lg:pb-3 sm:max-lg:px-4 sm:max-lg:pb-4 lg:h-full lg:grid lg:grid-rows-[1.15fr_0.85fr] lg:gap-3 lg:p-0">
-                <div className="max-lg:pt-1 sm:max-lg:pt-2 lg:min-h-0 lg:pt-0">
-                  <div className="flex min-h-[220px] items-center justify-center overflow-hidden rounded-[20px] bg-[#F6E8E4] sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[300px] lg:h-full lg:rounded-2xl xl:rounded-3xl">
-                    <ImageWithFallback
-                      src={siteImages.heroSecondary}
-                      alt=""
-                      className="block h-auto w-full max-h-[min(52vh,440px)] object-contain object-center lg:max-h-none lg:h-full lg:w-full"
-                    />
-                  </div>
+              <div className="flex flex-col gap-3 lg:h-full lg:grid lg:grid-rows-[1.15fr_0.85fr] lg:gap-3">
+                <div className="flex min-h-[200px] items-center justify-center overflow-hidden rounded-[18px] bg-[#F6E8E4] sm:min-h-[220px] sm:rounded-[22px] lg:min-h-[300px] lg:h-full lg:rounded-2xl xl:rounded-3xl">
+                  <ImageWithFallback
+                    src={siteImages.heroSecondary}
+                    alt=""
+                    className="block h-auto w-full max-h-[min(40vh,300px)] object-contain object-center sm:max-h-[min(44vh,340px)] lg:h-full lg:max-h-none lg:w-full"
+                  />
                 </div>
-                <div className="flex min-h-0 flex-1 flex-col lg:min-h-0">
+                <div
+                  className="flex flex-col rounded-[18px] px-4 py-4 sm:rounded-[22px] sm:px-6 sm:py-6 lg:rounded-2xl lg:px-8 lg:py-8 xl:rounded-3xl"
+                  style={{
+                    background: "linear-gradient(135deg, #FFF5F2 0%, #FFFFFF 100%)",
+                    boxShadow: "0 8px 24px rgba(100, 37, 21, 0.06)",
+                  }}
+                >
+                  <div style={{ color: CORAL, fontWeight: 800, letterSpacing: "0.16em", fontSize: 11 }}>
+                    {heroSettings.badge || "Wedding weekend"}
+                  </div>
                   <div
-                    className="flex h-full min-h-[140px] flex-1 flex-col rounded-[20px] px-5 py-5 sm:rounded-[24px] sm:px-6 sm:py-6 lg:min-h-0 lg:flex-none lg:rounded-2xl lg:px-8 lg:py-8 xl:rounded-3xl"
-                    style={{
-                      background: "linear-gradient(135deg, #FFF5F2 0%, #FFFFFF 100%)",
-                      boxShadow: "0 8px 24px rgba(100, 37, 21, 0.06)",
-                    }}
+                    className="mt-3 sm:mt-4"
+                    style={{ fontWeight: 900, fontSize: "clamp(20px, 5vw, 40px)", lineHeight: 1.08 }}
                   >
-                    <div style={{ color: CORAL, fontWeight: 800, letterSpacing: "0.16em", fontSize: 12 }}>
-                      {heroSettings.badge || "Wedding weekend"}
-                    </div>
-                    <div
-                      className="mt-4"
-                      style={{ fontWeight: 900, fontSize: "clamp(24px, 3vw, 40px)", lineHeight: 1.05 }}
-                    >
-                      {heroSettings.note || "Свадебное приглашение"}
-                    </div>
+                    {heroSettings.note || "Свадебное приглашение"}
                   </div>
                 </div>
               </div>
@@ -840,7 +834,7 @@ export default function App() {
         </section>
 
         {/* WIDE WHITE CARD */}
-        <div className="relative px-2 sm:px-4 md:px-6 lg:px-8 pb-20 sm:pb-32 overflow-x-hidden">
+        <div className="relative px-3 sm:px-4 md:px-6 lg:px-8 pb-16 sm:pb-32 overflow-x-hidden">
           {/* decorative flowers peeking from edges */}
           <Flower size={130} color={CORAL} className="hidden sm:block absolute -top-10 left-2 z-20 pointer-events-none" rotate={-25} style={{ opacity: 0.95 }} />
           <Flower size={120} color={PINK} className="hidden sm:block absolute top-[14%] right-2 z-20 pointer-events-none" rotate={30} />
@@ -853,11 +847,11 @@ export default function App() {
             {/* ДОРОГИЕ ДРУЗЬЯ + МЕСТО — two columns */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 border-t" style={{ borderColor: "#F0E8E8" }}>
               <div className="p-6 sm:p-8 lg:p-12 xl:p-16 lg:border-r" style={{ borderColor: "#F0E8E8" }}>
-                <div className="flex items-start gap-3 sm:gap-4 lg:gap-5 mb-5 lg:mb-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4 lg:gap-5 mb-5 lg:mb-6">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-2xl flex items-center justify-center shrink-0" style={{ background: PINK_LIGHT }}>
                     <Heart size={24} style={{ color: CORAL }} fill={CORAL} />
                   </div>
-                  <div style={{ fontWeight: 900, fontSize: "clamp(22px, 2.5vw, 36px)", letterSpacing: "-0.01em", lineHeight: 1.1 }}>
+                  <div style={{ fontWeight: 900, fontSize: "clamp(22px, 5.5vw, 36px)", letterSpacing: "-0.01em", lineHeight: 1.1 }}>
                     {welcomeSettings.title || "Дорогие друзья!"}
                   </div>
                 </div>
@@ -872,11 +866,11 @@ export default function App() {
               </div>
 
               <div className="p-6 sm:p-8 lg:p-12 xl:p-16 border-t lg:border-t-0" style={{ borderColor: "#F0E8E8" }}>
-                <div className="flex items-start gap-3 sm:gap-4 lg:gap-5 mb-5 lg:mb-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4 lg:gap-5 mb-5 lg:mb-6">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-2xl flex items-center justify-center shrink-0" style={{ background: PINK_LIGHT }}>
                     <MapPin size={24} style={{ color: CORAL }} />
                   </div>
-                  <div style={{ fontWeight: 900, fontSize: "clamp(20px, 2.5vw, 34px)", letterSpacing: "-0.01em", lineHeight: 1.1 }}>
+                  <div style={{ fontWeight: 900, fontSize: "clamp(20px, 5vw, 34px)", letterSpacing: "-0.01em", lineHeight: 1.1 }}>
                     {locationSettings.title || "Место проведения"}
                   </div>
                 </div>
@@ -892,8 +886,8 @@ export default function App() {
                   <ImageWithFallback src={siteImages.venue} alt="" className="w-full h-full object-cover" style={{ filter: "grayscale(40%)" }} />
                 </div>
                 <button
-                  className="mt-5 lg:mt-6 px-6 sm:px-8 lg:px-10 py-3 sm:py-3.5 lg:py-4 rounded-full text-white transition active:scale-[0.98] inline-flex items-center gap-2"
-                  style={{ background: CORAL, fontWeight: 800, letterSpacing: "0.08em", fontSize: "clamp(11px, 1.2vw, 13px)" }}
+                  className="mt-5 flex w-full max-w-sm items-center justify-center gap-2 rounded-full px-6 py-3 text-white transition active:scale-[0.98] sm:mt-6 sm:inline-flex sm:w-auto sm:px-8 lg:px-10 lg:py-4"
+                  style={{ background: CORAL, fontWeight: 800, letterSpacing: "0.08em", fontSize: "clamp(11px, 2.8vw, 13px)" }}
                   onClick={() => window.open(locationSettings.buttonHref || "https://maps.google.com", "_blank")}
                 >
                   {locationSettings.buttonLabel || "Посмотреть на карте →"}
@@ -904,11 +898,11 @@ export default function App() {
             {/* РАСПОРЯДОК ДНЯ — coral wide grid */}
             <div style={{ background: CORAL }} className="text-white relative">
               <div className="px-4 sm:px-6 lg:px-12 xl:px-16 py-10 sm:py-14 lg:py-20 xl:py-24">
-                <div className="flex items-center gap-3 sm:gap-4 lg:gap-5 mb-10 lg:mb-14">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 lg:gap-5 mb-8 sm:mb-10 lg:mb-14">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-2xl flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.18)" }}>
                     <Calendar size={24} color="white" />
                   </div>
-                  <div style={{ fontWeight: 900, fontSize: "clamp(24px, 3.5vw, 52px)", letterSpacing: "-0.02em" }}>
+                  <div style={{ fontWeight: 900, fontSize: "clamp(22px, 5.5vw, 52px)", letterSpacing: "-0.02em", lineHeight: 1.05 }}>
                     {scheduleSettings.title || "Расписание дня"}
                   </div>
                 </div>
@@ -981,7 +975,7 @@ export default function App() {
                     ))}
                   </div>
                 </div>
-                <div className="lg:col-span-7 xl:col-span-8 grid grid-cols-3 gap-3 lg:gap-4 xl:gap-6">
+                <div className="lg:col-span-7 xl:col-span-8 grid grid-cols-2 gap-3 sm:gap-4 lg:gap-4 xl:gap-6">
                   {[siteImages.dressPrimary, siteImages.dressSecondary].map((src, i) => (
                     <div key={i} className="aspect-[3/4] rounded-2xl lg:rounded-3xl overflow-hidden group">
                       <ImageWithFallback src={src} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -1000,7 +994,7 @@ export default function App() {
 
               <div className="relative max-w-6xl mx-auto">
                 <div className="text-center mb-10 lg:mb-16">
-                  <div className="inline-flex items-center gap-3 lg:gap-4 mb-4 lg:mb-5">
+                  <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-center sm:text-left lg:gap-4 mb-4 lg:mb-5">
                     <div className="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center" style={{ background: PINK_LIGHT }}>
                       <BookHeart size={24} style={{ color: CORAL }} />
                     </div>
@@ -1034,9 +1028,9 @@ export default function App() {
                     />
                   </svg>
 
-                  <div className="lg:hidden absolute left-5 top-5 bottom-5 border-l-4 border-dotted" style={{ borderColor: PINK }} />
+                  <div className="lg:hidden absolute left-4 top-4 bottom-4 border-l-[3px] border-dotted" style={{ borderColor: PINK }} />
 
-                  <div className="space-y-8 lg:space-y-10 xl:space-y-12">
+                  <div className="space-y-6 sm:space-y-8 lg:space-y-10 xl:space-y-12">
                     {(storySlides.length ? storySlides : defaultStorySlides).map((story, i) => {
                       const isRight = i % 2 === 1;
 
@@ -1061,7 +1055,7 @@ export default function App() {
                             </div>
                           </div>
 
-                          <div className="absolute lg:static left-0 top-7 z-20 lg:col-start-2 lg:row-start-1 flex items-center justify-center">
+                          <div className="absolute lg:static left-0 top-5 z-20 sm:top-6 lg:col-start-2 lg:row-start-1 flex items-center justify-center">
                             <div
                               className="w-10 h-10 lg:w-[92px] lg:h-[92px] rounded-full flex items-center justify-center"
                               style={{
@@ -1079,9 +1073,9 @@ export default function App() {
                             </div>
                           </div>
 
-                          <div className={`pl-14 lg:pl-0 ${isRight ? "lg:col-start-1 lg:row-start-1" : "lg:col-start-3"}`}>
+                          <div className={`pl-[3.25rem] sm:pl-14 lg:pl-0 ${isRight ? "lg:col-start-1 lg:row-start-1" : "lg:col-start-3"}`}>
                             <div
-                              className="rounded-[28px] lg:rounded-[32px] p-5 sm:p-6 lg:p-7 xl:p-8 transition-transform duration-500 hover:-translate-y-1"
+                              className="rounded-[22px] p-4 sm:rounded-[28px] sm:p-6 lg:rounded-[32px] lg:p-7 xl:p-8 transition-transform duration-500 hover:-translate-y-1"
                               style={{
                                 background: "linear-gradient(135deg, #FFF9F8 0%, #FFFFFF 100%)",
                                 border: `1px solid ${PINK_LIGHT}`,
@@ -1126,7 +1120,7 @@ export default function App() {
             <div className="px-4 sm:px-6 lg:px-12 xl:px-16 py-10 sm:py-14 lg:py-16 xl:py-20 relative overflow-hidden">
               <Flower size={100} color={CORAL} className="hidden xl:block absolute bottom-16 right-12 pointer-events-none" rotate={-25} style={{ opacity: 0.8 }} />
               <div className="relative max-w-6xl mx-auto">
-                <div className="px-6 py-8 rounded-3xl" style={{ background: PINK_LIGHT, border: `2px solid ${PINK}` }}>
+                <div className="rounded-2xl px-4 py-6 sm:rounded-3xl sm:px-6 sm:py-8" style={{ background: PINK_LIGHT, border: `2px solid ${PINK}` }}>
                   <div className="text-center mb-6">
                     <Music size={32} style={{ color: CORAL, margin: "0 auto 16px" }} />
                     <div style={{ fontWeight: 800, fontSize: "clamp(18px, 2vw, 24px)", marginBottom: "8px" }}>
@@ -1173,11 +1167,11 @@ export default function App() {
               <div className="relative">
                 <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5 lg:gap-6 mb-10 lg:mb-14">
                   <div>
-                    <div className="flex items-center gap-3 sm:gap-4 lg:gap-5">
+                    <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-4 lg:gap-5">
                       <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-2xl flex items-center justify-center shrink-0" style={{ background: PINK_LIGHT }}>
                         <Gift size={24} style={{ color: CORAL }} />
                       </div>
-                      <div style={{ fontWeight: 900, fontSize: "clamp(26px, 3.5vw, 56px)", letterSpacing: "-0.02em" }}>
+                      <div style={{ fontWeight: 900, fontSize: "clamp(24px, 6vw, 56px)", letterSpacing: "-0.02em", lineHeight: 1.05 }}>
                         {giftsSettings.title || "Пожелания"}
                       </div>
                     </div>
@@ -1638,7 +1632,7 @@ export default function App() {
             <div className="px-4 sm:px-6 lg:px-12 xl:px-16 py-10 sm:py-14 lg:py-20 xl:py-24 relative overflow-hidden">
               <Flower size={100} color={PINK_LIGHT} className="hidden xl:block absolute bottom-16 left-12 pointer-events-none" rotate={-15} style={{ opacity: 0.7 }} />
               <div className="relative max-w-5xl mx-auto text-center">
-                <div className="inline-flex items-center gap-3 lg:gap-4 mb-4 lg:mb-5">
+                <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-center sm:text-left lg:gap-4 mb-4 lg:mb-5">
                   <div className="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center" style={{ background: PINK_LIGHT }}>
                     <ImageIcon size={24} style={{ color: CORAL }} />
                   </div>
@@ -1667,7 +1661,7 @@ export default function App() {
               <Flower size={100} color={PINK} className="hidden xl:block absolute top-16 right-12 pointer-events-none" rotate={30} style={{ opacity: 0.7 }} />
               <div className="relative max-w-3xl mx-auto">
                 <div className="text-center mb-10 lg:mb-12">
-                  <div className="inline-flex items-center gap-3 lg:gap-4 mb-4 lg:mb-5">
+                  <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-center sm:text-left lg:gap-4 mb-4 lg:mb-5">
                     <div className="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center" style={{ background: PINK_LIGHT }}>
                       <ListMusic size={24} style={{ color: CORAL }} />
                     </div>
@@ -1715,7 +1709,7 @@ export default function App() {
             <div className="px-4 sm:px-6 lg:px-12 xl:px-16 py-10 sm:py-14 lg:py-20 xl:py-24 relative">
               <div className="relative max-w-4xl mx-auto">
                 <div className="text-center mb-10 lg:mb-14">
-                  <div className="inline-flex items-center gap-3 lg:gap-4 mb-4 lg:mb-5">
+                  <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-center sm:text-left lg:gap-4 mb-4 lg:mb-5">
                     <div className="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center" style={{ background: PINK_LIGHT }}>
                       <HelpCircle size={24} style={{ color: CORAL }} />
                     </div>
