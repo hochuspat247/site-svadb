@@ -748,9 +748,9 @@ export default function App() {
               boxShadow: "0 40px 100px rgba(100, 37, 21, 0.12)",
             }}
           >
-            <div className="grid max-lg:flex max-lg:min-h-[min(72vh,640px)] max-lg:flex-col lg:grid-cols-[1.15fr_0.85fr] lg:gap-5 lg:p-5">
-              <div className="max-lg:px-3 max-lg:pt-3 sm:max-lg:px-4 sm:max-lg:pt-4 lg:p-0">
-                <div className="relative min-h-[460px] max-lg:min-h-[360px] overflow-hidden rounded-[20px] sm:rounded-[24px] lg:min-h-[min(560px,58vh)] lg:rounded-2xl xl:rounded-3xl">
+            <div className="grid max-lg:flex max-lg:min-h-[min(72vh,640px)] max-lg:flex-col lg:min-h-[min(560px,58vh)] lg:grid-cols-[1.15fr_0.85fr] lg:items-stretch lg:gap-5 lg:p-5">
+              <div className="flex max-lg:flex-col max-lg:px-3 max-lg:pt-3 sm:max-lg:px-4 sm:max-lg:pt-4 lg:h-full lg:p-0">
+                <div className="relative min-h-[460px] max-lg:min-h-[360px] w-full overflow-hidden rounded-[20px] sm:rounded-[24px] lg:h-full lg:min-h-0 lg:rounded-2xl xl:rounded-3xl">
                   <ImageWithFallback
                     src={siteImages.heroPrimary}
                     alt=""
@@ -763,7 +763,7 @@ export default function App() {
                         "linear-gradient(115deg, rgba(19,12,10,0.82) 0%, rgba(19,12,10,0.45) 48%, rgba(19,12,10,0.2) 100%)",
                     }}
                   />
-                  <div className="relative z-10 flex h-full min-h-[380px] flex-col justify-between px-6 py-8 text-white sm:px-8 sm:py-10 lg:min-h-[440px] lg:px-12 lg:py-14">
+                  <div className="relative z-10 flex h-full min-h-[380px] flex-col justify-between px-6 py-8 text-white sm:px-8 sm:py-10 lg:min-h-full lg:px-12 lg:py-14">
                   <div className="inline-flex w-fit rounded-full bg-white/20 px-4 py-2 backdrop-blur">
                     {heroSettings.note || "Свадебное приглашение"}
                   </div>
@@ -811,7 +811,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="flex min-h-0 flex-1 flex-col gap-2 max-lg:px-3 max-lg:pb-3 sm:max-lg:px-4 sm:max-lg:pb-4 lg:min-h-[min(560px,58vh)] lg:grid lg:flex-none lg:grid-rows-[1.15fr_0.85fr] lg:gap-3 lg:p-0">
+              <div className="flex min-h-0 flex-1 flex-col gap-2 max-lg:px-3 max-lg:pb-3 sm:max-lg:px-4 sm:max-lg:pb-4 lg:h-full lg:grid lg:grid-rows-[1.15fr_0.85fr] lg:gap-3 lg:p-0">
                 <div className="max-lg:pt-1 sm:max-lg:pt-2 lg:min-h-0 lg:pt-0">
                   <div className="flex min-h-[220px] items-center justify-center overflow-hidden rounded-[20px] bg-[#F6E8E4] sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[300px] lg:h-full lg:rounded-2xl xl:rounded-3xl">
                     <ImageWithFallback
