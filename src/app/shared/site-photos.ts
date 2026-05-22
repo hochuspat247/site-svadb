@@ -59,6 +59,24 @@ export const sitePhotoOptions = [
   { id: "photo-18", label: "Праздник", src: photo18 },
 ] as const;
 
+function getMediaOrigin() {
+  const apiUrl = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
+
+  if (apiUrl.startsWith("http")) {
+    try {
+      return new URL(apiUrl).origin;
+    } catch {
+      return "";
+    }
+  }
+
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return window.location.origin;
+  }
+
+  return "";
+}
+
 export function resolveSiteImage(value?: string | null) {
   if (!value) {
     return "";
@@ -73,6 +91,15 @@ export function resolveSiteImage(value?: string | null) {
 
   if (photoLibrary[trimmed as keyof typeof photoLibrary]) {
     return photoLibrary[trimmed as keyof typeof photoLibrary];
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith("/uploads/")) {
+    const origin = getMediaOrigin();
+    return origin ? `${origin}${trimmed}` : trimmed;
   }
 
   return trimmed;

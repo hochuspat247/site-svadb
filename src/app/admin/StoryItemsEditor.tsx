@@ -1,13 +1,12 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { ArrowDown, ArrowUp, Plus, Trash2, X } from "lucide-react";
 import { resolveSiteImage } from "../shared/site-photos";
 import type { SiteSectionItem } from "../shared/wedding-types";
 import AdminMediaLibrary from "./AdminMediaLibrary";
-import { parseSectionItems, serializeSectionItems } from "./admin-utils";
 
 type StoryItemsEditorProps = {
-  itemsText: string;
-  onChange: (itemsText: string) => void;
+  items: SiteSectionItem[];
+  onChange: (items: SiteSectionItem[]) => void;
   uploads: { url: string; filename: string }[];
   uploadBusy: boolean;
   onUpload: (file: File) => Promise<string>;
@@ -23,17 +22,16 @@ const emptyItem = (): SiteSectionItem => ({
 });
 
 export default function StoryItemsEditor({
-  itemsText,
+  items,
   onChange,
   uploads,
   uploadBusy,
   onUpload,
 }: StoryItemsEditorProps) {
-  const items = useMemo(() => parseSectionItems(itemsText), [itemsText]);
   const [pickerIndex, setPickerIndex] = useState<number | null>(null);
 
   const updateItems = (next: SiteSectionItem[]) => {
-    onChange(serializeSectionItems(next));
+    onChange(next);
   };
 
   const updateItem = (index: number, patch: Partial<SiteSectionItem>) => {

@@ -23,6 +23,23 @@ const MOOD_LABEL_FALLBACKS = [
   "Любовь",
 ];
 
+function mergeStoryItems(
+  fallbackItems: SiteSectionItem[] = [],
+  remoteItems: SiteSectionItem[] = [],
+) {
+  if (!remoteItems.length) {
+    return fallbackItems;
+  }
+
+  return remoteItems.map((item, index) => ({
+    ...(fallbackItems[index] ?? {}),
+    ...item,
+    image: item.image || fallbackItems[index]?.image,
+  }));
+}
+
+const STORY_FALLBACK_IMAGES = ["photo-13", "photo-06", "photo-12", "photo-08", "photo-15", "photo-07"];
+
 export function mergeSiteSections(remote: SiteSection[]) {
   const remoteMap = Object.fromEntries(remote.map((section) => [section.id, section]));
   const knownIds = new Set(defaultSiteSections.map((section) => section.id));
@@ -33,13 +50,19 @@ export function mergeSiteSections(remote: SiteSection[]) {
       return fallback;
     }
 
+    const mergedSettings = {
+      ...fallback.settings,
+      ...fromApi.settings,
+    };
+
+    if (fallback.id === "story" && fromApi.settings.items?.length) {
+      mergedSettings.items = mergeStoryItems(fallback.settings.items, fromApi.settings.items);
+    }
+
     return {
       ...fallback,
       ...fromApi,
-      settings: {
-        ...fallback.settings,
-        ...fromApi.settings,
-      },
+      settings: mergedSettings,
     };
   });
 
@@ -102,12 +125,17 @@ export function getStorySlides(items?: SiteSectionItem[]) {
     return [];
   }
 
-  return items.map((item) => ({
-    date: item.subtitle || "",
-    title: item.title || "",
-    text: item.text || "",
-    image: resolveSiteImage(item.image),
-  }));
+  return items.map((item, index) => {
+    const resolved = resolveSiteImage(item.image);
+    const fallback = resolveSiteImage(STORY_FALLBACK_IMAGES[index % STORY_FALLBACK_IMAGES.length]);
+
+    return {
+      date: item.subtitle || "",
+      title: item.title || "",
+      text: item.text || "",
+      image: resolved || fallback,
+    };
+  });
 }
 
 export function getScheduleItems(items?: SiteSectionItem[]) {

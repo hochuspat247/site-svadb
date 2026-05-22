@@ -70,6 +70,7 @@ type SectionForm = {
   buttonHref: string;
   galleryImagesText: string;
   itemsText: string;
+  storyItems: SiteSectionItem[];
 };
 
 const coral = "#E85A4F";
@@ -179,6 +180,7 @@ function sectionTemplate(type: SiteSectionType): SectionForm {
     buttonHref: "",
     galleryImagesText: "",
     itemsText: "",
+    storyItems: [],
   };
 }
 
@@ -264,7 +266,33 @@ function toSectionForm(section: SiteSection): SectionForm {
     buttonHref: section.settings.buttonHref || "",
     galleryImagesText: (section.settings.galleryImages || []).join("\n"),
     itemsText: serializeSectionItems(section.settings.items || []),
+    storyItems:
+      section.type === "story"
+        ? (section.settings.items || []).map((item) => ({
+            title: item.title || "",
+            subtitle: item.subtitle || "",
+            text: item.text || "",
+            extra: item.extra || "",
+            image: item.image || "",
+          }))
+        : [],
   };
+}
+
+function storyItemsForPayload(form: SectionForm): SiteSectionItem[] {
+  if (form.type === "story") {
+    return (form.storyItems.length ? form.storyItems : parseSectionItems(form.itemsText))
+      .filter((item) => item.title.trim())
+      .map((item) => ({
+        title: item.title.trim(),
+        subtitle: item.subtitle?.trim() || "",
+        text: item.text?.trim() || "",
+        extra: item.extra?.trim() || "",
+        image: item.image?.trim() || "",
+      }));
+  }
+
+  return parseSectionItems(form.itemsText);
 }
 
 function sectionPayload(form: SectionForm) {
@@ -285,7 +313,7 @@ function sectionPayload(form: SectionForm) {
       buttonLabel: form.buttonLabel,
       buttonHref: form.buttonHref,
       galleryImages: parseGalleryImages(form.galleryImagesText),
-      items: parseSectionItems(form.itemsText),
+      items: storyItemsForPayload(form),
     },
   };
 }
@@ -1198,8 +1226,18 @@ export default function AdminPage() {
                   </h3>
                   {sectionForm.type === "story" ? (
                     <StoryItemsEditor
-                      itemsText={sectionForm.itemsText}
-                      onChange={(itemsText) => setSectionForm((current) => ({ ...current, itemsText }))}
+                      items={
+                        sectionForm.storyItems.length
+                          ? sectionForm.storyItems
+                          : parseSectionItems(sectionForm.itemsText)
+                      }
+                      onChange={(storyItems) =>
+                        setSectionForm((current) => ({
+                          ...current,
+                          storyItems,
+                          itemsText: serializeSectionItems(storyItems),
+                        }))
+                      }
                       uploads={uploadedImages}
                       uploadBusy={uploadBusy}
                       onUpload={uploadImageFile}
