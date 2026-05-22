@@ -4,19 +4,21 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-APP_PATH = Path("src/app/App.tsx")
-
-MOJIBAKE_MARKERS = re.compile(
-    r"РЎ|Рџ|Рћ|Рљ|Рњ|РђР|Р'Р|РќР|Р—Р|РЎР‚|РЎРЅ|РЎС‚|вЂ|РќР|РћРў|РџРћ|РЎРљ|РЎРќ|РЎРџ|РЎР'|РЎРњ|РџСЂ|Р”Рѕ|Р’Р°|Р’С‹|Р—Р°|РќРµ|РђРќРљ|РќРђРЁ|Р“РћРЎ|РџРћР–|РњР•РЎ|Р РђРЎ|Р”Р Р•РЎ|РђРўРњ|Р’РћРџ|РћРўРџ|Р—РђР'|РџРћРЎ"
-)
+ROOT = Path(__file__).resolve().parent.parent
+TARGETS = [
+    ROOT / "src/app/App.tsx",
+]
 
 SKIP_LINE = re.compile(
-    r"settings\.|coupleNames|siteImages|mergeSiteSections|resolveSiteImage|"
-    r"getGallerySlides|welcomeSettings|heroSettings|locationSettings|"
-    r"scheduleSettings|dressSettings|storySettings|gallerySettings|"
-    r"giftsSettings|rsvpSettings|musicSettings|faqSettings|closingSettings|"
-    r"sitePhotoOptions|defaultSiteSections|fetchSiteSections|photo-\d{2}|"
-    r"import |from |\.\./|/api/|index\.html"
+    r"^\s*import |^\s*export |from ['\"]|resolveSiteImage|getSection\(|sectionMap|"
+    r"photo-\d{2}|\.png|\.jpg|/api/|index\.html|className=|style=\{\{"
+)
+
+# UTF-8 read as cp1251: lines often contain Р/С followed by more Cyrillic letters
+MOJIBAKE_HINT = re.compile(
+    r"Р[ЂЃЄЅІЇЈЉЊЋЌЎЏА-Яа-яђѓєѕіїЈЉЊЋЌЎЏ]|"
+    r"С[ЂЃЄЅІЇЈЉЊЋЌЎЏА-Яа-яђѓєѕіїЈЉЊЋЌЎЏ]|"
+    r"вЂ|РµР|РїР|РЅР|РѕР|РІР|РґР|СЃР|С‚Р|СЏР|СЌС"
 )
 
 
@@ -41,26 +43,39 @@ def fix_mojibake(text: str) -> str:
 
 
 def should_fix(line: str) -> bool:
-    return bool(MOJIBAKE_MARKERS.search(line)) and not SKIP_LINE.search(line)
+    if SKIP_LINE.search(line):
+        return False
+    return bool(MOJIBAKE_HINT.search(line))
 
 
-def main() -> None:
-    lines = APP_PATH.read_text(encoding="utf-8").splitlines()
+def process_file(path: Path) -> int:
+    lines = path.read_text(encoding="utf-8").splitlines()
     fixed_count = 0
     output: list[str] = []
 
     for line in lines:
         if should_fix(line):
             try:
-                output.append(fix_mojibake(line))
-                fixed_count += 1
-                continue
+                fixed = fix_mojibake(line)
+                if fixed != line:
+                    output.append(fixed)
+                    fixed_count += 1
+                    continue
             except UnicodeDecodeError:
                 pass
         output.append(line)
 
-    APP_PATH.write_text("\n".join(output) + "\n", encoding="utf-8")
-    print(f"Fixed {fixed_count} lines in {APP_PATH}")
+    path.write_text("\n".join(output) + "\n", encoding="utf-8")
+    return fixed_count
+
+
+def main() -> None:
+    total = 0
+    for target in TARGETS:
+        count = process_file(target)
+        total += count
+        print(f"Fixed {count} lines in {target.relative_to(ROOT)}")
+    print(f"Total: {total}")
 
 
 if __name__ == "__main__":

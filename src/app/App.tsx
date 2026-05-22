@@ -179,7 +179,7 @@ function GuestsBlock({ guests, currentGuestId, isRegistered }: { guests: any[]; 
   const bride = [...BRIDE_GUESTS];
 
   guests.forEach((guest) => {
-    const entry = { name: guest.name, role: "Р“РѕСЃС‚СЊ", isYou: guest.id === currentGuestId, photo: guest.photo };
+    const entry = { name: guest.name, role: "Гость", isYou: guest.id === currentGuestId, photo: guest.photo };
     if (guest.side === "Со стороны Ивана") groom.push(entry as any);
     else if (guest.side === "Со стороны Анастасии") bride.push(entry as any);
   });
@@ -492,7 +492,7 @@ export default function App() {
     if (result.success && result.guest) {
       setIsRegistered(true);
       setCurrentGuestId(result.guest.id);
-      showToast("Р РµРіРёСЃС‚СЂР°С†РёСЏ РїРѕРґС‚РІРµСЂР¶РґРµРЅР°! РўРµРїРµСЂСЊ РјРѕР¶РЅРѕ Р±СЂРѕРЅРёСЂРѕРІР°С‚СЊ РїРѕРґР°СЂРѕРє");
+      showToast("Регистрация подтверждена! Теперь можно бронировать подарок");
       await loadData();
     } else {
       showToast(result.error || "Ошибка регистрации");
@@ -570,7 +570,7 @@ export default function App() {
 
   const handleMusicSubmit = async () => {
     if (!musicInput.trim()) {
-      showToast("Р’РІРµРґРёС‚Рµ РЅР°Р·РІР°РЅРёРµ РїРµСЃРЅРё");
+      showToast("Введите название песни");
       return;
     }
 
@@ -809,10 +809,14 @@ export default function App() {
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <div
-                  className="rounded-b-[28px] px-5 py-5 sm:px-6 sm:py-6 lg:rounded-none lg:px-8 lg:py-8"
-                  style={{ background: "linear-gradient(135deg, #FFF5F2 0%, #FFFFFF 100%)" }}
-                >
+                <div className="px-3 pb-3 pt-2 sm:px-4 sm:pb-4 lg:p-0">
+                  <div
+                    className="rounded-[20px] px-5 py-5 sm:rounded-[24px] sm:px-6 sm:py-6 lg:rounded-none lg:px-8 lg:py-8"
+                    style={{
+                      background: "linear-gradient(135deg, #FFF5F2 0%, #FFFFFF 100%)",
+                      boxShadow: "0 8px 24px rgba(100, 37, 21, 0.06)",
+                    }}
+                  >
                   <div style={{ color: CORAL, fontWeight: 800, letterSpacing: "0.16em", fontSize: 12 }}>
                     {heroSettings.badge || "Wedding weekend"}
                   </div>
@@ -821,6 +825,7 @@ export default function App() {
                     style={{ fontWeight: 900, fontSize: "clamp(24px, 3vw, 40px)", lineHeight: 1.05 }}
                   >
                     {heroSettings.note || "Свадебное приглашение"}
+                  </div>
                   </div>
                 </div>
               </div>
@@ -1028,20 +1033,20 @@ export default function App() {
                   <div className="space-y-8 lg:space-y-10 xl:space-y-12">
                     {(storySlides.length ? storySlides : [
                       {
-                        date: "2 РєСѓСЂСЃ",
-                        title: "РЁР°С…РјР°С‚С‹",
+                        date: "2 курс",
+                        title: "Шахматы",
                         text: "Всё началось на секции шахмат. Я пришла на занятие, и единственное свободное место оказалось напротив Ивана. Мы разложили фигуры, начали партию — и незаметно разговорились. Я рассказала о хакатонах, показала факультет. Ваня загорелся идеей и перевёлся на экономический.",
                         image: "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
                       },
                       {
-                        date: "Р›РµС‚Рѕ 2024",
+                        date: "Лето 2024",
                         title: "Адлер и ФИЧА",
                         text: "Вместе поехали в Адлер по программе профкома. А потом прошли отбор на форум «ФИЧА». Наша команда Avenir заняла первое место на хакатоне! Мы стали ещё ближе.",
                         image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
                       },
                       {
                         date: "Сентябрь 2024",
-                        title: "РРґРµР°С‚РѕРЅ",
+                        title: "Идеатон",
                         text: "После мероприятия «Идеатон», которое мы организовали в университете, Ваня предложил мне стать парой. Я не раздумывала ни секунды — так начались наши отношения.",
                         image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
                       },
@@ -1052,14 +1057,14 @@ export default function App() {
                         image: "https://images.unsplash.com/photo-1519741497674-611481863552?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
                       },
                       {
-                        date: "РСЋРЅСЊ 2025",
+                        date: "Июнь 2025",
                         title: "Новый дом",
                         text: "Мы съехались и начали делать ремонт в нашей первой совместной квартире. Каждый день — новое приключение, каждое решение принимаем вместе. Строим наше семейное гнёздышко своими руками.",
                         image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
                       },
                       {
-                        date: "28 РѕРєС‚СЏР±СЂСЏ 2025",
-                        title: "Р РѕСЃРїРёСЃСЊ",
+                        date: "28 октября 2025",
+                        title: "Роспись",
                         text: "Официально стали мужем и женой! В этот день мы расписались и сделали первый шаг к нашей большой свадьбе. Теперь мы — семья не только по сердцу, но и по документам.",
                         image: "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
                       },
@@ -1192,9 +1197,13 @@ export default function App() {
                 <div className="px-6 py-8 rounded-3xl" style={{ background: PINK_LIGHT, border: `2px solid ${PINK}` }}>
                   <div className="text-center mb-6">
                     <Music size={32} style={{ color: CORAL, margin: "0 auto 16px" }} />
-                    <div style={{ fontWeight: 800, fontSize: "clamp(18px, 2vw, 24px)", marginBottom: "8px" }}>Музыкальное настроение</div>
+                    <div style={{ fontWeight: 800, fontSize: "clamp(18px, 2vw, 24px)", marginBottom: "8px" }}>
+                      {musicSettings.badge || musicSettings.title || "Музыкальное настроение"}
+                    </div>
                     <p style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#666", lineHeight: 1.6 }}>
-                      Р›РµРіРєРёР№ РґР¶Р°Р· РЅР° С†РµСЂРµРјРѕРЅРёРё, СЂРѕРјР°РЅС‚РёС‡РЅС‹Рµ Р±Р°Р»Р»Р°РґС‹ РЅР° СѓР¶РёРЅРµ, С‚Р°РЅС†РµРІР°Р»СЊРЅС‹Рµ С…РёС‚С‹ РІРµС‡РµСЂРѕРј
+                      {musicSettings.note ||
+                        musicSettings.description ||
+                        "Легкий джаз на церемонии, романтичные баллады на ужине, танцевальные хиты вечером"}
                     </p>
                   </div>
 
@@ -1212,7 +1221,7 @@ export default function App() {
                                 {wish.song}
                               </div>
                               <div style={{ fontSize: "clamp(11px, 1.1vw, 12px)", color: "#999", marginTop: "2px" }}>
-                                РѕС‚ {wish.guestName}
+                                от {wish.guestName}
                               </div>
                             </div>
                           </div>
@@ -1544,7 +1553,7 @@ export default function App() {
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
                       disabled={isRegistered}
-                      placeholder="РРІР°РЅ РРІР°РЅРѕРІ"
+                      placeholder="Иван Иванов"
                       className="w-full mt-2 px-5 py-3.5 rounded-2xl outline-none transition border-2"
                       style={{ background: "#FBF6F4", fontSize: 15, borderColor: form.name ? PINK : "transparent", fontWeight: 500 }}
                     />
@@ -1661,7 +1670,7 @@ export default function App() {
                         value={form.allergy}
                         onChange={(e) => setForm({ ...form, allergy: e.target.value })}
                         disabled={isRegistered}
-                        placeholder="Р•СЃР»Рё РµСЃС‚СЊ"
+                        placeholder="Если есть"
                         className="w-full mt-2 px-4 py-3 rounded-2xl outline-none border-2"
                         style={{ background: "#FBF6F4", fontSize: 13, borderColor: form.allergy ? PINK : "transparent", fontWeight: 500 }}
                       />
@@ -1714,7 +1723,7 @@ export default function App() {
                     Скоро здесь появятся фотографии
                   </div>
                   <p style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#aaa", lineHeight: 1.6 }}>
-                    5-6 СЃРµРЅС‚СЏР±СЂСЏ 2026
+                    {gallerySettings.subtitle || heroSettings.subtitle || "5-6 сентября 2026"}
                   </p>
                 </div>
               </div>
@@ -1788,7 +1797,7 @@ export default function App() {
                   {(faqItems.length ? faqItems : [
                     { q: "Можно ли с детьми?", a: "Да, дети приветствуются! Для них будет организована отдельная зона с развлечениями." },
                     { q: "Можно ли привести +1?", a: "Пожалуйста, укажите количество гостей при регистрации. Мы будем рады всем!" },
-                    { q: "Р‘СѓРґРµС‚ Р»Рё С‚СЂР°РЅСЃС„РµСЂ?", a: "РРЅС„РѕСЂРјР°С†РёСЏ Рѕ С‚СЂР°РЅСЃС„РµСЂРµ РїРѕСЏРІРёС‚СЃСЏ РїРѕР·РґРЅРµРµ РЅР° СЌС‚РѕРј СЃР°Р№С‚Рµ." },
+                    { q: "Будет ли трансфер?", a: "Информация о трансфере появится позднее на этом сайте." },
                     { q: "Во сколько заканчивается праздник?", a: "Официальная часть завершится около 23:00, но веселье может продолжиться!" },
                     { q: "Можно ли дарить цветы?", a: "Мы будем рады любым цветам, но можете выбрать подарок из нашего списка пожеланий." },
                     { q: "Где остановиться?", a: "Рекомендации по отелям в Краснодаре появятся позднее." },
