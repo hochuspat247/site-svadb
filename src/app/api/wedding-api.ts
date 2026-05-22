@@ -87,7 +87,9 @@ export async function fetchGiftCatalog(): Promise<{
 
 export async function fetchSiteSections(): Promise<SiteSection[]> {
   try {
-    const response = await fetch(`${API_URL}/site-builder`);
+    const response = await fetch(`${API_URL}/site-builder?ts=${Date.now()}`, {
+      cache: "no-store",
+    });
     const result = await response.json();
 
     if (!response.ok) {

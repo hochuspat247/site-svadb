@@ -15,6 +15,7 @@ import { defaultSiteSections } from "./data/site-builder-defaults.js";
 import { getGiftIconByKey } from "./shared/gift-icons";
 import {
   buildSiteContentMap,
+  mergeSiteSections,
   getDressColors,
   getFaqItems,
   getGallerySlides,
@@ -332,9 +333,7 @@ export default function App() {
 
     if (sections.length) {
       setSiteSections(
-        sections
-          .filter((section) => section.isActive)
-          .sort((a, b) => a.sortOrder - b.sortOrder),
+        mergeSiteSections(sections).sort((a, b) => a.sortOrder - b.sortOrder),
       );
     }
   };
@@ -362,15 +361,27 @@ export default function App() {
     [heroSettings.title],
   );
 
-  const BG = resolveSiteImage(heroSettings.primaryImage) || photo10;
-  const DANCE = resolveSiteImage(heroSettings.secondaryImage) || photo04;
-  const VENUE = resolveSiteImage(locationSettings.primaryImage) || photo18;
-  const FAMILY = resolveSiteImage(closingSettings.primaryImage) || photo17;
-  const DRESS2 = resolveSiteImage(dressSettings.primaryImage) || photo01;
-  const DRESS3 = resolveSiteImage(dressSettings.secondaryImage) || photo18;
+  const siteImages = useMemo(
+    () => ({
+      bg: photo10,
+      dance: resolveSiteImage(heroSettings.secondaryImage) || photo04,
+      venue: resolveSiteImage(locationSettings.primaryImage) || photo18,
+      family: resolveSiteImage(closingSettings.primaryImage) || photo17,
+      dressPrimary: resolveSiteImage(dressSettings.primaryImage) || photo01,
+      dressSecondary: resolveSiteImage(dressSettings.secondaryImage) || photo18,
+    }),
+    [
+      heroSettings.secondaryImage,
+      locationSettings.primaryImage,
+      closingSettings.primaryImage,
+      dressSettings.primaryImage,
+      dressSettings.secondaryImage,
+    ],
+  );
+
   const moodSlides = useMemo(
     () => getGallerySlides(gallerySettings),
-    [gallerySettings],
+    [JSON.stringify(gallerySettings.galleryImages)],
   );
   const storySlides = useMemo(
     () => getStorySlides(storySettings.items),
@@ -719,15 +730,15 @@ export default function App() {
 
       {/* FIXED GRAYSCALE BACKGROUND */}
       <div className="fixed inset-0 z-0">
-        <ImageWithFallback src={BG} alt="" className="w-full h-full object-cover" style={{ filter: "grayscale(100%) brightness(0.55)" }} />
+        <ImageWithFallback src={siteImages.bg} alt="" className="w-full h-full object-cover" style={{ filter: "grayscale(100%) brightness(0.55)" }} />
       </div>
 
       {/* CONTENT */}
       <div className="relative z-10 overflow-x-hidden">
         {/* HERO */}
         <section className="px-4 sm:px-6 lg:px-12 pt-16 sm:pt-20 lg:pt-24 xl:pt-32 pb-20 sm:pb-24 lg:pb-32 text-white relative overflow-hidden">
-          <Flower size={140} color={PINK} className="hidden lg:block absolute top-12 right-12 xl:right-20" rotate={20} style={{ opacity: 0.95 }} />
-          <Flower size={90} color={PINK_LIGHT} className="hidden lg:block absolute top-56 left-12 xl:left-20" rotate={-15} />
+          <Flower size={140} color={PINK} className="absolute top-12 right-4 sm:right-12 xl:right-20 pointer-events-none" rotate={20} style={{ opacity: 0.95 }} />
+          <Flower size={90} color={PINK_LIGHT} className="absolute top-40 sm:top-56 left-4 sm:left-12 xl:left-20 pointer-events-none" rotate={-15} />
           <div className="max-w-2xl mx-auto">
             <h1 style={{ fontWeight: 900, fontSize: "clamp(36px, 6vw, 88px)", lineHeight: 0.95, letterSpacing: "-0.02em" }}>
               {(heroSettings.note || "Свадебное приглашение").split(" ").map((word, index, words) => (
@@ -743,18 +754,18 @@ export default function App() {
         {/* WIDE WHITE CARD */}
         <div className="relative px-2 sm:px-4 md:px-6 lg:px-8 pb-20 sm:pb-32 overflow-x-hidden">
           {/* decorative flowers peeking from edges */}
-          <Flower size={130} color={CORAL} className="hidden 2xl:block absolute -top-10 left-2 z-20 pointer-events-none" rotate={-25} style={{ opacity: 0.95 }} />
-          <Flower size={120} color={PINK} className="hidden 2xl:block absolute top-[14%] right-2 z-20 pointer-events-none" rotate={30} />
-          <Flower size={110} color={PINK_LIGHT} className="hidden 2xl:block absolute top-[38%] left-2 z-20 pointer-events-none" rotate={10} />
-          <Flower size={130} color={CORAL} className="hidden 2xl:block absolute top-[62%] right-2 z-20 pointer-events-none" rotate={-20} style={{ opacity: 0.9 }} />
-          <Flower size={100} color={PINK} className="hidden 2xl:block absolute bottom-24 left-2 z-20 pointer-events-none" rotate={45} />
+          <Flower size={130} color={CORAL} className="hidden sm:block absolute -top-10 left-2 z-20 pointer-events-none" rotate={-25} style={{ opacity: 0.95 }} />
+          <Flower size={120} color={PINK} className="hidden sm:block absolute top-[14%] right-2 z-20 pointer-events-none" rotate={30} />
+          <Flower size={110} color={PINK_LIGHT} className="hidden md:block absolute top-[38%] left-2 z-20 pointer-events-none" rotate={10} />
+          <Flower size={130} color={CORAL} className="hidden md:block absolute top-[62%] right-2 z-20 pointer-events-none" rotate={-20} style={{ opacity: 0.9 }} />
+          <Flower size={100} color={PINK} className="hidden sm:block absolute bottom-24 left-2 z-20 pointer-events-none" rotate={45} />
 
           <div className="relative z-10 max-w-7xl mx-auto bg-white overflow-hidden" style={{ borderRadius: "clamp(20px, 3vw, 36px) clamp(20px, 3vw, 36px) 0 0", boxShadow: "0 30px 80px rgba(0,0,0,0.25)" }}>
 
             {/* HERO: NAMES + DANCE вЂ” wide editorial split */}
             <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-0">
               <div className="lg:col-span-7 relative aspect-[4/5] sm:aspect-[3/4] lg:aspect-auto lg:min-h-[700px] xl:min-h-[750px] overflow-hidden">
-                <ImageWithFallback src={DANCE} alt="" className="w-full h-full object-cover" style={{ filter: "grayscale(100%) contrast(1.05)" }} />
+                <ImageWithFallback src={siteImages.dance} alt="" className="w-full h-full object-cover" style={{ filter: "grayscale(100%) contrast(1.05)" }} />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.35) 100%)" }} />
                 <div
                   className="absolute left-4 sm:left-6 lg:left-12 xl:left-16 top-[42%] px-5 sm:px-7 lg:px-9 py-2.5 sm:py-3 lg:py-3.5 text-white"
@@ -847,7 +858,7 @@ export default function App() {
                   </p>
                 ) : null}
                 <div className="mt-6 lg:mt-7 rounded-2xl lg:rounded-3xl overflow-hidden aspect-[16/9]">
-                  <ImageWithFallback src={VENUE} alt="" className="w-full h-full object-cover" style={{ filter: "grayscale(40%)" }} />
+                  <ImageWithFallback src={siteImages.venue} alt="" className="w-full h-full object-cover" style={{ filter: "grayscale(40%)" }} />
                 </div>
                 <button
                   className="mt-5 lg:mt-6 px-6 sm:px-8 lg:px-10 py-3 sm:py-3.5 lg:py-4 rounded-full text-white transition active:scale-[0.98] inline-flex items-center gap-2"
@@ -940,7 +951,7 @@ export default function App() {
                   </div>
                 </div>
                 <div className="lg:col-span-7 xl:col-span-8 grid grid-cols-3 gap-3 lg:gap-4 xl:gap-6">
-                  {[DRESS2, DRESS3].map((src, i) => (
+                  {[siteImages.dressPrimary, siteImages.dressSecondary].map((src, i) => (
                     <div key={i} className="aspect-[3/4] rounded-2xl lg:rounded-3xl overflow-hidden group">
                       <ImageWithFallback src={src} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                     </div>
@@ -1315,11 +1326,6 @@ export default function App() {
                           <div className="flex-1">
                             <div style={{ fontWeight: 800, fontSize: "clamp(17px, 1.6vw, 21px)", lineHeight: 1.25, letterSpacing: "-0.01em" }}>{g.name}</div>
                             <div className="mt-2" style={{ fontSize: "clamp(12px, 1.2vw, 14px)", color: "#999", lineHeight: 1.5 }}>{g.hint}</div>
-                            {(g.price || g.suggestedAmount) && (
-                              <div className="mt-4 inline-flex rounded-full px-3 py-1.5" style={{ background: "#FFF1EF", color: CORAL, fontSize: "clamp(11px, 1.1vw, 12px)", fontWeight: 800 }}>
-                                {g.price || `Рекомендуемая сумма: ${g.suggestedAmount}`}
-                              </div>
-                            )}
                             {g.conditionsText && (
                               <div className="mt-3 rounded-2xl px-3 py-3" style={{ background: "#FFF9F8", color: "#666", fontSize: "clamp(12px, 1.1vw, 13px)", lineHeight: 1.55 }}>
                                 {g.conditionsText}
@@ -1788,7 +1794,7 @@ export default function App() {
         {/* CLOSING WITH FAMILY PHOTO */}
         <section className="relative">
           <div className="relative h-[60vh] sm:h-[70vh] lg:h-[85vh] xl:h-[90vh] overflow-hidden">
-            <ImageWithFallback src={FAMILY} alt="" className="w-full h-full object-cover" style={{ filter: "grayscale(100%) brightness(0.6)" }} />
+            <ImageWithFallback src={siteImages.family} alt="" className="w-full h-full object-cover" style={{ filter: "grayscale(100%) brightness(0.6)" }} />
             <Flower size={120} color={PINK} className="hidden lg:block absolute bottom-12 lg:bottom-16 right-8 lg:right-16" rotate={25} />
             <Flower size={80} color={CORAL} className="hidden lg:block absolute top-12 lg:top-16 left-8 lg:left-16" rotate={-15} style={{ opacity: 0.9 }} />
             <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-12">

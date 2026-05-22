@@ -1016,15 +1016,41 @@ export default function AdminPage() {
                 </label>
 
                 <div className="md:col-span-2 rounded-[24px] border border-[#f0e8e8] bg-white p-4">
-                  <div style={{ fontWeight: 800, marginBottom: 12 }}>Библиотека фото</div>
+                  <div style={{ fontWeight: 800, marginBottom: 12 }}>
+                    Библиотека фото — клик по карточке: основное фото, кнопка ниже: второе
+                  </div>
                   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                     {sitePhotoOptions.map((photo) => (
                       <div key={photo.id} className="rounded-2xl border border-[#f0e8e8] bg-[#fff9f8] p-3">
-                        <div className="overflow-hidden rounded-2xl">
-                          <img src={photo.src} alt={photo.label} className="h-28 w-full object-cover" />
-                        </div>
-                        <div className="mt-3" style={{ fontWeight: 800 }}>{photo.label}</div>
-                        <div className="mt-1 text-sm" style={{ color: "#666" }}>{photo.id}</div>
+                        <button
+                          type="button"
+                          className="w-full text-left"
+                          onClick={() =>
+                            setSectionForm((current) => ({
+                              ...current,
+                              primaryImage: photo.id,
+                            }))
+                          }
+                        >
+                          <div className="overflow-hidden rounded-2xl">
+                            <img src={photo.src} alt={photo.label} className="h-28 w-full object-cover" />
+                          </div>
+                          <div className="mt-3" style={{ fontWeight: 800 }}>{photo.label}</div>
+                          <div className="mt-1 text-sm" style={{ color: "#666" }}>{photo.id}</div>
+                        </button>
+                        <button
+                          type="button"
+                          className="mt-2 w-full rounded-full px-3 py-2 text-sm"
+                          style={{ background: "#fff1ef", color: "#E85A4F", fontWeight: 700 }}
+                          onClick={() =>
+                            setSectionForm((current) => ({
+                              ...current,
+                              secondaryImage: photo.id,
+                            }))
+                          }
+                        >
+                          Второе фото
+                        </button>
                       </div>
                     ))}
                   </div>

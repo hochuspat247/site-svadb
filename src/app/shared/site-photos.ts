@@ -64,7 +64,18 @@ export function resolveSiteImage(value?: string | null) {
     return "";
   }
 
-  return photoLibrary[value as keyof typeof photoLibrary] || value;
+  const trimmed = value.trim();
+  const normalized = trimmed.toLowerCase();
+
+  if (photoLibrary[normalized as keyof typeof photoLibrary]) {
+    return photoLibrary[normalized as keyof typeof photoLibrary];
+  }
+
+  if (photoLibrary[trimmed as keyof typeof photoLibrary]) {
+    return photoLibrary[trimmed as keyof typeof photoLibrary];
+  }
+
+  return trimmed;
 }
 
 export function getDefaultGalleryImages() {

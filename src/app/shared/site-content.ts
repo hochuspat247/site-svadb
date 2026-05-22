@@ -1,3 +1,4 @@
+import { defaultSiteSections } from "../data/site-builder-defaults.js";
 import type { SiteSection, SiteSectionItem, SiteSectionSettings } from "./wedding-types";
 import { getDefaultGalleryImages, resolveSiteImage, sitePhotoOptions } from "./site-photos";
 
@@ -21,6 +22,31 @@ const MOOD_LABEL_FALLBACKS = [
   "Семья",
   "Любовь",
 ];
+
+export function mergeSiteSections(remote: SiteSection[]) {
+  const remoteMap = Object.fromEntries(remote.map((section) => [section.id, section]));
+  const knownIds = new Set(defaultSiteSections.map((section) => section.id));
+
+  const mergedDefaults = defaultSiteSections.map((fallback) => {
+    const fromApi = remoteMap[fallback.id];
+    if (!fromApi) {
+      return fallback;
+    }
+
+    return {
+      ...fallback,
+      ...fromApi,
+      settings: {
+        ...fallback.settings,
+        ...fromApi.settings,
+      },
+    };
+  });
+
+  const extraSections = remote.filter((section) => !knownIds.has(section.id));
+
+  return [...mergedDefaults, ...extraSections];
+}
 
 export function buildSiteContentMap(sections: SiteSection[]) {
   return Object.fromEntries(sections.map((section) => [section.id, section]));
