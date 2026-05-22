@@ -815,9 +815,7 @@ export default function AdminPage() {
             <h1 className="mt-5" style={{ fontWeight: 900, fontSize: "clamp(30px, 5vw, 48px)", lineHeight: 1 }}>
               Панель управления
             </h1>
-            <p className="mt-4" style={{ color: "#666", lineHeight: 1.7 }}>
-              Вход защищён паролем. Сейчас используется код доступа <code>123456</code>.
-            </p>
+
           </div>
 
           <form className="space-y-4" onSubmit={handleLogin}>

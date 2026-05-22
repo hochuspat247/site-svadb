@@ -3,7 +3,7 @@ import crypto from "crypto";
 const TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 7;
 
 function getAdminPassword() {
-  return process.env.ADMIN_PASSWORD || "123456";
+  return process.env.ADMIN_PASSWORD || "1234561";
 }
 
 function getTokenSecret() {
