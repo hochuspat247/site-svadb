@@ -26,6 +26,7 @@ import AdminMediaLibrary from "./AdminMediaLibrary";
 import GalleryImagesEditor from "./GalleryImagesEditor";
 import SectionImagePicker from "./SectionImagePicker";
 import StoryItemsEditor from "./StoryItemsEditor";
+import { mergeSiteSections } from "../shared/site-content";
 import { parseSectionItems, sectionImageSlots, serializeSectionItems, slugifySectionId } from "./admin-utils";
 import type {
   GiftBooking,
@@ -457,7 +458,7 @@ export default function AdminPage() {
         setGifts(result.gifts);
         setBookings(result.bookings);
         setWishes(result.wishes);
-        setSections(result.sections);
+        setSections(mergeSiteSections(result.sections));
 
         try {
           const uploads = await fetchUploadedImages();

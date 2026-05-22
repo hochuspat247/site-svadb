@@ -383,6 +383,10 @@ export default function App() {
     () => getGallerySlides(gallerySettings),
     [JSON.stringify(gallerySettings.galleryImages)],
   );
+  const defaultStorySlides = useMemo(
+    () => getStorySlides(defaultSiteSections.find((section) => section.id === "story")?.settings.items),
+    [],
+  );
   const storySlides = useMemo(
     () => getStorySlides(storySettings.items),
     [storySettings.items],
@@ -1037,50 +1041,7 @@ export default function App() {
                   <div className="lg:hidden absolute left-5 top-5 bottom-5 border-l-4 border-dotted" style={{ borderColor: PINK }} />
 
                   <div className="space-y-8 lg:space-y-10 xl:space-y-12">
-                    {(storySlides.length ? storySlides : [
-                      {
-                        date: "2 курс",
-                        title: "Шахматы",
-                        text: "Всё началось на секции шахмат. Я пришла на занятие, и единственное свободное место оказалось напротив Ивана. Мы разложили фигуры, начали партию — и незаметно разговорились. Я рассказала о хакатонах, показала факультет. Ваня загорелся идеей и перевёлся на экономический.",
-                        image: "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
-                      },
-                      {
-                        date: "Лето 2024",
-                        title: "Адлер и ФИЧА",
-                        text: "Вместе поехали в Адлер по программе профкома. А потом прошли отбор на форум «ФИЧА». Наша команда Avenir заняла первое место на хакатоне! Мы стали ещё ближе.",
-                        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
-                      },
-                      {
-                        date: "Сентябрь 2024",
-                        title: "Идеатон",
-                        text: "После мероприятия «Идеатон», которое мы организовали в университете, Ваня предложил мне стать парой. Я не раздумывала ни секунды — так начались наши отношения.",
-                        image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
-                      },
-                      {
-                        date: "Ноябрь 2024",
-                        title: "Предложение",
-                        text: "Ваня встал на одно колено и сделал мне предложение руки и сердца. Конечно, я сказала «Да!» Мы строим Avenir вместе и планируем нашу совместную жизнь.",
-                        image: "https://images.unsplash.com/photo-1519741497674-611481863552?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
-                      },
-                      {
-                        date: "Июнь 2025",
-                        title: "Новый дом",
-                        text: "Мы съехались и начали делать ремонт в нашей первой совместной квартире. Каждый день — новое приключение, каждое решение принимаем вместе. Строим наше семейное гнёздышко своими руками.",
-                        image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
-                      },
-                      {
-                        date: "28 октября 2025",
-                        title: "Роспись",
-                        text: "Официально стали мужем и женой! В этот день мы расписались и сделали первый шаг к нашей большой свадьбе. Теперь мы — семья не только по сердцу, но и по документам.",
-                        image: "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
-                      },
-                      {
-                        date: "Сентябрь 2026",
-                        title: "Свадьба",
-                        text: "И вот мы здесь — готовы отпраздновать нашу любовь вместе со всеми, кто нам дорог. Наша история — это любовь, общие мечты, победы и вера в то, что вместе мы можем всё. Спасибо, что разделите с нами этот день!",
-                        image: "https://images.unsplash.com/photo-1606800052052-a08af7148866?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=85&w=900",
-                      },
-                    ]).map((story, i) => {
+                    {(storySlides.length ? storySlides : defaultStorySlides).map((story, i) => {
                       const isRight = i % 2 === 1;
 
                       return (
