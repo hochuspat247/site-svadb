@@ -22,7 +22,10 @@ import {
   uploadSiteImage,
 } from "./admin-api";
 import { getGiftIconByKey, giftIconOptions } from "../shared/gift-icons";
-import { resolveSiteImage, sitePhotoOptions } from "../shared/site-photos";
+import AdminMediaLibrary from "./AdminMediaLibrary";
+import GalleryImagesEditor from "./GalleryImagesEditor";
+import SectionImagePicker from "./SectionImagePicker";
+import { sectionImageSlots, slugifySectionId } from "./admin-utils";
 import type {
   GiftBooking,
   GiftBookingMode,
@@ -36,7 +39,7 @@ import type {
   WeddingGift,
 } from "../shared/wedding-types";
 
-type AdminTab = "sections" | "guests" | "categories" | "gifts" | "wishes";
+type AdminTab = "sections" | "media" | "guests" | "categories" | "gifts" | "wishes";
 
 type GuestForm = Omit<Guest, "id" | "createdAt">;
 type CategoryForm = {
@@ -396,7 +399,7 @@ export default function AdminPage() {
   const [sectionForm, setSectionForm] = useState<SectionForm>(sectionTemplate("person"));
 
   const [uploadedImages, setUploadedImages] = useState<{ url: string; filename: string }[]>([]);
-  const [uploadBusy, setUploadBusy] = useState<"primary" | "secondary" | "gallery" | null>(null);
+  const [uploadBusy, setUploadBusy] = useState(false);
 
   const sortedGuests = useMemo(
     () => guests.slice().sort((a, b) => a.name.localeCompare(b.name, "ru")),
@@ -493,48 +496,36 @@ export default function AdminPage() {
     setError("");
   };
 
-  const handleSiteImageUpload = async (
-    slot: "primary" | "secondary" | "gallery",
-    fileList: FileList | null,
-  ) => {
-    const file = fileList?.[0];
-    if (!file) {
-      return;
-    }
-
-    resetFeedback();
-    setUploadBusy(slot);
-
+  const uploadImageFile = async (file: File) => {
+    setUploadBusy(true);
     try {
       const uploaded = await uploadSiteImage(file);
-      const url = uploaded.url;
-
-      setSectionForm((previous) => {
-        if (slot === "primary") {
-          return { ...previous, primaryImage: url };
-        }
-
-        if (slot === "secondary") {
-          return { ...previous, secondaryImage: url };
-        }
-
-        const trimmed = previous.galleryImagesText.trim();
-        const nextLine = trimmed ? `${trimmed}\n${url}` : url;
-        return { ...previous, galleryImagesText: nextLine };
-      });
-
       const catalog = await fetchUploadedImages();
       setUploadedImages(catalog);
-      setMessage(
-        slot === "gallery"
-          ? "Фото добавлено в список галереи в форме (внизу). Сохраните блок, чтобы показать его на сайте."
-          : "Фото загружено на сервер. Сохраните блок, чтобы показать его на сайте.",
-      );
-    } catch (uploadIssue) {
-      setError(uploadIssue instanceof Error ? uploadIssue.message : "Не удалось загрузить фото");
+      return uploaded.url;
     } finally {
-      setUploadBusy(null);
+      setUploadBusy(false);
     }
+  };
+
+  const validateSectionForm = () => {
+    const name = sectionForm.name.trim();
+    if (!name) {
+      return "Укажите название блока (как он будет виден в списке слева).";
+    }
+
+    if (!sectionForm.type) {
+      return "Выберите тип блока.";
+    }
+
+    if (!selectedSectionId) {
+      const id = slugifySectionId(sectionForm.id || name);
+      if (!id) {
+        return "Укажите ID блока латиницей или кириллицей (например: hero-main).";
+      }
+    }
+
+    return null;
   };
 
   const handleLogin = async (event: React.FormEvent) => {
@@ -629,11 +620,18 @@ export default function AdminPage() {
     event.preventDefault();
     resetFeedback();
 
+    const validationError = validateSectionForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     try {
+      const sectionId = selectedSectionId || slugifySectionId(sectionForm.id || sectionForm.name);
       const section = selectedSectionId
         ? await updateSection(selectedSectionId, sectionPayload(sectionForm))
         : await createSection({
-            id: sectionForm.id,
+            id: sectionId,
             ...sectionPayload(sectionForm),
           });
 
@@ -673,8 +671,15 @@ export default function AdminPage() {
   };
 
   const handleSectionTypeChange = (type: SiteSectionType) => {
-    setSectionForm((current) => ({ ...sectionTemplate(type), ...current, type }));
+    setSectionForm((current) => ({ ...current, type }));
   };
+
+  const galleryImages = useMemo(
+    () => parseGalleryImages(sectionForm.galleryImagesText),
+    [sectionForm.galleryImagesText],
+  );
+
+  const imageSlots = sectionImageSlots(sectionForm.type);
 
   const handleDelete = async (kind: "guest" | "category" | "gift" | "section") => {
     if (kind === "guest" && selectedGuestId && window.confirm("Удалить этого гостя?")) {
@@ -801,7 +806,8 @@ export default function AdminPage() {
 
           <div className="mt-5 flex flex-wrap gap-2">
             {([
-              ["sections", "Секции"],
+              ["sections", "Блоки сайта"],
+              ["media", "Медиатека"],
               ["guests", "Гости"],
               ["categories", "Категории"],
               ["gifts", "Подарки"],
@@ -852,7 +858,13 @@ export default function AdminPage() {
                   type="button"
                   onClick={() => {
                     setSelectedSectionId(null);
-                    setSectionForm(sectionTemplate("person"));
+                    const type: SiteSectionType = "text";
+                    setSectionForm({
+                      ...sectionTemplate(type),
+                      name: "Новый блок",
+                      id: `block-${Date.now()}`,
+                      type,
+                    });
                   }}
                   className="w-full rounded-2xl px-4 py-3 text-left"
                   style={{ background: blush, fontWeight: 800 }}
@@ -917,22 +929,36 @@ export default function AdminPage() {
 
             <SectionCard
               title={selectedSectionId ? "Редактирование блока" : "Новый блок"}
-              subtitle="Можно собирать блоки как конструктор: менять тексты, фото, элементы, порядок и видимость."
+              subtitle={
+                sectionTypeOptions.find((item) => item.value === sectionForm.type)?.hint ||
+                "Заполните поля и нажмите «Сохранить» — изменения появятся на сайте у всех гостей."
+              }
             >
-              <form className="grid gap-4 md:grid-cols-2" onSubmit={handleSectionSave}>
+              <form className="space-y-8" onSubmit={handleSectionSave}>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="md:col-span-2 rounded-2xl border border-[#f0e8e8] bg-[#fffefb] px-4 py-3 text-sm" style={{ color: "#666" }}>
+                    {selectedSectionId ? (
+                      <>
+                        ID блока: <strong style={{ color: ink }}>{selectedSectionId}</strong>
+                      </>
+                    ) : (
+                      <>ID создастся автоматически из названия, если поле ID оставить пустым.</>
+                    )}
+                  </div>
+
                 {!selectedSectionId ? (
                   <label className="block">
-                    <FieldLabel>ID блока</FieldLabel>
+                    <FieldLabel>ID блока (латиница, необязательно)</FieldLabel>
                     <TextInput
                       value={sectionForm.id}
                       onChange={(event) => setSectionForm({ ...sectionForm, id: event.target.value })}
-                      placeholder="host-tamada"
+                      placeholder="hero-main"
                     />
                   </label>
                 ) : null}
 
                 <label className="block">
-                  <FieldLabel>Название в админке</FieldLabel>
+                  <FieldLabel>Название в админке *</FieldLabel>
                   <TextInput
                     value={sectionForm.name}
                     onChange={(event) => setSectionForm({ ...sectionForm, name: event.target.value })}
@@ -963,7 +989,7 @@ export default function AdminPage() {
                   />
                 </label>
 
-                <label className="flex items-center gap-3 rounded-2xl border border-[#f0e8e8] px-4 py-3">
+                <label className="flex items-center gap-3 rounded-2xl border border-[#f0e8e8] px-4 py-3 md:col-span-2">
                   <input
                     type="checkbox"
                     checked={sectionForm.isActive}
@@ -971,7 +997,13 @@ export default function AdminPage() {
                   />
                   <span style={{ fontWeight: 700 }}>Показывать блок на сайте</span>
                 </label>
+                </div>
 
+                <div>
+                  <h3 className="mb-4" style={{ fontWeight: 900, fontSize: 18 }}>
+                    Тексты
+                  </h3>
+                  <div className="grid gap-4 md:grid-cols-2">
                 <label className="block">
                   <FieldLabel>Бейдж</FieldLabel>
                   <TextInput
@@ -1016,93 +1048,6 @@ export default function AdminPage() {
                 </label>
 
                 <label className="block">
-                  <FieldLabel>Основное фото — ID из библиотеки, свой URL (/uploads/...) или файл ниже</FieldLabel>
-                  <TextInput
-                    value={sectionForm.primaryImage}
-                    onChange={(event) => setSectionForm({ ...sectionForm, primaryImage: event.target.value })}
-                    placeholder="photo-11 или /uploads/..."
-                  />
-                </label>
-
-                <label className="block">
-                  <FieldLabel>Второе фото — ID, URL (/uploads/...) или файл ниже</FieldLabel>
-                  <TextInput
-                    value={sectionForm.secondaryImage}
-                    onChange={(event) => setSectionForm({ ...sectionForm, secondaryImage: event.target.value })}
-                    placeholder="photo-18 или /uploads/..."
-                  />
-                </label>
-
-                <div className="flex flex-wrap items-center gap-3 md:col-span-2 rounded-2xl border border-[#f0e8e8] bg-[#fffefb] px-4 py-4">
-                  <span style={{ fontWeight: 800, flexBasis: "100%" }}>
-                    Отправить с компьютера на сервер (после сохранения блока картинка будет у всех на сайте)
-                  </span>
-                  <label
-                    className="inline-flex cursor-pointer items-center justify-center rounded-full border-2 px-5 py-2.5"
-                    style={{
-                      borderColor: coral,
-                      color: coral,
-                      fontWeight: 800,
-                      opacity: uploadBusy !== null ? 0.55 : 1,
-                    }}
-                  >
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif"
-                      className="sr-only"
-                      disabled={uploadBusy !== null}
-                      onChange={(event) => {
-                        void handleSiteImageUpload("primary", event.target.files);
-                        event.target.value = "";
-                      }}
-                    />
-                    {uploadBusy === "primary" ? "Загрузка…" : "Файл → основное фото"}
-                  </label>
-                  <label
-                    className="inline-flex cursor-pointer items-center justify-center rounded-full border-2 px-5 py-2.5"
-                    style={{
-                      borderColor: coral,
-                      color: coral,
-                      fontWeight: 800,
-                      opacity: uploadBusy !== null ? 0.55 : 1,
-                    }}
-                  >
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif"
-                      className="sr-only"
-                      disabled={uploadBusy !== null}
-                      onChange={(event) => {
-                        void handleSiteImageUpload("secondary", event.target.files);
-                        event.target.value = "";
-                      }}
-                    />
-                    {uploadBusy === "secondary" ? "Загрузка…" : "Файл → второе фото"}
-                  </label>
-                  <label
-                    className="inline-flex cursor-pointer items-center justify-center rounded-full border px-5 py-2.5"
-                    style={{
-                      background: blush,
-                      color: ink,
-                      fontWeight: 800,
-                      opacity: uploadBusy !== null ? 0.55 : 1,
-                    }}
-                  >
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif"
-                      className="sr-only"
-                      disabled={uploadBusy !== null}
-                      onChange={(event) => {
-                        void handleSiteImageUpload("gallery", event.target.files);
-                        event.target.value = "";
-                      }}
-                    />
-                    {uploadBusy === "gallery" ? "Загрузка…" : "Файл → добавить строку галереи"}
-                  </label>
-                </div>
-
-                <label className="block">
                   <FieldLabel>Кнопка</FieldLabel>
                   <TextInput
                     value={sectionForm.buttonLabel}
@@ -1119,8 +1064,61 @@ export default function AdminPage() {
                     placeholder="https://t.me/..."
                   />
                 </label>
+                  </div>
+                </div>
 
-                <label className="block md:col-span-2">
+                {imageSlots.primary || imageSlots.secondary || imageSlots.gallery ? (
+                  <div>
+                    <h3 className="mb-4" style={{ fontWeight: 900, fontSize: 18 }}>
+                      Изображения
+                    </h3>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {imageSlots.primary ? (
+                        <SectionImagePicker
+                          label="Основное фото"
+                          hint="Крупное фото блока на сайте"
+                          value={sectionForm.primaryImage}
+                          onChange={(primaryImage) => setSectionForm((current) => ({ ...current, primaryImage }))}
+                          uploads={uploadedImages}
+                          uploadBusy={uploadBusy}
+                          onUpload={uploadImageFile}
+                        />
+                      ) : null}
+                      {imageSlots.secondary ? (
+                        <SectionImagePicker
+                          label="Второе фото"
+                          hint="Дополнительный кадр (обложка, дресс-код)"
+                          value={sectionForm.secondaryImage}
+                          onChange={(secondaryImage) => setSectionForm((current) => ({ ...current, secondaryImage }))}
+                          uploads={uploadedImages}
+                          uploadBusy={uploadBusy}
+                          onUpload={uploadImageFile}
+                        />
+                      ) : null}
+                      {imageSlots.gallery ? (
+                        <GalleryImagesEditor
+                          images={galleryImages}
+                          onChange={(next) =>
+                            setSectionForm((current) => ({
+                              ...current,
+                              galleryImagesText: next.join("\n"),
+                            }))
+                          }
+                          uploads={uploadedImages}
+                          uploadBusy={uploadBusy}
+                          onUpload={uploadImageFile}
+                        />
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
+
+                {imageSlots.items ? (
+                <div>
+                  <h3 className="mb-4" style={{ fontWeight: 900, fontSize: 18 }}>
+                    Элементы списка
+                  </h3>
+                <label className="block">
                   <FieldLabel>Элементы блока</FieldLabel>
                   <TextArea
                     rows={6}
@@ -1129,141 +1127,10 @@ export default function AdminPage() {
                     placeholder={sectionExamples[sectionForm.type]}
                   />
                 </label>
-
-                <label className="block md:col-span-2">
-                  <FieldLabel>Фото для галереи (каждое с новой строки)</FieldLabel>
-                  <TextArea
-                    rows={5}
-                    value={sectionForm.galleryImagesText}
-                    onChange={(event) => setSectionForm({ ...sectionForm, galleryImagesText: event.target.value })}
-                    placeholder={"photo-01\nphoto-02\n/uploads/...\nhttps://..."}
-                  />
-                </label>
-
-                <div className="md:col-span-2 rounded-[24px] border border-[#f0e8e8] bg-white p-4">
-                  <div style={{ fontWeight: 800, marginBottom: 12 }}>
-                    Ваши файлы на сервере ({uploadedImages.length}) — клик по превью: основное фото;
-                    «Второе» — второе место в блоке; «В галерею» — новая строка в списке галереи
-                  </div>
-                  {uploadedImages.length === 0 ? (
-                    <div className="text-sm" style={{ color: "#888" }}>
-                      Пока нет загрузок — выберите файлы кнопками выше, они сохранятся на сервере в папку uploads/.
-                    </div>
-                  ) : (
-                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                      {uploadedImages.map((item) => (
-                        <div key={item.filename} className="rounded-2xl border border-[#f0e8e8] bg-[#fff9f8] p-3">
-                          <button
-                            type="button"
-                            className="w-full text-left"
-                            onClick={() =>
-                              setSectionForm((current) => ({ ...current, primaryImage: item.url }))
-                            }
-                          >
-                            <div className="overflow-hidden rounded-2xl bg-[#f3f3f3]">
-                              <img src={resolveSiteImage(item.url)} alt="" className="h-28 w-full object-cover" />
-                            </div>
-                          </button>
-                          <button
-                            type="button"
-                            className="mt-2 w-full rounded-full px-3 py-2 text-sm"
-                            style={{ background: "#fff1ef", color: "#E85A4F", fontWeight: 700 }}
-                            onClick={() =>
-                              setSectionForm((current) => ({
-                                ...current,
-                                secondaryImage: item.url,
-                              }))
-                            }
-                          >
-                            Второе место в блоке
-                          </button>
-                          <button
-                            type="button"
-                            className="mt-1 w-full rounded-full px-3 py-2 text-sm"
-                            style={{ background: ink, color: "white", fontWeight: 700 }}
-                            onClick={() =>
-                              setSectionForm((current) => ({
-                                ...current,
-                                galleryImagesText: `${current.galleryImagesText.trim()}${current.galleryImagesText.trim() ? "\n" : ""}${item.url}`,
-                              }))
-                            }
-                          >
-                            В галерею
-                          </button>
-                          <div className="mt-2 truncate text-xs" style={{ color: "#666" }} title={item.filename}>
-                            {item.filename}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
-
-                <div className="md:col-span-2 rounded-[24px] border border-[#f0e8e8] bg-white p-4">
-                  <div style={{ fontWeight: 800, marginBottom: 12 }}>
-                    Стандартная библиотека — клик по карточке: основное фото, кнопка ниже: второе
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                    {sitePhotoOptions.map((photo) => (
-                      <div key={photo.id} className="rounded-2xl border border-[#f0e8e8] bg-[#fff9f8] p-3">
-                        <button
-                          type="button"
-                          className="w-full text-left"
-                          onClick={() =>
-                            setSectionForm((current) => ({
-                              ...current,
-                              primaryImage: photo.id,
-                            }))
-                          }
-                        >
-                          <div className="overflow-hidden rounded-2xl">
-                            <img src={photo.src} alt={photo.label} className="h-28 w-full object-cover" />
-                          </div>
-                          <div className="mt-3" style={{ fontWeight: 800 }}>{photo.label}</div>
-                          <div className="mt-1 text-sm" style={{ color: "#666" }}>{photo.id}</div>
-                        </button>
-                        <button
-                          type="button"
-                          className="mt-2 w-full rounded-full px-3 py-2 text-sm"
-                          style={{ background: "#fff1ef", color: "#E85A4F", fontWeight: 700 }}
-                          onClick={() =>
-                            setSectionForm((current) => ({
-                              ...current,
-                              secondaryImage: photo.id,
-                            }))
-                          }
-                        >
-                          Второе фото
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {sectionForm.primaryImage ? (
-                  <div className="md:col-span-2 grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-[#f0e8e8] bg-[#fff9f8] p-3">
-                      <div style={{ fontWeight: 800, marginBottom: 8 }}>Превью основного фото</div>
-                      <img
-                        src={resolveSiteImage(sectionForm.primaryImage)}
-                        alt="primary preview"
-                        className="h-48 w-full rounded-2xl object-cover"
-                      />
-                    </div>
-                    {sectionForm.secondaryImage ? (
-                      <div className="rounded-2xl border border-[#f0e8e8] bg-[#fff9f8] p-3">
-                        <div style={{ fontWeight: 800, marginBottom: 8 }}>Превью второго фото</div>
-                        <img
-                          src={resolveSiteImage(sectionForm.secondaryImage)}
-                          alt="secondary preview"
-                          className="h-48 w-full rounded-2xl object-cover"
-                        />
-                      </div>
-                    ) : null}
-                  </div>
                 ) : null}
 
-                <div className="md:col-span-2 flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3 border-t border-[#f0e8e8] pt-6">
                   <button className="rounded-full px-6 py-3 text-white" style={{ background: coral, fontWeight: 800 }}>
                     {selectedSectionId ? "Сохранить блок" : "Добавить блок"}
                   </button>
@@ -1281,6 +1148,27 @@ export default function AdminPage() {
               </form>
             </SectionCard>
           </div>
+        ) : null}
+
+        {activeTab === "media" ? (
+          <SectionCard
+            title="Медиатека"
+            subtitle="Все фото в одном месте: загрузка с компьютера и стандартные кадры. В блоках сайта выбирайте «Из медиатеки»."
+          >
+            <AdminMediaLibrary
+              uploads={uploadedImages}
+              uploadBusy={uploadBusy}
+              onUpload={async (file) => {
+                resetFeedback();
+                try {
+                  await uploadImageFile(file);
+                  setMessage("Фото загружено. Выберите его в блоке сайта или скопируйте ID.");
+                } catch (uploadIssue) {
+                  setError(uploadIssue instanceof Error ? uploadIssue.message : "Не удалось загрузить фото");
+                }
+              }}
+            />
+          </SectionCard>
         ) : null}
 
         {activeTab === "guests" ? (

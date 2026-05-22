@@ -941,7 +941,9 @@ app.post("/api/admin/sections", requireAdminAuth, async (req, res) => {
       : {};
 
   if (!id || !name || !type) {
-    res.status(400).json({ error: "Section id, name and type are required" });
+    res.status(400).json({
+      error: "Укажите название блока и тип. ID создаётся из названия, если не задан.",
+    });
     return;
   }
 
@@ -988,7 +990,7 @@ app.put("/api/admin/sections/:id", requireAdminAuth, async (req, res) => {
       : {};
 
   if (!id || !name || !type) {
-    res.status(400).json({ error: "Section name and type are required" });
+    res.status(400).json({ error: "Укажите название блока и тип." });
     return;
   }
 
