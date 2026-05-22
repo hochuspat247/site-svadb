@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState, useTransition } from "react";
+import React, { useEffect, useMemo, useState, useTransition } from "react";
 import {
   clearAdminToken,
   createCategory,
@@ -18,8 +18,8 @@ import {
 import { getGiftIconByKey, giftIconOptions } from "../shared/gift-icons";
 import type {
   GiftBooking,
-  GiftCategory,
   GiftBookingMode,
+  GiftCategory,
   Guest,
   MusicWish,
   TravelOption,
@@ -39,10 +39,20 @@ type GiftForm = Omit<WeddingGift, "id" | "categoryName" | "categoryDescription" 
   travelOptionsText: string;
 };
 
-const pink = "#F4B6BE";
 const pinkLight = "#FBD3D8";
 const coral = "#E85A4F";
-const ink = "#1a1a1a";
+const ink = "#1A1A1A";
+
+const sideOptions = [
+  "Со стороны Ивана",
+  "Со стороны Анастасии",
+];
+
+const bookingModeLabels: Record<GiftBookingMode, string> = {
+  single: "Один бронь",
+  multiple: "Можно выбрать несколько раз",
+  travel: "Выбор направления",
+};
 
 const emptyGuestForm = (): GuestForm => ({
   name: "",
@@ -91,7 +101,7 @@ function parseTravelOptions(text: string): TravelOption[] {
 }
 
 function formatTravelOptions(options: TravelOption[]) {
-  return (options || []).map((item) => item.label || item.value).join("\n");
+  return options.map((item) => item.label || item.value).join("\n");
 }
 
 function toGuestForm(guest: Guest): GuestForm {
@@ -138,6 +148,41 @@ function toGiftForm(gift: WeddingGift): GiftForm {
   };
 }
 
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span style={{ fontSize: 12, fontWeight: 800, color: "#666", letterSpacing: "0.04em" }}>
+      {children}
+    </span>
+  );
+}
+
+function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <input
+      {...props}
+      className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3 outline-none"
+    />
+  );
+}
+
+function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <textarea
+      {...props}
+      className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3 outline-none"
+    />
+  );
+}
+
+function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <select
+      {...props}
+      className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3 outline-none"
+    />
+  );
+}
+
 function SectionCard({
   title,
   subtitle,
@@ -157,12 +202,14 @@ function SectionCard({
       }}
     >
       <div className="mb-5">
-        <h2 style={{ fontWeight: 900, fontSize: "clamp(22px, 2vw, 30px)", letterSpacing: "-0.02em" }}>{title}</h2>
-        {subtitle && (
+        <h2 style={{ fontWeight: 900, fontSize: "clamp(22px, 2vw, 30px)", letterSpacing: "-0.02em" }}>
+          {title}
+        </h2>
+        {subtitle ? (
           <p className="mt-2" style={{ color: "#666", lineHeight: 1.6 }}>
             {subtitle}
           </p>
-        )}
+        ) : null}
       </div>
       {children}
     </section>
@@ -189,6 +236,19 @@ function AdminPage() {
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
+  const sortedGuests = useMemo(
+    () => guests.slice().sort((a, b) => a.name.localeCompare(b.name, "ru")),
+    [guests],
+  );
+  const sortedCategories = useMemo(
+    () => categories.slice().sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, "ru")),
+    [categories],
+  );
+  const sortedGifts = useMemo(
+    () => gifts.slice().sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, "ru")),
+    [gifts],
+  );
+
   const bookingCountByGift = useMemo(() => {
     return bookings.reduce<Record<number, number>>((acc, booking) => {
       acc[booking.giftId] = (acc[booking.giftId] || 0) + 1;
@@ -205,9 +265,7 @@ function AdminPage() {
       try {
         const result = await fetchAdminBootstrap();
 
-        if (isCancelled) {
-          return;
-        }
+        if (isCancelled) return;
 
         startTransition(() => {
           setGuests(result.guests);
@@ -217,9 +275,7 @@ function AdminPage() {
           setWishes(result.wishes);
         });
       } catch (loadError) {
-        if (isCancelled) {
-          return;
-        }
+        if (isCancelled) return;
 
         clearAdminToken();
         setToken("");
@@ -233,6 +289,7 @@ function AdminPage() {
       isCancelled = true;
     };
   }, [token, startTransition]);
+
   useEffect(() => {
     if (!selectedGuestId) {
       setGuestForm(emptyGuestForm());
@@ -269,6 +326,11 @@ function AdminPage() {
     }
   }, [selectedGiftId, gifts]);
 
+  const resetFeedback = () => {
+    setMessage("");
+    setError("");
+  };
+
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoginError("");
@@ -280,14 +342,13 @@ function AdminPage() {
       setToken(nextToken);
       setPassword("");
     } catch (loginIssue) {
-      setLoginError(loginIssue instanceof Error ? loginIssue.message : "РќРµ СѓРґР°Р»РѕСЃСЊ РІРѕР№С‚Рё");
+      setLoginError(loginIssue instanceof Error ? loginIssue.message : "Не удалось войти");
     }
   };
 
   const handleGuestSave = async (event: React.FormEvent) => {
     event.preventDefault();
-    setError("");
-    setMessage("");
+    resetFeedback();
 
     try {
       const savedGuest = selectedGuestId
@@ -303,14 +364,16 @@ function AdminPage() {
       });
 
       setSelectedGuestId(savedGuest.id);
-      setMessage(selectedGuestId ? "Р“РѕСЃС‚СЊ РѕР±РЅРѕРІР»РµРЅ" : "Р“РѕСЃС‚СЊ РґРѕР±Р°РІР»РµРЅ");
+      setMessage(selectedGuestId ? "Гость обновлен" : "Гость добавлен");
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ РіРѕСЃС‚СЏ");
+      setError(saveError instanceof Error ? saveError.message : "Ошибка сохранения гостя");
     }
   };
 
   const handleGuestDelete = async () => {
-    if (!selectedGuestId || !window.confirm("РЈРґР°Р»РёС‚СЊ СЌС‚РѕРіРѕ РіРѕСЃС‚СЏ?")) return;
+    if (!selectedGuestId || !window.confirm("Удалить этого гостя?")) return;
+
+    resetFeedback();
 
     try {
       await deleteGuest(selectedGuestId);
@@ -318,16 +381,15 @@ function AdminPage() {
       setBookings((current) => current.filter((item) => item.guestId !== selectedGuestId));
       setSelectedGuestId(null);
       setGuestForm(emptyGuestForm());
-      setMessage("Р“РѕСЃС‚СЊ СѓРґР°Р»РµРЅ");
+      setMessage("Гость удален");
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : "РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РіРѕСЃС‚СЏ");
+      setError(deleteError instanceof Error ? deleteError.message : "Ошибка удаления гостя");
     }
   };
 
   const handleCategorySave = async (event: React.FormEvent) => {
     event.preventDefault();
-    setError("");
-    setMessage("");
+    resetFeedback();
 
     try {
       const savedCategory = selectedCategoryId
@@ -343,30 +405,31 @@ function AdminPage() {
       });
 
       setSelectedCategoryId(savedCategory.id);
-      setMessage(selectedCategoryId ? "РљР°С‚РµРіРѕСЂРёСЏ РѕР±РЅРѕРІР»РµРЅР°" : "РљР°С‚РµРіРѕСЂРёСЏ РґРѕР±Р°РІР»РµРЅР°");
+      setMessage(selectedCategoryId ? "Категория обновлена" : "Категория добавлена");
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ РєР°С‚РµРіРѕСЂРёРё");
+      setError(saveError instanceof Error ? saveError.message : "Ошибка сохранения категории");
     }
   };
 
   const handleCategoryDelete = async () => {
-    if (!selectedCategoryId || !window.confirm("РЈРґР°Р»РёС‚СЊ СЌС‚Сѓ РєР°С‚РµРіРѕСЂРёСЋ?")) return;
+    if (!selectedCategoryId || !window.confirm("Удалить эту категорию?")) return;
+
+    resetFeedback();
 
     try {
       await deleteCategory(selectedCategoryId);
       setCategories((current) => current.filter((item) => item.id !== selectedCategoryId));
       setSelectedCategoryId(null);
       setCategoryForm(emptyCategoryForm());
-      setMessage("РљР°С‚РµРіРѕСЂРёСЏ СѓРґР°Р»РµРЅР°");
+      setMessage("Категория удалена");
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : "РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РєР°С‚РµРіРѕСЂРёРё");
+      setError(deleteError instanceof Error ? deleteError.message : "Ошибка удаления категории");
     }
   };
 
   const handleGiftSave = async (event: React.FormEvent) => {
     event.preventDefault();
-    setError("");
-    setMessage("");
+    resetFeedback();
 
     const payload = {
       ...giftForm,
@@ -391,14 +454,16 @@ function AdminPage() {
       });
 
       setSelectedGiftId(savedGift.id);
-      setMessage(selectedGiftId ? "РџРѕРґР°СЂРѕРє РѕР±РЅРѕРІР»РµРЅ" : "РџРѕРґР°СЂРѕРє РґРѕР±Р°РІР»РµРЅ");
+      setMessage(selectedGiftId ? "Подарок обновлен" : "Подарок добавлен");
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ РїРѕРґР°СЂРєР°");
+      setError(saveError instanceof Error ? saveError.message : "Ошибка сохранения подарка");
     }
   };
 
   const handleGiftDelete = async () => {
-    if (!selectedGiftId || !window.confirm("РЈРґР°Р»РёС‚СЊ СЌС‚РѕС‚ РїРѕРґР°СЂРѕРє?")) return;
+    if (!selectedGiftId || !window.confirm("Удалить этот подарок?")) return;
+
+    resetFeedback();
 
     try {
       await deleteGift(selectedGiftId);
@@ -406,9 +471,9 @@ function AdminPage() {
       setBookings((current) => current.filter((item) => item.giftId !== selectedGiftId));
       setSelectedGiftId(null);
       setGiftForm(emptyGiftForm());
-      setMessage("РџРѕРґР°СЂРѕРє СѓРґР°Р»РµРЅ");
+      setMessage("Подарок удален");
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : "РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РїРѕРґР°СЂРєР°");
+      setError(deleteError instanceof Error ? deleteError.message : "Ошибка удаления подарка");
     }
   };
 
@@ -417,41 +482,43 @@ function AdminPage() {
       <div className="min-h-screen bg-[#fff8f6] px-4 py-10 sm:px-6 lg:px-8" style={{ color: ink }}>
         <div className="mx-auto max-w-md rounded-[32px] bg-white p-8 shadow-[0_20px_60px_rgba(0,0,0,0.08)]">
           <div className="mb-8">
-            <div className="inline-flex rounded-full px-4 py-2" style={{ background: pinkLight, color: coral, fontWeight: 800 }}>
+            <div
+              className="inline-flex rounded-full px-4 py-2"
+              style={{ background: pinkLight, color: coral, fontWeight: 800 }}
+            >
               /admin
             </div>
             <h1 className="mt-5" style={{ fontWeight: 900, fontSize: "clamp(30px, 5vw, 48px)", lineHeight: 1 }}>
-              РџР°РЅРµР»СЊ СѓРїСЂР°РІР»РµРЅРёСЏ
+              Панель управления
             </h1>
             <p className="mt-4" style={{ color: "#666", lineHeight: 1.7 }}>
-              Р’С…РѕРґ Р·Р°С‰РёС‰РµРЅ РїР°СЂРѕР»РµРј. РЎРµР№С‡Р°СЃ СѓСЃС‚Р°РЅРѕРІР»РµРЅ РєРѕРґ РґРѕСЃС‚СѓРїР° `123456`.
+              Вход защищен паролем. Сейчас установлен код доступа <code>123456</code>.
             </p>
           </div>
 
           <form className="space-y-4" onSubmit={handleLogin}>
             <label className="block">
-              <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.1em", color: "#666" }}>РџРђР РћР›Р¬</span>
-              <input
+              <FieldLabel>Пароль</FieldLabel>
+              <TextInput
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-[#fff8f6] px-4 py-3 outline-none"
                 placeholder="123456"
               />
             </label>
 
-            {loginError && (
+            {loginError ? (
               <div className="rounded-2xl px-4 py-3" style={{ background: "#FFF1EF", color: coral }}>
                 {loginError}
               </div>
-            )}
+            ) : null}
 
             <button
               type="submit"
               className="w-full rounded-full px-5 py-4 text-white transition"
               style={{ background: coral, fontWeight: 800, letterSpacing: "0.08em" }}
             >
-              Р’РћР™РўР
+              Войти
             </button>
           </form>
         </div>
@@ -469,21 +536,26 @@ function AdminPage() {
                 wedding admin
               </div>
               <h1 className="mt-4" style={{ fontWeight: 900, fontSize: "clamp(28px, 4vw, 54px)", lineHeight: 1 }}>
-                РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ СЃРІР°РґСЊР±С‹
+                Конструктор свадьбы
               </h1>
               <p className="mt-3 max-w-2xl" style={{ color: "#666", lineHeight: 1.7 }}>
-                Р—РґРµСЃСЊ РјРѕР¶РЅРѕ СЂРµРґР°РєС‚РёСЂРѕРІР°С‚СЊ РіРѕСЃС‚РµР№, РєР°С‚РµРіРѕСЂРёРё Рё РїРѕРґР°СЂРєРё. Р’СЃС‘ Р°РґР°РїС‚РёСЂРѕРІР°РЅРѕ РїРѕРґ РјРѕР±РёР»СЊРЅС‹Р№ СЌРєСЂР°РЅ Рё СЃСЂР°Р·Сѓ СѓС…РѕРґРёС‚ РІ Р±Р°Р·Сѓ.
+                Здесь можно редактировать гостей, категории и подарки. Все изменения сразу сохраняются в базе
+                и адаптированы под мобильный экран.
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {[
-                { label: "Р“РѕСЃС‚Рё", value: guests.length },
-                { label: "РџРѕРґР°СЂРєРё", value: gifts.length },
-                { label: "Р‘СЂРѕРЅРё", value: bookings.length },
-                { label: "РџРµСЃРЅРё", value: wishes.length },
+                { label: "Гости", value: guests.length },
+                { label: "Подарки", value: gifts.length },
+                { label: "Брони", value: bookings.length },
+                { label: "Песни", value: wishes.length },
               ].map((item) => (
-                <div key={item.label} className="rounded-2xl px-4 py-4" style={{ background: "#fff8f6", border: "1px solid #f0e8e8" }}>
+                <div
+                  key={item.label}
+                  className="rounded-2xl px-4 py-4"
+                  style={{ background: "#fff8f6", border: "1px solid #f0e8e8" }}
+                >
                   <div style={{ fontSize: 12, color: "#999", fontWeight: 700, letterSpacing: "0.08em" }}>{item.label}</div>
                   <div className="mt-2" style={{ fontWeight: 900, fontSize: 28 }}>{item.value}</div>
                 </div>
@@ -493,10 +565,10 @@ function AdminPage() {
 
           <div className="mt-5 flex flex-wrap gap-2">
             {([
-              ["guests", "Р“РѕСЃС‚Рё"],
-              ["categories", "РљР°С‚РµРіРѕСЂРёРё"],
-              ["gifts", "РџРѕРґР°СЂРєРё"],
-              ["wishes", "РџРµСЃРЅРё"],
+              ["guests", "Гости"],
+              ["categories", "Категории"],
+              ["gifts", "Подарки"],
+              ["wishes", "Песни"],
             ] as [AdminTab, string][]).map(([tabId, label]) => (
               <button
                 key={tabId}
@@ -522,23 +594,23 @@ function AdminPage() {
               className="rounded-full px-4 py-3 text-sm"
               style={{ background: "#1a1a1a", color: "white", fontWeight: 800, marginLeft: "auto" }}
             >
-              Р’С‹Р№С‚Рё
+              Выйти
             </button>
           </div>
         </div>
 
-        {(message || error) && (
+        {message || error ? (
           <div
             className="mb-5 rounded-2xl px-4 py-3"
-            style={{ background: error ? "#FFF1EF" : "#EAF8EE", color: error ? coral : "#2e7d32" }}
+            style={{ background: error ? "#FFF1EF" : "#EAF8EE", color: error ? coral : "#2E7D32" }}
           >
             {error || message}
           </div>
-        )}
+        ) : null}
 
-        {activeTab === "guests" && (
+        {activeTab === "guests" ? (
           <div className="grid gap-5 lg:grid-cols-[340px_minmax(0,1fr)]">
-            <SectionCard title="РЎРїРёСЃРѕРє РіРѕСЃС‚РµР№" subtitle="Р’С‹Р±РёСЂР°Р№ РіРѕСЃС‚СЏ РёР· СЃРїРёСЃРєР° РёР»Рё РґРѕР±Р°РІР»СЏР№ РЅРѕРІРѕРіРѕ.">
+            <SectionCard title="Список гостей" subtitle="Выбирай гостя из списка или добавляй нового.">
               <div className="space-y-3">
                 <button
                   type="button"
@@ -546,10 +618,10 @@ function AdminPage() {
                   className="w-full rounded-2xl px-4 py-3 text-left"
                   style={{ background: "#fff8f6", fontWeight: 800 }}
                 >
-                  + РќРѕРІС‹Р№ РіРѕСЃС‚СЊ
+                  + Новый гость
                 </button>
 
-                {guests.map((guest) => (
+                {sortedGuests.map((guest) => (
                   <button
                     key={guest.id}
                     type="button"
@@ -561,77 +633,122 @@ function AdminPage() {
                     }}
                   >
                     <div style={{ fontWeight: 800 }}>{guest.name}</div>
-                    <div className="mt-1" style={{ color: "#666", fontSize: 14 }}>{guest.side}</div>
+                    <div className="mt-1 text-sm" style={{ color: "#666" }}>
+                      {guest.side || "Без стороны"} • {guest.willAttend ? "Придет" : "Не придет"}
+                    </div>
                   </button>
                 ))}
               </div>
             </SectionCard>
 
-            <SectionCard title={selectedGuestId ? "Р РµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ РіРѕСЃС‚СЏ" : "РќРѕРІС‹Р№ РіРѕСЃС‚СЊ"}>
+            <SectionCard title={selectedGuestId ? "Редактирование гостя" : "Новый гость"}>
               <form className="grid gap-4 md:grid-cols-2" onSubmit={handleGuestSave}>
                 <label className="block md:col-span-2">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РРјСЏ</span>
-                  <input className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={guestForm.name} onChange={(event) => setGuestForm({ ...guestForm, name: event.target.value })} />
+                  <FieldLabel>Имя</FieldLabel>
+                  <TextInput value={guestForm.name} onChange={(event) => setGuestForm({ ...guestForm, name: event.target.value })} />
                 </label>
+
                 <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РЎС‚РѕСЂРѕРЅР°</span>
-                  <input className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={guestForm.side} onChange={(event) => setGuestForm({ ...guestForm, side: event.target.value })} />
+                  <FieldLabel>Сторона</FieldLabel>
+                  <Select value={guestForm.side} onChange={(event) => setGuestForm({ ...guestForm, side: event.target.value })}>
+                    <option value="">Выберите сторону</option>
+                    {sideOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </Select>
                 </label>
+
                 <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РЎС‚Р°С‚СѓСЃ СѓС‡Р°СЃС‚РёСЏ</span>
-                  <input className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={guestForm.attendanceLabel} onChange={(event) => setGuestForm({ ...guestForm, attendanceLabel: event.target.value })} />
+                  <FieldLabel>Формулировка ответа</FieldLabel>
+                  <TextInput
+                    value={guestForm.attendanceLabel}
+                    onChange={(event) => setGuestForm({ ...guestForm, attendanceLabel: event.target.value })}
+                    placeholder="Приду с парой"
+                  />
                 </label>
+
                 <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РўРµР»РµС„РѕРЅ</span>
-                  <input className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={guestForm.phone} onChange={(event) => setGuestForm({ ...guestForm, phone: event.target.value })} />
+                  <FieldLabel>Телефон</FieldLabel>
+                  <TextInput value={guestForm.phone} onChange={(event) => setGuestForm({ ...guestForm, phone: event.target.value })} />
                 </label>
+
                 <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>Email</span>
-                  <input className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={guestForm.email} onChange={(event) => setGuestForm({ ...guestForm, email: event.target.value })} />
+                  <FieldLabel>Email</FieldLabel>
+                  <TextInput value={guestForm.email} onChange={(event) => setGuestForm({ ...guestForm, email: event.target.value })} />
                 </label>
+
                 <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РљРѕР»РёС‡РµСЃС‚РІРѕ РіРѕСЃС‚РµР№</span>
-                  <input type="number" min={1} className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={guestForm.guestsCount} onChange={(event) => setGuestForm({ ...guestForm, guestsCount: Number(event.target.value) || 1 })} />
+                  <FieldLabel>Количество гостей</FieldLabel>
+                  <TextInput
+                    type="number"
+                    min={1}
+                    value={guestForm.guestsCount}
+                    onChange={(event) => setGuestForm({ ...guestForm, guestsCount: Number(event.target.value) || 1 })}
+                  />
                 </label>
+
                 <label className="flex items-center gap-3 rounded-2xl border border-[#f0e8e8] px-4 py-3">
-                  <input type="checkbox" checked={guestForm.willAttend} onChange={(event) => setGuestForm({ ...guestForm, willAttend: event.target.checked })} />
-                  <span style={{ fontWeight: 700 }}>РџСЂРёРґРµС‚ РЅР° СЃРІР°РґСЊР±Сѓ</span>
+                  <input
+                    type="checkbox"
+                    checked={guestForm.willAttend}
+                    onChange={(event) => setGuestForm({ ...guestForm, willAttend: event.target.checked })}
+                  />
+                  <span style={{ fontWeight: 700 }}>Гость сможет прийти</span>
                 </label>
+
                 <label className="block md:col-span-2">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РРјРµРЅР° СЃРїСѓС‚РЅРёРєРѕРІ</span>
-                  <textarea rows={3} className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={guestForm.guestNames} onChange={(event) => setGuestForm({ ...guestForm, guestNames: event.target.value })} />
+                  <FieldLabel>Имена спутников</FieldLabel>
+                  <TextArea rows={3} value={guestForm.guestNames} onChange={(event) => setGuestForm({ ...guestForm, guestNames: event.target.value })} />
                 </label>
+
                 <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РќР°РїРёС‚РєРё</span>
-                  <input className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={guestForm.drink} onChange={(event) => setGuestForm({ ...guestForm, drink: event.target.value })} />
+                  <FieldLabel>Напитки</FieldLabel>
+                  <TextInput value={guestForm.drink} onChange={(event) => setGuestForm({ ...guestForm, drink: event.target.value })} />
                 </label>
+
                 <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РђР»Р»РµСЂРіРёРё</span>
-                  <input className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={guestForm.allergy} onChange={(event) => setGuestForm({ ...guestForm, allergy: event.target.value })} />
+                  <FieldLabel>Аллергии</FieldLabel>
+                  <TextInput value={guestForm.allergy} onChange={(event) => setGuestForm({ ...guestForm, allergy: event.target.value })} />
                 </label>
+
                 <label className="block md:col-span-2">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>Р¤РѕС‚Рѕ (URL РёР»Рё data URL)</span>
-                  <textarea rows={2} className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={guestForm.photo || ""} onChange={(event) => setGuestForm({ ...guestForm, photo: event.target.value || null })} />
+                  <FieldLabel>Фото гостя (URL или data URL)</FieldLabel>
+                  <TextArea
+                    rows={2}
+                    value={guestForm.photo || ""}
+                    onChange={(event) => setGuestForm({ ...guestForm, photo: event.target.value || null })}
+                  />
                 </label>
 
                 <div className="md:col-span-2 flex flex-wrap gap-3">
-                  <button className="rounded-full px-6 py-3 text-white" style={{ background: coral, fontWeight: 800 }} disabled={isPending}>
-                    {selectedGuestId ? "РЎРѕС…СЂР°РЅРёС‚СЊ РіРѕСЃС‚СЏ" : "Р”РѕР±Р°РІРёС‚СЊ РіРѕСЃС‚СЏ"}
+                  <button
+                    className="rounded-full px-6 py-3 text-white"
+                    style={{ background: coral, fontWeight: 800 }}
+                    disabled={isPending}
+                  >
+                    {selectedGuestId ? "Сохранить гостя" : "Добавить гостя"}
                   </button>
-                  {selectedGuestId && (
-                    <button type="button" onClick={handleGuestDelete} className="rounded-full px-6 py-3" style={{ background: "#1a1a1a", color: "white", fontWeight: 800 }}>
-                      РЈРґР°Р»РёС‚СЊ
+                  {selectedGuestId ? (
+                    <button
+                      type="button"
+                      onClick={handleGuestDelete}
+                      className="rounded-full px-6 py-3"
+                      style={{ background: "#1a1a1a", color: "white", fontWeight: 800 }}
+                    >
+                      Удалить
                     </button>
-                  )}
+                  ) : null}
                 </div>
               </form>
             </SectionCard>
           </div>
-        )}
+        ) : null}
 
-        {activeTab === "categories" && (
+        {activeTab === "categories" ? (
           <div className="grid gap-5 lg:grid-cols-[340px_minmax(0,1fr)]">
-            <SectionCard title="РљР°С‚РµРіРѕСЂРёРё">
+            <SectionCard title="Категории" subtitle="Разделы подарков на публичной странице.">
               <div className="space-y-3">
                 <button
                   type="button"
@@ -639,69 +756,89 @@ function AdminPage() {
                   className="w-full rounded-2xl px-4 py-3 text-left"
                   style={{ background: "#fff8f6", fontWeight: 800 }}
                 >
-                  + РќРѕРІР°СЏ РєР°С‚РµРіРѕСЂРёСЏ
+                  + Новая категория
                 </button>
 
-                {categories
-                  .slice()
-                  .sort((a, b) => a.sortOrder - b.sortOrder)
-                  .map((category) => (
-                    <button
-                      key={category.id}
-                      type="button"
-                      onClick={() => setSelectedCategoryId(category.id)}
-                      className="w-full rounded-2xl px-4 py-3 text-left"
-                      style={{
-                        background: selectedCategoryId === category.id ? "#FFF1EF" : "white",
-                        border: `1px solid ${selectedCategoryId === category.id ? coral : "#f0e8e8"}`,
-                      }}
-                    >
-                      <div style={{ fontWeight: 800 }}>{category.name}</div>
-                      <div className="mt-1" style={{ color: "#999", fontSize: 13 }}>{category.id}</div>
-                    </button>
-                  ))}
+                {sortedCategories.map((category) => (
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => setSelectedCategoryId(category.id)}
+                    className="w-full rounded-2xl px-4 py-3 text-left"
+                    style={{
+                      background: selectedCategoryId === category.id ? "#FFF1EF" : "white",
+                      border: `1px solid ${selectedCategoryId === category.id ? coral : "#f0e8e8"}`,
+                    }}
+                  >
+                    <div style={{ fontWeight: 800 }}>{category.name}</div>
+                    <div className="mt-1 text-sm" style={{ color: "#999" }}>{category.id}</div>
+                  </button>
+                ))}
               </div>
             </SectionCard>
 
-            <SectionCard title={selectedCategoryId ? "Р РµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ РєР°С‚РµРіРѕСЂРёРё" : "РќРѕРІР°СЏ РєР°С‚РµРіРѕСЂРёСЏ"}>
+            <SectionCard title={selectedCategoryId ? "Редактирование категории" : "Новая категория"}>
               <form className="grid gap-4" onSubmit={handleCategorySave}>
-                {!selectedCategoryId && (
+                {!selectedCategoryId ? (
                   <label className="block">
-                    <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>ID РєР°С‚РµРіРѕСЂРёРё (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)</span>
-                    <input className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={categoryForm.id} onChange={(event) => setCategoryForm({ ...categoryForm, id: event.target.value })} placeholder="slug-budushego-razdela" />
+                    <FieldLabel>ID категории</FieldLabel>
+                    <TextInput
+                      value={categoryForm.id}
+                      onChange={(event) => setCategoryForm({ ...categoryForm, id: event.target.value })}
+                      placeholder="naprimer-home"
+                    />
                   </label>
-                )}
+                ) : null}
+
                 <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РќР°Р·РІР°РЅРёРµ</span>
-                  <input className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={categoryForm.name} onChange={(event) => setCategoryForm({ ...categoryForm, name: event.target.value })} />
+                  <FieldLabel>Название</FieldLabel>
+                  <TextInput value={categoryForm.name} onChange={(event) => setCategoryForm({ ...categoryForm, name: event.target.value })} />
                 </label>
+
                 <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РћРїРёСЃР°РЅРёРµ</span>
-                  <textarea rows={4} className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={categoryForm.description} onChange={(event) => setCategoryForm({ ...categoryForm, description: event.target.value })} />
+                  <FieldLabel>Описание</FieldLabel>
+                  <TextArea
+                    rows={4}
+                    value={categoryForm.description}
+                    onChange={(event) => setCategoryForm({ ...categoryForm, description: event.target.value })}
+                  />
                 </label>
+
                 <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РџРѕСЂСЏРґРѕРє</span>
-                  <input type="number" className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={categoryForm.sortOrder} onChange={(event) => setCategoryForm({ ...categoryForm, sortOrder: Number(event.target.value) || 0 })} />
+                  <FieldLabel>Порядок</FieldLabel>
+                  <TextInput
+                    type="number"
+                    value={categoryForm.sortOrder}
+                    onChange={(event) => setCategoryForm({ ...categoryForm, sortOrder: Number(event.target.value) || 0 })}
+                  />
                 </label>
 
                 <div className="flex flex-wrap gap-3">
                   <button className="rounded-full px-6 py-3 text-white" style={{ background: coral, fontWeight: 800 }}>
-                    {selectedCategoryId ? "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°С‚РµРіРѕСЂРёСЋ" : "Р”РѕР±Р°РІРёС‚СЊ РєР°С‚РµРіРѕСЂРёСЋ"}
+                    {selectedCategoryId ? "Сохранить категорию" : "Добавить категорию"}
                   </button>
-                  {selectedCategoryId && (
-                    <button type="button" onClick={handleCategoryDelete} className="rounded-full px-6 py-3" style={{ background: "#1a1a1a", color: "white", fontWeight: 800 }}>
-                      РЈРґР°Р»РёС‚СЊ
+                  {selectedCategoryId ? (
+                    <button
+                      type="button"
+                      onClick={handleCategoryDelete}
+                      className="rounded-full px-6 py-3"
+                      style={{ background: "#1a1a1a", color: "white", fontWeight: 800 }}
+                    >
+                      Удалить
                     </button>
-                  )}
+                  ) : null}
                 </div>
               </form>
             </SectionCard>
           </div>
-        )}
+        ) : null}
 
-        {activeTab === "gifts" && (
+        {activeTab === "gifts" ? (
           <div className="grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
-            <SectionCard title="РџРѕРґР°СЂРєРё" subtitle="РњРѕР¶РЅРѕ РјРµРЅСЏС‚СЊ С‚РµРєСЃС‚С‹, СѓСЃР»РѕРІРёСЏ, РёРєРѕРЅРєРё, РєР°С‚РµРіРѕСЂРёРё Рё СЂРµР¶РёРј Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ.">
+            <SectionCard
+              title="Подарки"
+              subtitle="Можно менять тексты, условия, иконки, категории, суммы и режим бронирования."
+            >
               <div className="space-y-3">
                 <button
                   type="button"
@@ -709,165 +846,202 @@ function AdminPage() {
                   className="w-full rounded-2xl px-4 py-3 text-left"
                   style={{ background: "#fff8f6", fontWeight: 800 }}
                 >
-                  + РќРѕРІС‹Р№ РїРѕРґР°СЂРѕРє
+                  + Новый подарок
                 </button>
 
-                {gifts
-                  .slice()
-                  .sort((a, b) => a.sortOrder - b.sortOrder)
-                  .map((gift) => {
-                    const Icon = getGiftIconByKey(gift.iconKey);
-                    return (
-                      <button
-                        key={gift.id}
-                        type="button"
-                        onClick={() => setSelectedGiftId(gift.id)}
-                        className="w-full rounded-2xl px-4 py-3 text-left"
-                        style={{
-                          background: selectedGiftId === gift.id ? "#FFF1EF" : "white",
-                          border: `1px solid ${selectedGiftId === gift.id ? coral : "#f0e8e8"}`,
-                          opacity: gift.isActive ? 1 : 0.65,
-                        }}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="rounded-2xl p-3" style={{ background: pinkLight }}>
-                            <Icon size={18} style={{ color: coral }} />
-                          </div>
-                          <div className="min-w-0">
-                            <div style={{ fontWeight: 800 }}>{gift.name}</div>
-                            <div className="mt-1 text-sm" style={{ color: "#666" }}>{gift.categoryName || gift.categoryId}</div>
-                            <div className="mt-1 text-xs" style={{ color: "#999" }}>
-                              {gift.bookingMode} В· Р±СЂРѕРЅРµР№: {bookingCountByGift[gift.id] || 0}
-                            </div>
+                {sortedGifts.map((gift) => {
+                  const Icon = getGiftIconByKey(gift.iconKey);
+
+                  return (
+                    <button
+                      key={gift.id}
+                      type="button"
+                      onClick={() => setSelectedGiftId(gift.id)}
+                      className="w-full rounded-2xl px-4 py-3 text-left"
+                      style={{
+                        background: selectedGiftId === gift.id ? "#FFF1EF" : "white",
+                        border: `1px solid ${selectedGiftId === gift.id ? coral : "#f0e8e8"}`,
+                        opacity: gift.isActive ? 1 : 0.65,
+                      }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="rounded-2xl p-3" style={{ background: pinkLight }}>
+                          <Icon size={18} style={{ color: coral }} />
+                        </div>
+                        <div className="min-w-0">
+                          <div style={{ fontWeight: 800 }}>{gift.name}</div>
+                          <div className="mt-1 text-sm" style={{ color: "#666" }}>{gift.categoryName || gift.categoryId}</div>
+                          <div className="mt-1 text-xs" style={{ color: "#999" }}>
+                            {bookingModeLabels[gift.bookingMode]} • броней: {bookingCountByGift[gift.id] || 0}
                           </div>
                         </div>
-                      </button>
-                    );
-                  })}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </SectionCard>
 
-            <SectionCard title={selectedGiftId ? "Р РµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ РїРѕРґР°СЂРєР°" : "РќРѕРІС‹Р№ РїРѕРґР°СЂРѕРє"}>
+            <SectionCard title={selectedGiftId ? "Редактирование подарка" : "Новый подарок"}>
               <form className="grid gap-4 md:grid-cols-2" onSubmit={handleGiftSave}>
                 <label className="block md:col-span-2">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РќР°Р·РІР°РЅРёРµ</span>
-                  <input className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={giftForm.name} onChange={(event) => setGiftForm({ ...giftForm, name: event.target.value })} />
+                  <FieldLabel>Название</FieldLabel>
+                  <TextInput value={giftForm.name} onChange={(event) => setGiftForm({ ...giftForm, name: event.target.value })} />
                 </label>
+
                 <label className="block md:col-span-2">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РћРїРёСЃР°РЅРёРµ / СѓСЃР»РѕРІРёРµ</span>
-                  <textarea rows={3} className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={giftForm.hint} onChange={(event) => setGiftForm({ ...giftForm, hint: event.target.value })} />
+                  <FieldLabel>Описание / условие</FieldLabel>
+                  <TextArea rows={3} value={giftForm.hint} onChange={(event) => setGiftForm({ ...giftForm, hint: event.target.value })} />
                 </label>
+
                 <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РљР°С‚РµРіРѕСЂРёСЏ</span>
-                  <select className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={giftForm.categoryId} onChange={(event) => setGiftForm({ ...giftForm, categoryId: event.target.value })}>
-                    <option value="">Р’С‹Р±РµСЂРёС‚Рµ РєР°С‚РµРіРѕСЂРёСЋ</option>
-                    {categories
-                      .slice()
-                      .sort((a, b) => a.sortOrder - b.sortOrder)
-                      .map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                  </select>
+                  <FieldLabel>Категория</FieldLabel>
+                  <Select value={giftForm.categoryId} onChange={(event) => setGiftForm({ ...giftForm, categoryId: event.target.value })}>
+                    <option value="">Выберите категорию</option>
+                    {sortedCategories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </Select>
                 </label>
+
                 <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РРєРѕРЅРєР°</span>
-                  <select className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={giftForm.iconKey} onChange={(event) => setGiftForm({ ...giftForm, iconKey: event.target.value })}>
+                  <FieldLabel>Иконка</FieldLabel>
+                  <Select value={giftForm.iconKey} onChange={(event) => setGiftForm({ ...giftForm, iconKey: event.target.value })}>
                     {giftIconOptions.map((option) => (
                       <option key={option} value={option}>
                         {option}
                       </option>
                     ))}
-                  </select>
-                </label>
-                <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>Р¦РµРЅР° / СЃСѓРјРјР°</span>
-                  <input className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={giftForm.priceLabel} onChange={(event) => setGiftForm({ ...giftForm, priceLabel: event.target.value })} placeholder="Р›СЋР±Р°СЏ СЃСѓРјРјР° РёР»Рё ~10 000 в‚Ѕ" />
-                </label>
-                <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>Р РµРєРѕРјРµРЅРґСѓРµРјР°СЏ СЃСѓРјРјР°</span>
-                  <input type="number" className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={giftForm.suggestedAmount ?? ""} onChange={(event) => setGiftForm({ ...giftForm, suggestedAmount: event.target.value ? Number(event.target.value) : null })} />
-                </label>
-                <label className="block md:col-span-2">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ СѓСЃР»РѕРІРёСЏ</span>
-                  <textarea rows={3} className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={giftForm.conditionsText} onChange={(event) => setGiftForm({ ...giftForm, conditionsText: event.target.value })} placeholder="РќР°РїСЂРёРјРµСЂ: СѓРєР°Р¶РёС‚Рµ СЃСѓРјРјСѓ, РїРѕР¶РµР»Р°РЅРёРµ, С„РѕСЂРјР°С‚ СЃРµСЂС‚РёС„РёРєР°С‚Р°" />
-                </label>
-                <label className="block md:col-span-2">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РЎСЃС‹Р»РєР°</span>
-                  <input className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={giftForm.link} onChange={(event) => setGiftForm({ ...giftForm, link: event.target.value })} />
-                </label>
-                <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>Р РµР¶РёРј Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ</span>
-                  <select className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={giftForm.bookingMode} onChange={(event) => setGiftForm({ ...giftForm, bookingMode: event.target.value as GiftBookingMode })}>
-                    <option value="single">РћРґРёРЅ Р±СЂРѕРЅСЊ</option>
-                    <option value="multiple">РќРµСЃРєРѕР»СЊРєРѕ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёР№</option>
-                    <option value="travel">Р’С‹Р±РѕСЂ РЅР°РїСЂР°РІР»РµРЅРёСЏ</option>
-                  </select>
-                </label>
-                <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>Special code</span>
-                  <input className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={giftForm.specialCode} onChange={(event) => setGiftForm({ ...giftForm, specialCode: event.target.value })} placeholder="count-multiple РёР»Рё СЃРІРѕР№ РєРѕРґ" />
+                  </Select>
                 </label>
 
-                {giftForm.bookingMode === "travel" && (
+                <label className="block">
+                  <FieldLabel>Цена / подпись суммы</FieldLabel>
+                  <TextInput
+                    value={giftForm.priceLabel}
+                    onChange={(event) => setGiftForm({ ...giftForm, priceLabel: event.target.value })}
+                    placeholder="Любая сумма или ~10 000 ₽"
+                  />
+                </label>
+
+                <label className="block">
+                  <FieldLabel>Рекомендуемая сумма</FieldLabel>
+                  <TextInput
+                    type="number"
+                    value={giftForm.suggestedAmount ?? ""}
+                    onChange={(event) => setGiftForm({ ...giftForm, suggestedAmount: event.target.value ? Number(event.target.value) : null })}
+                  />
+                </label>
+
+                <label className="block md:col-span-2">
+                  <FieldLabel>Дополнительные условия</FieldLabel>
+                  <TextArea
+                    rows={3}
+                    value={giftForm.conditionsText}
+                    onChange={(event) => setGiftForm({ ...giftForm, conditionsText: event.target.value })}
+                    placeholder="Например: укажите сумму, комментарий или формат сертификата"
+                  />
+                </label>
+
+                <label className="block md:col-span-2">
+                  <FieldLabel>Ссылка</FieldLabel>
+                  <TextInput value={giftForm.link} onChange={(event) => setGiftForm({ ...giftForm, link: event.target.value })} />
+                </label>
+
+                <label className="block">
+                  <FieldLabel>Режим бронирования</FieldLabel>
+                  <Select
+                    value={giftForm.bookingMode}
+                    onChange={(event) => setGiftForm({ ...giftForm, bookingMode: event.target.value as GiftBookingMode })}
+                  >
+                    <option value="single">Один бронь</option>
+                    <option value="multiple">Можно выбрать несколько раз</option>
+                    <option value="travel">Выбор направления</option>
+                  </Select>
+                </label>
+
+                <label className="block">
+                  <FieldLabel>Special code</FieldLabel>
+                  <TextInput
+                    value={giftForm.specialCode}
+                    onChange={(event) => setGiftForm({ ...giftForm, specialCode: event.target.value })}
+                    placeholder="count-multiple или свой код"
+                  />
+                </label>
+
+                {giftForm.bookingMode === "travel" ? (
                   <label className="block md:col-span-2">
-                    <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>Р’Р°СЂРёР°РЅС‚С‹ РЅР°РїСЂР°РІР»РµРЅРёР№</span>
-                    <textarea
+                    <FieldLabel>Варианты направлений</FieldLabel>
+                    <TextArea
                       rows={6}
-                      className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3"
                       value={giftForm.travelOptionsText}
                       onChange={(event) => setGiftForm({ ...giftForm, travelOptionsText: event.target.value })}
-                      placeholder={"РљР°Р¶РґРѕРµ РЅР°РїСЂР°РІР»РµРЅРёРµ СЃ РЅРѕРІРѕР№ СЃС‚СЂРѕРєРё"}
+                      placeholder="Каждое направление с новой строки"
                     />
                   </label>
-                )}
+                ) : null}
 
                 <label className="flex items-center gap-3 rounded-2xl border border-[#f0e8e8] px-4 py-3">
                   <input type="checkbox" checked={giftForm.featured} onChange={(event) => setGiftForm({ ...giftForm, featured: event.target.checked })} />
-                  <span style={{ fontWeight: 700 }}>РћСЃРѕР±РµРЅРЅС‹Р№ РїРѕРґР°СЂРѕРє</span>
+                  <span style={{ fontWeight: 700 }}>Особенный подарок</span>
                 </label>
+
                 <label className="flex items-center gap-3 rounded-2xl border border-[#f0e8e8] px-4 py-3">
                   <input type="checkbox" checked={giftForm.isActive} onChange={(event) => setGiftForm({ ...giftForm, isActive: event.target.checked })} />
-                  <span style={{ fontWeight: 700 }}>РџРѕРєР°Р·С‹РІР°С‚СЊ РЅР° СЃР°Р№С‚Рµ</span>
+                  <span style={{ fontWeight: 700 }}>Показывать на сайте</span>
                 </label>
+
                 <label className="block">
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#666" }}>РџРѕСЂСЏРґРѕРє</span>
-                  <input type="number" className="mt-2 w-full rounded-2xl border border-[#f0e8e8] bg-white px-4 py-3" value={giftForm.sortOrder} onChange={(event) => setGiftForm({ ...giftForm, sortOrder: Number(event.target.value) || 0 })} />
+                  <FieldLabel>Порядок</FieldLabel>
+                  <TextInput
+                    type="number"
+                    value={giftForm.sortOrder}
+                    onChange={(event) => setGiftForm({ ...giftForm, sortOrder: Number(event.target.value) || 0 })}
+                  />
                 </label>
 
                 <div className="md:col-span-2 flex flex-wrap gap-3">
                   <button className="rounded-full px-6 py-3 text-white" style={{ background: coral, fontWeight: 800 }}>
-                    {selectedGiftId ? "РЎРѕС…СЂР°РЅРёС‚СЊ РїРѕРґР°СЂРѕРє" : "Р”РѕР±Р°РІРёС‚СЊ РїРѕРґР°СЂРѕРє"}
+                    {selectedGiftId ? "Сохранить подарок" : "Добавить подарок"}
                   </button>
-                  {selectedGiftId && (
-                    <button type="button" onClick={handleGiftDelete} className="rounded-full px-6 py-3" style={{ background: "#1a1a1a", color: "white", fontWeight: 800 }}>
-                      РЈРґР°Р»РёС‚СЊ
+                  {selectedGiftId ? (
+                    <button
+                      type="button"
+                      onClick={handleGiftDelete}
+                      className="rounded-full px-6 py-3"
+                      style={{ background: "#1a1a1a", color: "white", fontWeight: 800 }}
+                    >
+                      Удалить
                     </button>
-                  )}
+                  ) : null}
                 </div>
               </form>
             </SectionCard>
           </div>
-        )}
+        ) : null}
 
-        {activeTab === "wishes" && (
-          <SectionCard title="РњСѓР·С‹РєР°Р»СЊРЅС‹Рµ РїРѕР¶РµР»Р°РЅРёСЏ" subtitle="РЎРїРёСЃРѕРє РїРµСЃРµРЅ, РєРѕС‚РѕСЂС‹Рµ СѓР¶Рµ РїСЂРёСЃР»Р°Р»Рё РіРѕСЃС‚Рё.">
+        {activeTab === "wishes" ? (
+          <SectionCard
+            title="Музыкальные пожелания"
+            subtitle="Список песен, которые уже прислали гости."
+          >
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {wishes.map((wish) => (
                 <div key={wish.id} className="rounded-2xl border border-[#f0e8e8] bg-white px-4 py-4">
                   <div style={{ fontWeight: 800 }}>{wish.song}</div>
                   <div className="mt-2 text-sm" style={{ color: "#666" }}>
-                    {wish.guestName || "Р“РѕСЃС‚СЊ"}
+                    {wish.guestName || "Гость"}
                   </div>
                   <div className="mt-2 text-xs" style={{ color: "#999" }}>
-                    {new Date(wish.createdAt).toLocaleString()}
+                    {new Date(wish.createdAt).toLocaleString("ru-RU")}
                   </div>
                 </div>
               ))}
             </div>
           </SectionCard>
-        )}
+        ) : null}
       </div>
     </div>
   );
