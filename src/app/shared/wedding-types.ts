@@ -99,6 +99,7 @@ export interface SiteSectionSettings {
   note?: string;
   primaryImage?: string | null;
   secondaryImage?: string | null;
+  backgroundImage?: string | null;
   buttonLabel?: string;
   buttonHref?: string;
   galleryImages?: string[];

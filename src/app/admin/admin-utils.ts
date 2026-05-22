@@ -16,6 +16,7 @@ export function sectionImageSlots(type: SiteSectionType) {
   return {
     primary: ["hero", "location", "dress-code", "closing", "person", "gallery", "text"].includes(type),
     secondary: ["hero", "dress-code"].includes(type),
+    background: type === "hero",
     gallery: type === "gallery",
     items: ["schedule", "story", "faq", "dress-code"].includes(type),
   };

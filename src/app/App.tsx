@@ -357,7 +357,10 @@ export default function App() {
 
   const siteImages = useMemo(
     () => ({
-      bg: photo10,
+      bg:
+        resolveSiteImage(heroSettings.backgroundImage) ||
+        resolveSiteImage(heroSettings.primaryImage) ||
+        photo10,
       heroPrimary: resolveSiteImage(heroSettings.primaryImage) || photo10,
       heroSecondary: resolveSiteImage(heroSettings.secondaryImage) || photo04,
       venue: resolveSiteImage(locationSettings.primaryImage) || photo18,
@@ -366,6 +369,7 @@ export default function App() {
       dressSecondary: resolveSiteImage(dressSettings.secondaryImage) || photo18,
     }),
     [
+      heroSettings.backgroundImage,
       heroSettings.primaryImage,
       heroSettings.secondaryImage,
       locationSettings.primaryImage,
@@ -740,8 +744,8 @@ export default function App() {
               boxShadow: "0 40px 100px rgba(100, 37, 21, 0.12)",
             }}
           >
-            <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
-              <div className="relative min-h-[460px] overflow-hidden px-6 py-8 sm:px-8 sm:py-10 lg:min-h-[520px] lg:px-12 lg:py-14">
+            <div className="grid gap-0 max-lg:flex max-lg:min-h-[min(72vh,640px)] max-lg:flex-col lg:grid-cols-[1.15fr_0.85fr]">
+              <div className="relative min-h-[460px] overflow-hidden px-6 py-8 sm:px-8 sm:py-10 lg:min-h-[520px] lg:px-12 lg:py-14 max-lg:min-h-[360px] max-lg:shrink-0">
                 <ImageWithFallback
                   src={siteImages.heroPrimary}
                   alt=""
@@ -801,31 +805,33 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="grid gap-0 lg:grid-rows-[1.15fr_0.85fr]">
-                <div className="overflow-hidden bg-[#F6E8E4] min-h-[240px] lg:min-h-[300px]">
-                  <ImageWithFallback
-                    src={siteImages.heroSecondary}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
+              <div className="flex min-h-0 flex-1 flex-col gap-2 lg:grid lg:grid-rows-[1.15fr_0.85fr] lg:gap-0">
+                <div className="px-3 pt-2 sm:px-4 sm:pt-3 lg:p-0">
+                  <div className="overflow-hidden rounded-[20px] bg-[#F6E8E4] sm:rounded-[24px] lg:min-h-[300px] lg:rounded-none">
+                    <ImageWithFallback
+                      src={siteImages.heroSecondary}
+                      alt=""
+                      className="min-h-[220px] w-full object-cover sm:min-h-[240px] lg:min-h-[300px] lg:h-full"
+                    />
+                  </div>
                 </div>
-                <div className="px-3 pb-3 pt-2 sm:px-4 sm:pb-4 lg:p-0">
+                <div className="flex min-h-0 flex-1 flex-col px-3 pb-3 sm:px-4 sm:pb-4 lg:p-0">
                   <div
-                    className="rounded-[20px] px-5 py-5 sm:rounded-[24px] sm:px-6 sm:py-6 lg:rounded-none lg:px-8 lg:py-8"
+                    className="flex h-full min-h-[140px] flex-1 flex-col rounded-[20px] px-5 py-5 sm:rounded-[24px] sm:px-6 sm:py-6 lg:min-h-0 lg:flex-none lg:rounded-none lg:px-8 lg:py-8"
                     style={{
                       background: "linear-gradient(135deg, #FFF5F2 0%, #FFFFFF 100%)",
                       boxShadow: "0 8px 24px rgba(100, 37, 21, 0.06)",
                     }}
                   >
-                  <div style={{ color: CORAL, fontWeight: 800, letterSpacing: "0.16em", fontSize: 12 }}>
-                    {heroSettings.badge || "Wedding weekend"}
-                  </div>
-                  <div
-                    className="mt-4"
-                    style={{ fontWeight: 900, fontSize: "clamp(24px, 3vw, 40px)", lineHeight: 1.05 }}
-                  >
-                    {heroSettings.note || "Свадебное приглашение"}
-                  </div>
+                    <div style={{ color: CORAL, fontWeight: 800, letterSpacing: "0.16em", fontSize: 12 }}>
+                      {heroSettings.badge || "Wedding weekend"}
+                    </div>
+                    <div
+                      className="mt-4"
+                      style={{ fontWeight: 900, fontSize: "clamp(24px, 3vw, 40px)", lineHeight: 1.05 }}
+                    >
+                      {heroSettings.note || "Свадебное приглашение"}
+                    </div>
                   </div>
                 </div>
               </div>

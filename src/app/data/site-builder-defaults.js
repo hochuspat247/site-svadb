@@ -18,6 +18,7 @@ export const defaultSiteSections = [
       note: "Свадебное приглашение",
       primaryImage: "photo-10",
       secondaryImage: "photo-04",
+      backgroundImage: "photo-10",
       buttonLabel: "Посмотреть программу",
       buttonHref: "#schedule",
     },

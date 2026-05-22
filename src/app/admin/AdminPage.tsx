@@ -39,7 +39,7 @@ import type {
   WeddingGift,
 } from "../shared/wedding-types";
 
-type AdminTab = "sections" | "media" | "guests" | "categories" | "gifts" | "wishes";
+type AdminTab = "sections" | "background" | "media" | "guests" | "categories" | "gifts" | "wishes";
 
 type GuestForm = Omit<Guest, "id" | "createdAt">;
 type CategoryForm = {
@@ -64,6 +64,7 @@ type SectionForm = {
   note: string;
   primaryImage: string;
   secondaryImage: string;
+  backgroundImage: string;
   buttonLabel: string;
   buttonHref: string;
   galleryImagesText: string;
@@ -83,7 +84,11 @@ const bookingModeLabels: Record<GiftBookingMode, string> = {
 };
 
 const sectionTypeOptions: { value: SiteSectionType; label: string; hint: string }[] = [
-  { value: "hero", label: "Обложка", hint: "Главный экран с крупными фото и основным сообщением." },
+  {
+    value: "hero",
+    label: "Обложка",
+    hint: "Главный экран, фото обложки и фон страницы (серое фото за всей карточкой сайта).",
+  },
   { value: "text", label: "Текстовый блок", hint: "Свободный информационный блок с текстом." },
   { value: "location", label: "Локация", hint: "Место проведения, адрес, кнопка на карту и фото." },
   { value: "schedule", label: "Расписание", hint: "Тайминг дня с карточками времени." },
@@ -168,6 +173,7 @@ function sectionTemplate(type: SiteSectionType): SectionForm {
     note: "",
     primaryImage: "",
     secondaryImage: "",
+    backgroundImage: "",
     buttonLabel: "",
     buttonHref: "",
     galleryImagesText: "",
@@ -276,6 +282,7 @@ function toSectionForm(section: SiteSection): SectionForm {
     note: section.settings.note || "",
     primaryImage: section.settings.primaryImage || "",
     secondaryImage: section.settings.secondaryImage || "",
+    backgroundImage: section.settings.backgroundImage || "",
     buttonLabel: section.settings.buttonLabel || "",
     buttonHref: section.settings.buttonHref || "",
     galleryImagesText: (section.settings.galleryImages || []).join("\n"),
@@ -297,6 +304,7 @@ function sectionPayload(form: SectionForm) {
       note: form.note,
       primaryImage: form.primaryImage || null,
       secondaryImage: form.secondaryImage || null,
+      backgroundImage: form.backgroundImage || null,
       buttonLabel: form.buttonLabel,
       buttonHref: form.buttonHref,
       galleryImages: parseGalleryImages(form.galleryImagesText),
@@ -400,6 +408,7 @@ export default function AdminPage() {
 
   const [uploadedImages, setUploadedImages] = useState<{ url: string; filename: string }[]>([]);
   const [uploadBusy, setUploadBusy] = useState(false);
+  const [pageBackgroundImage, setPageBackgroundImage] = useState("");
 
   const sortedGuests = useMemo(
     () => guests.slice().sort((a, b) => a.name.localeCompare(b.name, "ru")),
@@ -424,6 +433,11 @@ export default function AdminPage() {
       sections
         .slice()
         .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, "ru")),
+    [sections],
+  );
+
+  const heroSection = useMemo(
+    () => sections.find((section) => section.id === "hero" || section.type === "hero"),
     [sections],
   );
 
@@ -490,6 +504,10 @@ export default function AdminPage() {
     const section = sections.find((item) => item.id === selectedSectionId);
     if (section) setSectionForm(toSectionForm(section));
   }, [selectedSectionId, sections]);
+
+  useEffect(() => {
+    setPageBackgroundImage(heroSection?.settings.backgroundImage || heroSection?.settings.primaryImage || "");
+  }, [heroSection]);
 
   const resetFeedback = () => {
     setMessage("");
@@ -613,6 +631,33 @@ export default function AdminPage() {
       setMessage(selectedGiftId ? "Подарок обновлён" : "Подарок добавлен");
     } catch (issue) {
       setError(issue instanceof Error ? issue.message : "Не удалось сохранить подарок");
+    }
+  };
+
+  const handlePageBackgroundSave = async () => {
+    if (!heroSection) {
+      setError("Блок «Обложка» не найден. Создайте секцию hero в списке блоков.");
+      return;
+    }
+
+    resetFeedback();
+
+    try {
+      const form = toSectionForm(heroSection);
+      const updated = await updateSection(heroSection.id, {
+        ...sectionPayload({
+          ...form,
+          backgroundImage: pageBackgroundImage,
+        }),
+      });
+
+      setSections((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+      if (selectedSectionId === updated.id) {
+        setSectionForm(toSectionForm(updated));
+      }
+      setMessage("Фон страницы сохранён. Обновите сайт у гостей (Ctrl+F5).");
+    } catch (issue) {
+      setError(issue instanceof Error ? issue.message : "Не удалось сохранить фон страницы");
     }
   };
 
@@ -807,6 +852,7 @@ export default function AdminPage() {
           <div className="mt-5 flex flex-wrap gap-2">
             {([
               ["sections", "Блоки сайта"],
+              ["background", "Фон страницы"],
               ["media", "Медиатека"],
               ["guests", "Гости"],
               ["categories", "Категории"],
@@ -849,6 +895,46 @@ export default function AdminPage() {
             </div>
           ) : null}
         </div>
+
+        {activeTab === "background" ? (
+          <SectionCard
+            title="Фон всей страницы"
+            subtitle="Серое фото за белой карточкой сайта — видно по краям при прокрутке. Можно загрузить своё или выбрать из медиатеки."
+          >
+            {heroSection ? (
+              <div className="mx-auto max-w-xl space-y-6">
+                <SectionImagePicker
+                  label="Фоновое фото"
+                  hint="Рекомендуется горизонтальное фото, хорошо смотрится в ч/б"
+                  value={pageBackgroundImage}
+                  onChange={setPageBackgroundImage}
+                  uploads={uploadedImages}
+                  uploadBusy={uploadBusy}
+                  onUpload={async (file) => {
+                    const url = await uploadImageFile(file);
+                    setPageBackgroundImage(url);
+                    return url;
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => void handlePageBackgroundSave()}
+                  className="w-full rounded-full px-6 py-4 text-white"
+                  style={{ background: coral, fontWeight: 800 }}
+                >
+                  Сохранить фон страницы
+                </button>
+                <p className="text-center text-sm" style={{ color: "#888" }}>
+                  То же поле есть в блоке «Обложка» → раздел «Изображения».
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-[#f0e8e8] bg-[#fff9f8] px-5 py-8 text-center" style={{ color: "#666" }}>
+                Секция «Обложка» (hero) не найдена. Откройте вкладку «Блоки сайта» и добавьте блок типа «Обложка».
+              </div>
+            )}
+          </SectionCard>
+        ) : null}
 
         {activeTab === "sections" ? (
           <div className="grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
@@ -1067,12 +1153,27 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                {imageSlots.primary || imageSlots.secondary || imageSlots.gallery ? (
+                {imageSlots.primary || imageSlots.secondary || imageSlots.background || imageSlots.gallery ? (
                   <div>
                     <h3 className="mb-4" style={{ fontWeight: 900, fontSize: 18 }}>
                       Изображения
                     </h3>
                     <div className="grid gap-4 md:grid-cols-2">
+                      {imageSlots.background ? (
+                        <div className="md:col-span-2">
+                          <SectionImagePicker
+                            label="Фон всей страницы"
+                            hint="Серое фото позади белой карточки сайта (видно по краям при прокрутке)"
+                            value={sectionForm.backgroundImage}
+                            onChange={(backgroundImage) =>
+                              setSectionForm((current) => ({ ...current, backgroundImage }))
+                            }
+                            uploads={uploadedImages}
+                            uploadBusy={uploadBusy}
+                            onUpload={uploadImageFile}
+                          />
+                        </div>
+                      ) : null}
                       {imageSlots.primary ? (
                         <SectionImagePicker
                           label="Основное фото"
