@@ -748,9 +748,9 @@ export default function App() {
               boxShadow: "0 40px 100px rgba(100, 37, 21, 0.12)",
             }}
           >
-            <div className="grid gap-0 max-lg:flex max-lg:min-h-[min(72vh,640px)] max-lg:flex-col lg:grid-cols-[1.15fr_0.85fr]">
+            <div className="grid max-lg:flex max-lg:min-h-[min(72vh,640px)] max-lg:flex-col lg:grid-cols-[1.15fr_0.85fr] lg:gap-5 lg:p-5">
               <div className="max-lg:px-3 max-lg:pt-3 sm:max-lg:px-4 sm:max-lg:pt-4 lg:p-0">
-                <div className="relative min-h-[460px] overflow-hidden rounded-[20px] sm:rounded-[24px] lg:min-h-[520px] lg:rounded-none max-lg:min-h-[360px]">
+                <div className="relative min-h-[460px] max-lg:min-h-[360px] overflow-hidden rounded-[20px] sm:rounded-[24px] lg:min-h-[min(560px,58vh)] lg:rounded-2xl xl:rounded-3xl">
                   <ImageWithFallback
                     src={siteImages.heroPrimary}
                     alt=""
@@ -811,19 +811,19 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="flex min-h-0 flex-1 flex-col gap-2 max-lg:px-3 max-lg:pb-3 sm:max-lg:px-4 sm:max-lg:pb-4 lg:grid lg:grid-rows-[1.15fr_0.85fr] lg:gap-0 lg:p-0">
-                <div className="max-lg:pt-1 sm:max-lg:pt-2 lg:pt-0">
-                  <div className="flex items-center justify-center overflow-hidden rounded-[20px] bg-[#F6E8E4] sm:rounded-[24px] lg:min-h-[300px] lg:rounded-none">
+              <div className="flex min-h-0 flex-1 flex-col gap-2 max-lg:px-3 max-lg:pb-3 sm:max-lg:px-4 sm:max-lg:pb-4 lg:min-h-[min(560px,58vh)] lg:grid lg:flex-none lg:grid-rows-[1.15fr_0.85fr] lg:gap-3 lg:p-0">
+                <div className="max-lg:pt-1 sm:max-lg:pt-2 lg:min-h-0 lg:pt-0">
+                  <div className="flex min-h-[220px] items-center justify-center overflow-hidden rounded-[20px] bg-[#F6E8E4] sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[300px] lg:h-full lg:rounded-2xl xl:rounded-3xl">
                     <ImageWithFallback
                       src={siteImages.heroSecondary}
                       alt=""
-                      className="block h-auto w-full max-h-[min(52vh,440px)] object-contain object-center lg:h-full lg:min-h-[280px] lg:max-h-[300px]"
+                      className="block h-auto w-full max-h-[min(52vh,440px)] object-contain object-center lg:max-h-none lg:h-full lg:w-full"
                     />
                   </div>
                 </div>
-                <div className="flex min-h-0 flex-1 flex-col">
+                <div className="flex min-h-0 flex-1 flex-col lg:min-h-0">
                   <div
-                    className="flex h-full min-h-[140px] flex-1 flex-col rounded-[20px] px-5 py-5 sm:rounded-[24px] sm:px-6 sm:py-6 lg:min-h-0 lg:flex-none lg:rounded-none lg:px-8 lg:py-8"
+                    className="flex h-full min-h-[140px] flex-1 flex-col rounded-[20px] px-5 py-5 sm:rounded-[24px] sm:px-6 sm:py-6 lg:min-h-0 lg:flex-none lg:rounded-2xl lg:px-8 lg:py-8 xl:rounded-3xl"
                     style={{
                       background: "linear-gradient(135deg, #FFF5F2 0%, #FFFFFF 100%)",
                       boxShadow: "0 8px 24px rgba(100, 37, 21, 0.06)",
