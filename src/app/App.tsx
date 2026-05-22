@@ -19,8 +19,10 @@ import {
   getDressColors,
   getFaqItems,
   getScheduleItems,
+  getActiveSectionByType,
   getSection,
   getStorySlides,
+  isSectionActive,
   sectionSettings,
 } from "./shared/site-content";
 import { resolveSiteImage } from "./shared/site-photos";
@@ -347,6 +349,12 @@ export default function App() {
   const scheduleSettings = sectionSettings(getSection(sectionMap, "schedule"));
   const dressSettings = sectionSettings(getSection(sectionMap, "dress-code"));
   const storySettings = sectionSettings(getSection(sectionMap, "story"));
+  const personSection = useMemo(
+    () => getActiveSectionByType(siteSections, "person"),
+    [siteSections],
+  );
+  const personSettings = sectionSettings(personSection);
+  const personProfile = personSettings.items?.[0];
   const giftsSettings = sectionSettings(getSection(sectionMap, "gifts"));
   const rsvpSettings = sectionSettings(getSection(sectionMap, "rsvp"));
   const musicSettings = sectionSettings(getSection(sectionMap, "music"));
@@ -1115,6 +1123,81 @@ export default function App() {
             </div>
 
             <div className="h-px mx-4 sm:mx-6 md:mx-14" style={{ background: "#F0E8E8" }} />
+
+            {personSection && isSectionActive(personSection) ? (
+              <>
+                <div
+                  id={personSection.id}
+                  className="px-4 sm:px-6 lg:px-12 xl:px-16 py-10 sm:py-14 lg:py-20 xl:py-24 relative overflow-hidden"
+                >
+                  <Flower size={90} color={PINK} className="hidden md:block absolute top-10 left-8 pointer-events-none" rotate={12} style={{ opacity: 0.5 }} />
+                  <div className="relative max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center">
+                    <div className="order-2 lg:order-1">
+                      {personSettings.badge ? (
+                        <div
+                          className="inline-flex rounded-full px-3 py-1.5 mb-4"
+                          style={{ background: PINK_LIGHT, color: CORAL, fontWeight: 800, fontSize: 11, letterSpacing: "0.12em" }}
+                        >
+                          {personSettings.badge}
+                        </div>
+                      ) : null}
+                      <h2 style={{ fontWeight: 900, fontSize: "clamp(26px, 5vw, 48px)", letterSpacing: "-0.02em", lineHeight: 1.05 }}>
+                        {personSettings.title || "Наш ведущий"}
+                      </h2>
+                      {personSettings.subtitle ? (
+                        <p className="mt-3" style={{ fontSize: "clamp(16px, 2.5vw, 20px)", color: CORAL, fontWeight: 700, lineHeight: 1.4 }}>
+                          {personSettings.subtitle}
+                        </p>
+                      ) : null}
+                      {personSettings.description ? (
+                        <p className="mt-4" style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#666", lineHeight: 1.7 }}>
+                          {personSettings.description}
+                        </p>
+                      ) : null}
+                      {personProfile?.title ? (
+                        <div className="mt-6 rounded-2xl px-5 py-4" style={{ background: "#FBF6F4", border: `1px solid ${PINK_LIGHT}` }}>
+                          <div style={{ fontWeight: 900, fontSize: "clamp(18px, 2.5vw, 24px)", lineHeight: 1.15 }}>
+                            {personProfile.title}
+                          </div>
+                          {personProfile.subtitle ? (
+                            <div className="mt-1" style={{ fontWeight: 700, fontSize: "clamp(13px, 1.2vw, 15px)", color: CORAL }}>
+                              {personProfile.subtitle}
+                            </div>
+                          ) : null}
+                          {personProfile.text ? (
+                            <p className="mt-2" style={{ fontSize: "clamp(14px, 1.2vw, 15px)", color: "#666", lineHeight: 1.65 }}>
+                              {personProfile.text}
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : null}
+                      {personSettings.buttonLabel && personSettings.buttonHref ? (
+                        <a
+                          href={personSettings.buttonHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-6 flex w-full max-w-sm items-center justify-center gap-2 rounded-full px-6 py-3.5 text-white transition active:scale-[0.98] sm:inline-flex sm:w-auto"
+                          style={{ background: CORAL, fontWeight: 800, fontSize: "clamp(13px, 2.8vw, 15px)" }}
+                        >
+                          {personSettings.buttonLabel}
+                          <ArrowUpRight size={18} />
+                        </a>
+                      ) : null}
+                    </div>
+                    <div className="order-1 lg:order-2">
+                      <div className="overflow-hidden rounded-[22px] sm:rounded-3xl aspect-[4/5] max-h-[min(72vh,520px)] lg:max-h-none" style={{ boxShadow: "0 18px 50px rgba(0,0,0,0.1)" }}>
+                        <ImageWithFallback
+                          src={resolveSiteImage(personSettings.primaryImage) || photo11}
+                          alt={personProfile?.title || personSettings.title || ""}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="h-px mx-4 sm:mx-6 md:mx-14" style={{ background: "#F0E8E8" }} />
+              </>
+            ) : null}
 
             {/* Music wishes preview */}
             <div className="px-4 sm:px-6 lg:px-12 xl:px-16 py-10 sm:py-14 lg:py-16 xl:py-20 relative overflow-hidden">

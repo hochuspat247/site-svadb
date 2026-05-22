@@ -1,5 +1,5 @@
 import { defaultSiteSections } from "../data/site-builder-defaults.js";
-import type { SiteSection, SiteSectionItem, SiteSectionSettings } from "./wedding-types";
+import type { SiteSection, SiteSectionItem, SiteSectionSettings, SiteSectionType } from "./wedding-types";
 import { getDefaultGalleryImages, resolveSiteImage, sitePhotoOptions } from "./site-photos";
 
 const MOOD_LABEL_FALLBACKS = [
@@ -121,6 +121,10 @@ export function getSection(
   id: string,
 ) {
   return map[id];
+}
+
+export function getActiveSectionByType(sections: SiteSection[], type: SiteSectionType) {
+  return sections.find((section) => section.type === type && isSectionActive(section));
 }
 
 export function isSectionActive(section?: SiteSection) {
