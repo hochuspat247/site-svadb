@@ -18,7 +18,6 @@ import {
   mergeSiteSections,
   getDressColors,
   getFaqItems,
-  getGallerySlides,
   getScheduleItems,
   getSection,
   getStorySlides,
@@ -348,7 +347,6 @@ export default function App() {
   const scheduleSettings = sectionSettings(getSection(sectionMap, "schedule"));
   const dressSettings = sectionSettings(getSection(sectionMap, "dress-code"));
   const storySettings = sectionSettings(getSection(sectionMap, "story"));
-  const gallerySettings = sectionSettings(getSection(sectionMap, "gallery"));
   const giftsSettings = sectionSettings(getSection(sectionMap, "gifts"));
   const rsvpSettings = sectionSettings(getSection(sectionMap, "rsvp"));
   const musicSettings = sectionSettings(getSection(sectionMap, "music"));
@@ -379,10 +377,6 @@ export default function App() {
     ],
   );
 
-  const moodSlides = useMemo(
-    () => getGallerySlides(gallerySettings),
-    [JSON.stringify(gallerySettings.galleryImages)],
-  );
   const defaultStorySlides = useMemo(
     () => getStorySlides(defaultSiteSections.find((section) => section.id === "story")?.settings.items),
     [],
@@ -1128,41 +1122,10 @@ export default function App() {
 
             <div className="h-px mx-4 sm:mx-6 md:mx-14" style={{ background: "#F0E8E8" }} />
 
-            {/* MOODBOARD */}
-            <div className="px-4 sm:px-6 lg:px-12 xl:px-16 py-10 sm:py-14 lg:py-20 xl:py-24 relative overflow-hidden">
+            {/* Music wishes preview */}
+            <div className="px-4 sm:px-6 lg:px-12 xl:px-16 py-10 sm:py-14 lg:py-16 xl:py-20 relative overflow-hidden">
               <Flower size={100} color={CORAL} className="hidden xl:block absolute bottom-16 right-12 pointer-events-none" rotate={-25} style={{ opacity: 0.8 }} />
               <div className="relative max-w-6xl mx-auto">
-                <div className="text-center mb-10 lg:mb-14">
-                  <div className="inline-flex items-center gap-3 lg:gap-4 mb-4 lg:mb-5">
-                    <div className="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center" style={{ background: PINK_LIGHT }}>
-                      <Palette size={24} style={{ color: CORAL }} />
-                    </div>
-                    <div style={{ fontWeight: 900, fontSize: "clamp(26px, 3.5vw, 56px)", letterSpacing: "-0.02em" }}>
-                      {gallerySettings.title || "Атмосфера"}
-                    </div>
-                  </div>
-                  <p className="max-w-2xl mx-auto px-4" style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#666", lineHeight: 1.6 }}>
-                    {gallerySettings.description}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6 mb-10 lg:mb-12">
-                  {moodSlides.map((slide, i) => (
-                    <div key={`${slide.src}-${i}`} className="aspect-square rounded-2xl lg:rounded-3xl flex items-center justify-center text-center transition-transform duration-300 hover:scale-105 overflow-hidden relative group">
-                      <ImageWithFallback
-                        src={slide.src}
-                        alt={slide.label}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        style={{ filter: "grayscale(30%) brightness(0.7)" }}
-                      />
-                      <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(232,90,79,0.2) 0%, rgba(244,182,190,0.3) 100%)" }} />
-                      <div className="relative z-10 px-4" style={{ fontWeight: 800, fontSize: "clamp(16px, 2vw, 22px)", color: "white", letterSpacing: "-0.01em", textShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
-                        {slide.label}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
                 <div className="px-6 py-8 rounded-3xl" style={{ background: PINK_LIGHT, border: `2px solid ${PINK}` }}>
                   <div className="text-center mb-6">
                     <Music size={32} style={{ color: CORAL, margin: "0 auto 16px" }} />
@@ -1692,7 +1655,7 @@ export default function App() {
                     Скоро здесь появятся фотографии
                   </div>
                   <p style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#aaa", lineHeight: 1.6 }}>
-                    {gallerySettings.subtitle || heroSettings.subtitle || "5-6 сентября 2026"}
+                    {heroSettings.subtitle || "5-6 сентября 2026"}
                   </p>
                 </div>
               </div>

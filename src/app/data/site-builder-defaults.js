@@ -194,7 +194,7 @@ export const defaultSiteSections = [
     name: "Галерея",
     type: "gallery",
     sortOrder: 8,
-    isActive: true,
+    isActive: false,
     settings: {
       badge: "Атмосфера",
       title: "Фотографии и настроение",
