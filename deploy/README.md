@@ -34,6 +34,8 @@ Recommended structure on the server:
 
 After build, backend serves the frontend from `dist/`, so one Node process is enough.
 
+**Uploaded pictures** go to the `uploads/` folder next to `dist/` (created automatically when you upload from the admin). That folder is not in git — back it up on the server before migrations or reinstalls.
+
 ## Updates from git
 
 From `/opt/wedding-invite/app`:

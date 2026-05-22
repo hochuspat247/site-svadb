@@ -1,7 +1,10 @@
 import "dotenv/config";
 import cors from "cors";
+import crypto from "crypto";
 import express from "express";
 import fs from "fs";
+import { readdir, stat } from "fs/promises";
+import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
 import {
@@ -18,6 +21,31 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distPath = path.resolve(__dirname, "../dist");
 const hasBuiltFrontend = fs.existsSync(distPath);
+const uploadsRoot = path.resolve(__dirname, "../uploads");
+fs.mkdirSync(uploadsRoot, { recursive: true });
+
+const imageUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, uploadsRoot),
+    filename: (_req, file, cb) => {
+      const rawExt = path.extname(file.originalname || "").toLowerCase();
+      const allowedExt = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+      const ext = allowedExt.includes(rawExt) ? rawExt : ".jpg";
+      cb(null, `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${ext}`);
+    },
+  }),
+  limits: { fileSize: 14 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname || "").toLowerCase();
+    const extOk = [".jpg", ".jpeg", ".png", ".webp", ".gif"].includes(ext);
+    const mimeOk = /^image\/(jpeg|png|webp|gif)$/i.test(file.mimetype || "");
+    if (extOk || mimeOk) {
+      cb(null, true);
+      return;
+    }
+    cb(new Error("Поддерживаются только изображения: JPG, PNG, WebP и GIF."));
+  },
+});
 
 app.use(
   cors({
@@ -278,6 +306,21 @@ function requireAdminAuth(req, res, next) {
   next();
 }
 
+function handleImageUpload(req, res, next) {
+  imageUpload.single("file")(req, res, (uploadError) => {
+    if (uploadError) {
+      res.status(400).json({
+        error:
+          typeof uploadError.message === "string"
+            ? uploadError.message
+            : "Ошибка загрузки файла",
+      });
+      return;
+    }
+    next();
+  });
+}
+
 app.get("/api/health", async (_req, res) => {
   try {
     await query("select 1");
@@ -337,6 +380,51 @@ app.get("/api/site-builder", async (_req, res) => {
     res.status(500).json({ error: "Failed to fetch site sections" });
   }
 });
+
+app.post("/api/admin/upload", requireAdminAuth, handleImageUpload, (req, res) => {
+  if (!req.file) {
+    res.status(400).json({ error: "Файл не передан" });
+    return;
+  }
+
+  const urlPath = `/uploads/${req.file.filename}`;
+  res.json({ url: urlPath, filename: req.file.filename });
+});
+
+app.get("/api/admin/uploads", requireAdminAuth, async (_req, res) => {
+  try {
+    const names = await readdir(uploadsRoot);
+    const entries = [];
+    for (const name of names) {
+      if (name.startsWith(".")) {
+        continue;
+      }
+
+      const fullPath = path.join(uploadsRoot, name);
+      const stats = await stat(fullPath);
+
+      if (!stats.isFile()) {
+        continue;
+      }
+
+      entries.push({ filename: name, mtime: stats.mtimeMs });
+    }
+
+    entries.sort((a, b) => b.mtime - a.mtime);
+
+    res.json({
+      uploads: entries.map((item) => ({
+        filename: item.filename,
+        url: `/uploads/${item.filename}`,
+      })),
+    });
+  } catch (uploadListError) {
+    console.error("Upload list error", uploadListError);
+    res.status(500).json({ error: "Не удалось получить список загрузок" });
+  }
+});
+
+app.use("/uploads", express.static(uploadsRoot));
 
 app.post("/api/register", async (req, res) => {
   const {
@@ -1194,7 +1282,7 @@ app.get("/api/music", async (_req, res) => {
 if (hasBuiltFrontend) {
   app.use(express.static(distPath));
 
-  app.get(/^\/(?!api).*/, (_req, res) => {
+  app.get(/^\/(?!api)(?!uploads).*/, (_req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
   });
 }

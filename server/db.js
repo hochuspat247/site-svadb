@@ -19,6 +19,7 @@ export function getPool() {
     pool = new Pool({
       connectionString,
       ssl: shouldUseSsl ? { rejectUnauthorized: false } : false,
+      options: "-c client_encoding=UTF8",
     });
   }
 

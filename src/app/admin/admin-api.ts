@@ -241,3 +241,27 @@ export async function deleteSection(id: string) {
 
   return readJson(response);
 }
+
+export async function uploadSiteImage(file: File): Promise<{ url: string; filename: string }> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${API_URL}/admin/upload`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+    body: formData,
+  });
+
+  return readJson(response);
+}
+
+export async function fetchUploadedImages(): Promise<{ url: string; filename: string }[]> {
+  const response = await fetch(`${API_URL}/admin/uploads`, {
+    headers: getHeaders(),
+  });
+
+  const result = await readJson(response);
+  return Array.isArray(result.uploads) ? result.uploads : [];
+}
