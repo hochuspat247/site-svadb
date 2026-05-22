@@ -740,29 +740,30 @@ export default function App() {
       {/* CONTENT */}
       <div className="relative z-10 overflow-x-hidden">
         {/* HERO — split cover */}
-        <section id="hero" className="relative px-2 sm:px-4 md:px-6 lg:px-8 pt-6 sm:pt-8 lg:pt-10 pb-4 sm:pb-6">
+        <section id="hero" className="relative px-4 sm:px-5 md:px-6 lg:px-10 pt-6 sm:pt-8 lg:pt-10 pb-4 sm:pb-6">
           <div
             className="relative z-10 mx-auto max-w-7xl overflow-hidden bg-[#FFF8F5]"
             style={{
-              borderRadius: "clamp(20px, 3vw, 36px)",
+              borderRadius: "clamp(24px, 4vw, 40px)",
               boxShadow: "0 40px 100px rgba(100, 37, 21, 0.12)",
             }}
           >
             <div className="grid gap-0 max-lg:flex max-lg:min-h-[min(72vh,640px)] max-lg:flex-col lg:grid-cols-[1.15fr_0.85fr]">
-              <div className="relative min-h-[460px] overflow-hidden px-6 py-8 sm:px-8 sm:py-10 lg:min-h-[520px] lg:px-12 lg:py-14 max-lg:min-h-[360px] max-lg:shrink-0">
-                <ImageWithFallback
-                  src={siteImages.heroPrimary}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      "linear-gradient(115deg, rgba(19,12,10,0.82) 0%, rgba(19,12,10,0.45) 48%, rgba(19,12,10,0.2) 100%)",
-                  }}
-                />
-                <div className="relative z-10 flex h-full min-h-[380px] flex-col justify-between text-white lg:min-h-[440px]">
+              <div className="max-lg:px-3 max-lg:pt-3 sm:max-lg:px-4 sm:max-lg:pt-4 lg:p-0">
+                <div className="relative min-h-[460px] overflow-hidden rounded-[20px] sm:rounded-[24px] lg:min-h-[520px] lg:rounded-none max-lg:min-h-[360px]">
+                  <ImageWithFallback
+                    src={siteImages.heroPrimary}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(115deg, rgba(19,12,10,0.82) 0%, rgba(19,12,10,0.45) 48%, rgba(19,12,10,0.2) 100%)",
+                    }}
+                  />
+                  <div className="relative z-10 flex h-full min-h-[380px] flex-col justify-between px-6 py-8 text-white sm:px-8 sm:py-10 lg:min-h-[440px] lg:px-12 lg:py-14">
                   <div className="inline-flex w-fit rounded-full bg-white/20 px-4 py-2 backdrop-blur">
                     {heroSettings.note || "Свадебное приглашение"}
                   </div>
@@ -807,10 +808,11 @@ export default function App() {
                     ) : null}
                   </div>
                 </div>
+                </div>
               </div>
 
-              <div className="flex min-h-0 flex-1 flex-col gap-2 lg:grid lg:grid-rows-[1.15fr_0.85fr] lg:gap-0">
-                <div className="px-3 pt-2 sm:px-4 sm:pt-3 lg:p-0">
+              <div className="flex min-h-0 flex-1 flex-col gap-2 max-lg:px-3 max-lg:pb-3 sm:max-lg:px-4 sm:max-lg:pb-4 lg:grid lg:grid-rows-[1.15fr_0.85fr] lg:gap-0 lg:p-0">
+                <div className="max-lg:pt-1 sm:max-lg:pt-2 lg:pt-0">
                   <div className="overflow-hidden rounded-[20px] bg-[#F6E8E4] sm:rounded-[24px] lg:min-h-[300px] lg:rounded-none">
                     <ImageWithFallback
                       src={siteImages.heroSecondary}
@@ -819,7 +821,7 @@ export default function App() {
                     />
                   </div>
                 </div>
-                <div className="flex min-h-0 flex-1 flex-col px-3 pb-3 sm:px-4 sm:pb-4 lg:p-0">
+                <div className="flex min-h-0 flex-1 flex-col">
                   <div
                     className="flex h-full min-h-[140px] flex-1 flex-col rounded-[20px] px-5 py-5 sm:rounded-[24px] sm:px-6 sm:py-6 lg:min-h-0 lg:flex-none lg:rounded-none lg:px-8 lg:py-8"
                     style={{
