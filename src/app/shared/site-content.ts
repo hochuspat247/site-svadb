@@ -73,33 +73,39 @@ const STORY_FALLBACK_IMAGES = [
 ];
 
 export function mergeSiteSections(remote: SiteSection[]) {
+  if (remote.length === 0) {
+    return [...defaultSiteSections];
+  }
+
   const remoteMap = Object.fromEntries(remote.map((section) => [section.id, section]));
   const knownIds = new Set(defaultSiteSections.map((section) => section.id));
 
-  const mergedDefaults = defaultSiteSections.map((fallback) => {
-    const fromApi = remoteMap[fallback.id];
-    if (!fromApi) {
-      return fallback;
-    }
+  const mergedDefaults = defaultSiteSections
+    .map((fallback) => {
+      const fromApi = remoteMap[fallback.id];
+      if (!fromApi) {
+        return null;
+      }
 
-    const mergedSettings = {
-      ...fallback.settings,
-      ...fromApi.settings,
-    };
+      const mergedSettings = {
+        ...fallback.settings,
+        ...fromApi.settings,
+      };
 
-    if (fallback.id === "story") {
-      mergedSettings.items = mergeStoryItems(
-        fallback.settings.items,
-        fromApi.settings.items ?? [],
-      );
-    }
+      if (fallback.id === "story") {
+        mergedSettings.items = mergeStoryItems(
+          fallback.settings.items,
+          fromApi.settings.items ?? [],
+        );
+      }
 
-    return {
-      ...fallback,
-      ...fromApi,
-      settings: mergedSettings,
-    };
-  });
+      return {
+        ...fallback,
+        ...fromApi,
+        settings: mergedSettings,
+      };
+    })
+    .filter((section): section is SiteSection => section !== null);
 
   const extraSections = remote.filter((section) => !knownIds.has(section.id));
 

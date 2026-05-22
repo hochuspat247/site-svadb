@@ -759,7 +759,9 @@ export default function AdminPage() {
 
     if (kind === "section" && selectedSectionId && window.confirm("Удалить этот блок?")) {
       await deleteSection(selectedSectionId);
-      setSections((current) => current.filter((item) => item.id !== selectedSectionId));
+      setSections((current) =>
+        mergeSiteSections(current.filter((item) => item.id !== selectedSectionId)),
+      );
       setSelectedSectionId(null);
       setSectionForm(sectionTemplate("person"));
       setMessage("Блок удалён");
