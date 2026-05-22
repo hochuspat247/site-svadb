@@ -7,6 +7,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 TARGETS = [
     ROOT / "src/app/App.tsx",
+    ROOT / "src/app/admin/AdminPage.tsx",
+    ROOT / "src/app/api/wedding-api.ts",
 ]
 
 SKIP_LINE = re.compile(

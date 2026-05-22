@@ -1,3 +1,4 @@
+import { fixMojibakeText } from "../shared/fix-encoding";
 import type {
   GiftBooking,
   GiftCategory,
@@ -6,6 +7,20 @@ import type {
   SiteSection,
   WeddingGift,
 } from "../shared/wedding-types";
+
+function normalizeGuest(guest: Guest): Guest {
+  return {
+    ...guest,
+    name: fixMojibakeText(guest.name),
+    side: fixMojibakeText(guest.side),
+    phone: fixMojibakeText(guest.phone),
+    email: fixMojibakeText(guest.email),
+    attendanceLabel: fixMojibakeText(guest.attendanceLabel),
+    guestNames: fixMojibakeText(guest.guestNames),
+    drink: fixMojibakeText(guest.drink),
+    allergy: fixMojibakeText(guest.allergy),
+  };
+}
 
 const API_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
 
@@ -55,7 +70,7 @@ export async function fetchGuests(): Promise<Guest[]> {
       return [];
     }
 
-    return result.guests || [];
+    return (result.guests || []).map((guest: Guest) => normalizeGuest(guest));
   } catch (error) {
     console.error("Network error fetching guests:", error);
     return [];

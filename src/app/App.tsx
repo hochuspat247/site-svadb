@@ -25,6 +25,7 @@ import {
   isSectionActive,
   sectionSettings,
 } from "./shared/site-content";
+import { fixMojibakeText } from "./shared/fix-encoding";
 import { resolveSiteImage } from "./shared/site-photos";
 import type {
   GiftBooking,
@@ -114,7 +115,7 @@ const AVATAR_COLORS = ["#F4B6BE", "#FBD3D8", "#F4E1D2", "#D9A89A", "#FFC4B0", "#
 
 function initials(name: string) {
   return name
-    .split(/[\s&Рё]+/)
+    .split(/[\s&ё]+/i)
     .filter(Boolean)
     .slice(0, 2)
     .map((p) => p[0])
@@ -123,6 +124,7 @@ function initials(name: string) {
 }
 
 function GuestAvatar({ name, idx, isYou = false, photo }: { name: string; idx: number; isYou?: boolean; photo?: string | null }) {
+  const displayName = fixMojibakeText(name);
   const bg = AVATAR_COLORS[idx % AVATAR_COLORS.length];
   return (
     <div
@@ -157,19 +159,24 @@ function GuestAvatar({ name, idx, isYou = false, photo }: { name: string; idx: n
           }}
         >
           {photo ? (
-            <img src={photo} alt={name} className="w-full h-full object-cover" />
+            <img src={photo} alt={displayName} className="w-full h-full object-cover" />
           ) : (
-            initials(name)
+            initials(displayName)
           )}
         </div>
         {isYou && (
           <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 sm:px-2 py-0.5 rounded-full" style={{ background: "#1a1a1a", color: "white", fontSize: 8, fontWeight: 800, letterSpacing: "0.08em" }}>
-            Р’Р«
+            Вы
           </div>
         )}
       </div>
-      <div className="text-center px-1">
-        <div style={{ fontWeight: 700, fontSize: "clamp(10px, 2.5vw, 12px)", lineHeight: 1.2 }}>{name}</div>
+      <div className="w-full min-w-0 px-1 text-center">
+        <div
+          className="break-words"
+          style={{ fontWeight: 700, fontSize: "clamp(10px, 2.5vw, 12px)", lineHeight: 1.25, wordBreak: "break-word" }}
+        >
+          {displayName}
+        </div>
       </div>
     </div>
   );
@@ -180,9 +187,15 @@ function GuestsBlock({ guests, currentGuestId, isRegistered }: { guests: any[]; 
   const bride = [...BRIDE_GUESTS];
 
   guests.forEach((guest) => {
-    const entry = { name: guest.name, role: "Гость", isYou: guest.id === currentGuestId, photo: guest.photo };
-    if (guest.side === "Со стороны Ивана") groom.push(entry as any);
-    else if (guest.side === "Со стороны Анастасии") bride.push(entry as any);
+    const entry = {
+      name: fixMojibakeText(guest.name),
+      role: "Гость",
+      isYou: guest.id === currentGuestId,
+      photo: guest.photo,
+    };
+    const side = fixMojibakeText(guest.side);
+    if (side === "Со стороны Ивана") groom.push(entry as any);
+    else if (side === "Со стороны Анастасии") bride.push(entry as any);
   });
 
   const Column = ({ title, who, list, color }: any) => (
