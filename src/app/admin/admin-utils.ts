@@ -47,6 +47,21 @@ export function sectionImageSlots(type: SiteSectionType) {
     background: type === "hero",
     gallery: type === "gallery",
     items: ["schedule", "story", "faq", "dress-code"].includes(type),
+    personProfile: type === "person",
+  };
+}
+
+export function emptyPersonProfile(): SiteSectionItem {
+  return { title: "", subtitle: "", text: "" };
+}
+
+export function personProfileFromItems(items: SiteSectionItem[] = []): SiteSectionItem {
+  const first = items[0];
+  if (!first) return emptyPersonProfile();
+  return {
+    title: first.title || "",
+    subtitle: first.subtitle || "",
+    text: first.text || "",
   };
 }
 

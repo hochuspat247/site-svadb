@@ -26,8 +26,16 @@ import AdminMediaLibrary from "./AdminMediaLibrary";
 import GalleryImagesEditor from "./GalleryImagesEditor";
 import SectionImagePicker from "./SectionImagePicker";
 import StoryItemsEditor from "./StoryItemsEditor";
+import PersonProfileEditor from "./PersonProfileEditor";
 import { mergeSiteSections } from "../shared/site-content";
-import { parseSectionItems, sectionImageSlots, serializeSectionItems, slugifySectionId } from "./admin-utils";
+import {
+  emptyPersonProfile,
+  parseSectionItems,
+  personProfileFromItems,
+  sectionImageSlots,
+  serializeSectionItems,
+  slugifySectionId,
+} from "./admin-utils";
 import type {
   GiftBooking,
   GiftBookingMode,
@@ -72,6 +80,7 @@ type SectionForm = {
   galleryImagesText: string;
   itemsText: string;
   storyItems: SiteSectionItem[];
+  personProfile: SiteSectionItem;
 };
 
 const coral = "#E85A4F";
@@ -182,6 +191,7 @@ function sectionTemplate(type: SiteSectionType): SectionForm {
     galleryImagesText: "",
     itemsText: "",
     storyItems: [],
+    personProfile: emptyPersonProfile(),
   };
 }
 
@@ -277,6 +287,8 @@ function toSectionForm(section: SiteSection): SectionForm {
             image: item.image || "",
           }))
         : [],
+    personProfile:
+      section.type === "person" ? personProfileFromItems(section.settings.items || []) : emptyPersonProfile(),
   };
 }
 
@@ -291,6 +303,18 @@ function storyItemsForPayload(form: SectionForm): SiteSectionItem[] {
         extra: item.extra?.trim() || "",
         image: item.image?.trim() || "",
       }));
+  }
+
+  if (form.type === "person") {
+    const profile = form.personProfile;
+    if (!profile.title.trim()) return [];
+    return [
+      {
+        title: profile.title.trim(),
+        subtitle: profile.subtitle?.trim() || "",
+        text: profile.text?.trim() || "",
+      },
+    ];
   }
 
   return parseSectionItems(form.itemsText);
@@ -722,7 +746,16 @@ export default function AdminPage() {
   };
 
   const handleSectionTypeChange = (type: SiteSectionType) => {
-    setSectionForm((current) => ({ ...current, type }));
+    setSectionForm((current) => ({
+      ...current,
+      type,
+      personProfile:
+        type === "person"
+          ? current.type === "person"
+            ? current.personProfile
+            : personProfileFromItems(parseSectionItems(current.itemsText))
+          : emptyPersonProfile(),
+    }));
   };
 
   const galleryImages = useMemo(
@@ -1099,36 +1132,43 @@ export default function AdminPage() {
                   </h3>
                   <div className="grid gap-4 md:grid-cols-2">
                 <label className="block">
-                  <FieldLabel>Бейдж</FieldLabel>
+                  <FieldLabel>{sectionForm.type === "person" ? "Метка над заголовком" : "Бейдж"}</FieldLabel>
                   <TextInput
                     value={sectionForm.badge}
                     onChange={(event) => setSectionForm({ ...sectionForm, badge: event.target.value })}
-                    placeholder="Например: Наш ведущий"
+                    placeholder={sectionForm.type === "person" ? "Например: Наш ведущий" : "Например: Наш ведущий"}
                   />
                 </label>
 
                 <label className="block">
-                  <FieldLabel>Заголовок</FieldLabel>
+                  <FieldLabel>{sectionForm.type === "person" ? "Заголовок секции" : "Заголовок"}</FieldLabel>
                   <TextInput
                     value={sectionForm.title}
                     onChange={(event) => setSectionForm({ ...sectionForm, title: event.target.value })}
+                    placeholder={sectionForm.type === "person" ? "Наш ведущий" : undefined}
                   />
                 </label>
 
                 <label className="block">
-                  <FieldLabel>Подзаголовок</FieldLabel>
+                  <FieldLabel>{sectionForm.type === "person" ? "Подзаголовок секции" : "Подзаголовок"}</FieldLabel>
                   <TextInput
                     value={sectionForm.subtitle}
                     onChange={(event) => setSectionForm({ ...sectionForm, subtitle: event.target.value })}
+                    placeholder={sectionForm.type === "person" ? "Тамада, который держит настроение вечера" : undefined}
                   />
                 </label>
 
                 <label className="block md:col-span-2">
-                  <FieldLabel>Описание</FieldLabel>
+                  <FieldLabel>{sectionForm.type === "person" ? "Текст над карточкой" : "Описание"}</FieldLabel>
                   <TextArea
                     rows={3}
                     value={sectionForm.description}
                     onChange={(event) => setSectionForm({ ...sectionForm, description: event.target.value })}
+                    placeholder={
+                      sectionForm.type === "person"
+                        ? "Коротко о ведущем: стиль, опыт, формат вечера"
+                        : undefined
+                    }
                   />
                 </label>
 
@@ -1219,6 +1259,24 @@ export default function AdminPage() {
                         />
                       ) : null}
                     </div>
+                  </div>
+                ) : null}
+
+                {imageSlots.personProfile ? (
+                  <div>
+                    <h3 className="mb-4" style={{ fontWeight: 900, fontSize: 18 }}>
+                      Карточка на сайте
+                    </h3>
+                    <PersonProfileEditor
+                      profile={sectionForm.personProfile}
+                      onChange={(personProfile) =>
+                        setSectionForm((current) => ({
+                          ...current,
+                          personProfile,
+                          itemsText: serializeSectionItems([personProfile]),
+                        }))
+                      }
+                    />
                   </div>
                 ) : null}
 

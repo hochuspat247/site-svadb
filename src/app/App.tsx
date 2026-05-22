@@ -753,7 +753,7 @@ export default function App() {
       </div>
 
       {/* CONTENT */}
-      <div className="relative z-10 overflow-x-hidden">
+      <div className="relative z-10 overflow-x-clip overflow-y-visible">
         {/* HERO — split cover */}
         <section id="hero" className="relative px-3 sm:px-5 md:px-6 lg:px-10 pt-4 sm:pt-8 lg:pt-10 pb-4 sm:pb-6">
           <div
@@ -855,9 +855,10 @@ export default function App() {
         </section>
 
         {/* WIDE WHITE CARD */}
-        <div className="relative px-3 sm:px-4 md:px-6 lg:px-8 pb-16 sm:pb-32 overflow-x-hidden">
+        <div className="relative px-3 sm:px-4 md:px-6 lg:px-8 pt-10 sm:pt-8 pb-16 sm:pb-32 overflow-x-clip overflow-y-visible">
           {/* decorative flowers peeking from edges */}
-          <Flower size={130} color={CORAL} className="hidden sm:block absolute -top-10 left-2 z-20 pointer-events-none" rotate={-25} style={{ opacity: 0.95 }} />
+          <Flower size={72} color={CORAL} className="absolute top-2 left-3 z-20 pointer-events-none sm:hidden" rotate={-25} style={{ opacity: 0.95 }} />
+          <Flower size={130} color={CORAL} className="hidden sm:block absolute top-0 left-2 z-20 pointer-events-none" rotate={-25} style={{ opacity: 0.95 }} />
           <Flower size={120} color={PINK} className="hidden sm:block absolute top-[14%] right-2 z-20 pointer-events-none" rotate={30} />
           <Flower size={110} color={PINK_LIGHT} className="hidden md:block absolute top-[38%] left-2 z-20 pointer-events-none" rotate={10} />
           <Flower size={130} color={CORAL} className="hidden md:block absolute top-[62%] right-2 z-20 pointer-events-none" rotate={-20} style={{ opacity: 0.9 }} />
@@ -1844,10 +1845,13 @@ export default function App() {
 
         {/* CLOSING WITH FAMILY PHOTO */}
         <section className="relative">
-          <div className="relative h-[60vh] sm:h-[70vh] lg:h-[85vh] xl:h-[90vh] overflow-hidden">
-            <ImageWithFallback src={siteImages.family} alt="" className="w-full h-full object-cover" style={{ filter: "grayscale(100%) brightness(0.6)" }} />
-            <Flower size={120} color={PINK} className="hidden lg:block absolute bottom-12 lg:bottom-16 right-8 lg:right-16" rotate={25} />
-            <Flower size={80} color={CORAL} className="hidden lg:block absolute top-12 lg:top-16 left-8 lg:left-16" rotate={-15} style={{ opacity: 0.9 }} />
+          <div className="relative h-[60vh] sm:h-[70vh] lg:h-[85vh] xl:h-[90vh]">
+            <div className="absolute inset-0 overflow-hidden">
+              <ImageWithFallback src={siteImages.family} alt="" className="w-full h-full object-cover" style={{ filter: "grayscale(100%) brightness(0.6)" }} />
+            </div>
+            <Flower size={64} color={CORAL} className="absolute top-4 left-4 z-10 pointer-events-none sm:hidden" rotate={-15} style={{ opacity: 0.9 }} />
+            <Flower size={80} color={CORAL} className="hidden sm:block absolute top-8 left-6 lg:top-16 lg:left-16 z-10 pointer-events-none" rotate={-15} style={{ opacity: 0.9 }} />
+            <Flower size={96} color={PINK} className="absolute bottom-6 right-4 z-10 pointer-events-none sm:bottom-10 sm:right-8 lg:bottom-16 lg:right-16" rotate={25} />
             <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-12">
               <div className="text-center text-white max-w-2xl">
                 <div style={{ fontWeight: 900, fontSize: "clamp(28px, 5vw, 72px)", lineHeight: 0.95, letterSpacing: "-0.02em" }}>
