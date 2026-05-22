@@ -522,10 +522,14 @@ export default function App() {
     }
   };
 
+  const scrollToRsvp = () => {
+    document.getElementById("rsvp")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   const handleOpenTravelModal = (id: number) => {
     if (!isRegistered || !currentGuestId) {
       showToast("Сначала заполните форму регистрации");
-      document.getElementById("rsvp")?.scrollIntoView({ behavior: "smooth" });
+      scrollToRsvp();
       return;
     }
 
@@ -540,7 +544,7 @@ export default function App() {
   const handleBook = async (id: number, selectedCountry?: string) => {
     if (!isRegistered || !currentGuestId) {
       showToast("Сначала заполните форму регистрации");
-      document.getElementById("rsvp")?.scrollIntoView({ behavior: "smooth" });
+      scrollToRsvp();
       return;
     }
 
@@ -755,7 +759,7 @@ export default function App() {
       {/* CONTENT */}
       <div className="relative z-10 overflow-x-clip overflow-y-visible">
         {/* HERO — split cover */}
-        <section id="hero" className="relative px-3 sm:px-5 md:px-6 lg:px-10 pt-4 sm:pt-8 lg:pt-10 pb-4 sm:pb-6">
+        <section id="hero" className="relative px-4 sm:px-5 md:px-6 lg:px-10 pt-4 sm:pt-8 lg:pt-10 pb-4 sm:pb-6">
           <div
             className="relative z-10 mx-auto max-w-7xl overflow-hidden bg-[#FFF8F5]"
             style={{
@@ -764,7 +768,7 @@ export default function App() {
             }}
           >
             <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4 lg:min-h-[min(560px,58vh)] lg:grid lg:grid-cols-[1.15fr_0.85fr] lg:items-stretch lg:gap-5 lg:p-5">
-              <div className="relative min-h-[min(68vw,300px)] w-full overflow-hidden rounded-[18px] sm:min-h-[340px] sm:rounded-[22px] lg:min-h-0 lg:h-full lg:rounded-2xl xl:rounded-3xl">
+              <div className="relative min-h-[min(62vw,280px)] w-full overflow-hidden rounded-[20px] sm:min-h-[320px] sm:rounded-[22px] lg:min-h-0 lg:h-full lg:rounded-2xl xl:rounded-3xl">
                 <ImageWithFallback
                   src={siteImages.heroPrimary}
                   alt=""
@@ -777,11 +781,11 @@ export default function App() {
                       "linear-gradient(115deg, rgba(19,12,10,0.82) 0%, rgba(19,12,10,0.45) 48%, rgba(19,12,10,0.2) 100%)",
                   }}
                 />
-                <div className="relative z-10 flex min-h-[min(68vw,300px)] flex-col justify-between p-5 text-white sm:min-h-[340px] sm:p-7 lg:min-h-full lg:px-12 lg:py-14">
-                  <div className="inline-flex w-fit max-w-full rounded-full bg-white/20 px-3 py-1.5 text-xs backdrop-blur sm:px-4 sm:py-2 sm:text-sm">
-                    {heroSettings.note || "Свадебное приглашение"}
+                <div className="relative z-10 flex min-h-[min(62vw,280px)] flex-col justify-between p-5 text-white sm:min-h-[320px] sm:p-6 lg:min-h-full lg:px-12 lg:py-14">
+                  <div className="inline-flex w-fit max-w-full rounded-full bg-white/20 px-3 py-1.5 text-[11px] backdrop-blur sm:px-4 sm:py-2 sm:text-sm">
+                    {heroSettings.badge || "Wedding weekend"}
                   </div>
-                  <div className="max-w-xl">
+                  <div className="max-w-xl pt-4 sm:pt-0">
                     <div
                       style={{
                         color: "#FFD6CE",
@@ -824,29 +828,50 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 lg:h-full lg:grid lg:grid-rows-[1.15fr_0.85fr] lg:gap-3">
-                <div className="flex min-h-[200px] items-center justify-center overflow-hidden rounded-[18px] bg-[#F6E8E4] sm:min-h-[220px] sm:rounded-[22px] lg:min-h-[300px] lg:h-full lg:rounded-2xl xl:rounded-3xl">
-                  <ImageWithFallback
-                    src={siteImages.heroSecondary}
-                    alt=""
-                    className="block h-auto w-full max-h-[min(40vh,300px)] object-contain object-center sm:max-h-[min(44vh,340px)] lg:h-full lg:max-h-none lg:w-full"
-                  />
-                </div>
+              <div className="flex flex-col lg:h-full lg:grid lg:grid-rows-[1.15fr_0.85fr] lg:gap-3">
                 <div
-                  className="flex flex-col rounded-[18px] px-4 py-4 sm:rounded-[22px] sm:px-6 sm:py-6 lg:rounded-2xl lg:px-8 lg:py-8 xl:rounded-3xl"
-                  style={{
-                    background: "linear-gradient(135deg, #FFF5F2 0%, #FFFFFF 100%)",
-                    boxShadow: "0 8px 24px rgba(100, 37, 21, 0.06)",
-                  }}
+                  className="overflow-hidden rounded-[20px] sm:rounded-[22px] lg:contents"
+                  style={{ boxShadow: "0 8px 24px rgba(100, 37, 21, 0.06)" }}
                 >
-                  <div style={{ color: CORAL, fontWeight: 800, letterSpacing: "0.16em", fontSize: 11 }}>
-                    {heroSettings.badge || "Wedding weekend"}
+                  <div className="relative aspect-[4/5] max-h-[min(52vh,300px)] w-full overflow-hidden bg-[#F6E8E4] sm:max-h-[320px] lg:aspect-auto lg:max-h-none lg:min-h-[300px] lg:h-full lg:rounded-2xl xl:rounded-3xl">
+                    <ImageWithFallback
+                      src={siteImages.heroSecondary}
+                      alt=""
+                      className="h-full w-full object-cover object-[center_22%] lg:object-contain lg:object-center"
+                    />
                   </div>
                   <div
-                    className="mt-3 sm:mt-4"
-                    style={{ fontWeight: 900, fontSize: "clamp(20px, 5vw, 40px)", lineHeight: 1.08 }}
+                    className="flex flex-col px-4 py-4 sm:px-5 sm:py-5 lg:flex-1 lg:rounded-2xl lg:px-8 lg:py-8 xl:rounded-3xl"
+                    style={{
+                      background: "linear-gradient(135deg, #FFF5F2 0%, #FFFFFF 100%)",
+                      boxShadow: "0 8px 24px rgba(100, 37, 21, 0.06)",
+                    }}
                   >
-                    {heroSettings.note || "Свадебное приглашение"}
+                    <div style={{ color: CORAL, fontWeight: 800, letterSpacing: "0.16em", fontSize: 11 }}>
+                      {heroSettings.badge || "Wedding weekend"}
+                    </div>
+                    <div
+                      className="mt-2 sm:mt-3"
+                      style={{ fontWeight: 900, fontSize: "clamp(18px, 4.5vw, 40px)", lineHeight: 1.12 }}
+                    >
+                      {heroSettings.note || "Свадебное приглашение"}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={scrollToRsvp}
+                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-full px-5 py-3.5 transition active:scale-[0.98] sm:mt-5 lg:mt-auto lg:w-fit"
+                      style={{
+                        background: CORAL,
+                        color: "white",
+                        fontWeight: 800,
+                        fontSize: "clamp(13px, 2.8vw, 15px)",
+                        letterSpacing: "0.04em",
+                        boxShadow: `0 10px 28px ${CORAL}44`,
+                      }}
+                    >
+                      Заполнить анкету
+                      <ArrowRight size={18} />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -855,7 +880,7 @@ export default function App() {
         </section>
 
         {/* WIDE WHITE CARD */}
-        <div className="relative px-3 sm:px-4 md:px-6 lg:px-8 pt-10 sm:pt-8 pb-16 sm:pb-32 overflow-x-clip overflow-y-visible">
+        <div className="relative px-4 sm:px-4 md:px-6 lg:px-8 pt-6 sm:pt-8 pb-16 sm:pb-32 overflow-x-clip overflow-y-visible">
           {/* decorative flowers peeking from edges */}
           <Flower size={72} color={CORAL} className="absolute top-2 left-3 z-20 pointer-events-none sm:hidden" rotate={-25} style={{ opacity: 0.95 }} />
           <Flower size={130} color={CORAL} className="hidden sm:block absolute top-0 left-2 z-20 pointer-events-none" rotate={-25} style={{ opacity: 0.95 }} />
