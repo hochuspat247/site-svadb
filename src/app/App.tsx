@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
-import { Heart, Gift, Utensils, Cake, Sparkles, MapPin, Calendar, Upload, Check, Plane, BedDouble, Coffee, UtensilsCrossed, ChefHat, Wine, ArrowUpRight, Users, Camera, Compass, Home, Car, Sofa, Tv, Music, Gamepad2, Package, BookHeart, Palette, HelpCircle, ListMusic, ImageIcon, Smartphone, Mouse, Battery, ShoppingBag, Wrench, Monitor, Ticket, Mountain, CircleDollarSign, Dumbbell, Store, Globe, Wallet, Palette as PaletteIcon, Box, Bike, X } from "lucide-react";
+import { Heart, Gift, Utensils, Cake, Sparkles, MapPin, Calendar, Upload, Check, Plane, BedDouble, Coffee, UtensilsCrossed, ChefHat, Wine, ArrowUpRight, ArrowRight, Users, Camera, Compass, Home, Car, Sofa, Tv, Music, Gamepad2, Package, BookHeart, Palette, HelpCircle, ListMusic, ImageIcon, Smartphone, Mouse, Battery, ShoppingBag, Wrench, Monitor, Ticket, Mountain, CircleDollarSign, Dumbbell, Store, Globe, Wallet, Palette as PaletteIcon, Box, Bike, X } from "lucide-react";
 import {
   registerGuest,
   fetchGiftCatalog,
@@ -23,7 +23,6 @@ import {
   getSection,
   getStorySlides,
   sectionSettings,
-  splitCoupleNames,
 } from "./shared/site-content";
 import { resolveSiteImage } from "./shared/site-photos";
 import type {
@@ -356,21 +355,18 @@ export default function App() {
   const faqSettings = sectionSettings(getSection(sectionMap, "faq"));
   const closingSettings = sectionSettings(getSection(sectionMap, "closing"));
 
-  const coupleNames = useMemo(
-    () => splitCoupleNames(heroSettings.title),
-    [heroSettings.title],
-  );
-
   const siteImages = useMemo(
     () => ({
       bg: photo10,
-      dance: resolveSiteImage(heroSettings.secondaryImage) || photo04,
+      heroPrimary: resolveSiteImage(heroSettings.primaryImage) || photo10,
+      heroSecondary: resolveSiteImage(heroSettings.secondaryImage) || photo04,
       venue: resolveSiteImage(locationSettings.primaryImage) || photo18,
       family: resolveSiteImage(closingSettings.primaryImage) || photo17,
       dressPrimary: resolveSiteImage(dressSettings.primaryImage) || photo01,
       dressSecondary: resolveSiteImage(dressSettings.secondaryImage) || photo18,
     }),
     [
+      heroSettings.primaryImage,
       heroSettings.secondaryImage,
       locationSettings.primaryImage,
       closingSettings.primaryImage,
@@ -735,19 +731,100 @@ export default function App() {
 
       {/* CONTENT */}
       <div className="relative z-10 overflow-x-hidden">
-        {/* HERO */}
-        <section className="px-4 sm:px-6 lg:px-12 pt-16 sm:pt-20 lg:pt-24 xl:pt-32 pb-20 sm:pb-24 lg:pb-32 text-white relative overflow-hidden">
-          <Flower size={140} color={PINK} className="absolute top-12 right-4 sm:right-12 xl:right-20 pointer-events-none" rotate={20} style={{ opacity: 0.95 }} />
-          <Flower size={90} color={PINK_LIGHT} className="absolute top-40 sm:top-56 left-4 sm:left-12 xl:left-20 pointer-events-none" rotate={-15} />
-          <div className="max-w-2xl mx-auto">
-            <h1 style={{ fontWeight: 900, fontSize: "clamp(36px, 6vw, 88px)", lineHeight: 0.95, letterSpacing: "-0.02em" }}>
-              {(heroSettings.note || "Свадебное приглашение").split(" ").map((word, index, words) => (
-                <React.Fragment key={`${word}-${index}`}>
-                  {index > 0 && index === Math.ceil(words.length / 2) ? <br /> : null}
-                  {word}{index < words.length - 1 ? " " : ""}
-                </React.Fragment>
-              ))}
-            </h1>
+        {/* HERO — split cover */}
+        <section id="hero" className="relative px-2 sm:px-4 md:px-6 lg:px-8 pt-6 sm:pt-8 lg:pt-10 pb-4 sm:pb-6">
+          <div
+            className="relative z-10 mx-auto max-w-7xl overflow-hidden bg-[#FFF8F5]"
+            style={{
+              borderRadius: "clamp(20px, 3vw, 36px)",
+              boxShadow: "0 40px 100px rgba(100, 37, 21, 0.12)",
+            }}
+          >
+            <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
+              <div className="relative min-h-[460px] overflow-hidden px-6 py-8 sm:px-8 sm:py-10 lg:min-h-[520px] lg:px-12 lg:py-14">
+                <ImageWithFallback
+                  src={siteImages.heroPrimary}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(115deg, rgba(19,12,10,0.82) 0%, rgba(19,12,10,0.45) 48%, rgba(19,12,10,0.2) 100%)",
+                  }}
+                />
+                <div className="relative z-10 flex h-full min-h-[380px] flex-col justify-between text-white lg:min-h-[440px]">
+                  <div className="inline-flex w-fit rounded-full bg-white/20 px-4 py-2 backdrop-blur">
+                    {heroSettings.note || "Свадебное приглашение"}
+                  </div>
+                  <div className="max-w-xl">
+                    <div
+                      style={{
+                        color: "#FFD6CE",
+                        fontWeight: 800,
+                        letterSpacing: "0.14em",
+                        fontSize: "clamp(12px, 1.2vw, 14px)",
+                      }}
+                    >
+                      {heroSettings.subtitle || "5-6 сентября 2026"}
+                    </div>
+                    <h1
+                      className="mt-5"
+                      style={{
+                        fontWeight: 900,
+                        fontSize: "clamp(36px, 6vw, 72px)",
+                        lineHeight: 0.92,
+                        letterSpacing: "-0.04em",
+                      }}
+                    >
+                      {heroSettings.title || "Иван и Анастасия"}
+                    </h1>
+                    <p
+                      className="mt-6 max-w-lg"
+                      style={{ lineHeight: 1.7, color: "rgba(255,255,255,0.88)", fontSize: "clamp(15px, 1.4vw, 17px)" }}
+                    >
+                      {heroSettings.description ||
+                        "Мы будем счастливы провести этот день вместе с вами и собрать вокруг себя самых близких людей."}
+                    </p>
+                    {heroSettings.buttonLabel ? (
+                      <a
+                        href={heroSettings.buttonHref || "#schedule"}
+                        className="mt-8 inline-flex items-center gap-2 rounded-full px-6 py-4 transition active:scale-[0.98]"
+                        style={{ background: CORAL, color: "white", fontWeight: 800 }}
+                      >
+                        {heroSettings.buttonLabel}
+                        <ArrowRight size={18} />
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-0 lg:grid-rows-[1.15fr_0.85fr]">
+                <div className="overflow-hidden bg-[#F6E8E4] min-h-[240px] lg:min-h-[300px]">
+                  <ImageWithFallback
+                    src={siteImages.heroSecondary}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div
+                  className="rounded-b-[28px] px-5 py-5 sm:px-6 sm:py-6 lg:rounded-none lg:px-8 lg:py-8"
+                  style={{ background: "linear-gradient(135deg, #FFF5F2 0%, #FFFFFF 100%)" }}
+                >
+                  <div style={{ color: CORAL, fontWeight: 800, letterSpacing: "0.16em", fontSize: 12 }}>
+                    {heroSettings.badge || "Wedding weekend"}
+                  </div>
+                  <div
+                    className="mt-4"
+                    style={{ fontWeight: 900, fontSize: "clamp(24px, 3vw, 40px)", lineHeight: 1.05 }}
+                  >
+                    {heroSettings.note || "Свадебное приглашение"}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -760,64 +837,7 @@ export default function App() {
           <Flower size={130} color={CORAL} className="hidden md:block absolute top-[62%] right-2 z-20 pointer-events-none" rotate={-20} style={{ opacity: 0.9 }} />
           <Flower size={100} color={PINK} className="hidden sm:block absolute bottom-24 left-2 z-20 pointer-events-none" rotate={45} />
 
-          <div className="relative z-10 max-w-7xl mx-auto bg-white overflow-hidden" style={{ borderRadius: "clamp(20px, 3vw, 36px) clamp(20px, 3vw, 36px) 0 0", boxShadow: "0 30px 80px rgba(0,0,0,0.25)" }}>
-
-            {/* HERO: NAMES + DANCE — wide editorial split */}
-            <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-0">
-              <div className="lg:col-span-7 relative aspect-[4/5] sm:aspect-[3/4] lg:aspect-auto lg:min-h-[700px] xl:min-h-[750px] overflow-hidden">
-                <ImageWithFallback src={siteImages.dance} alt="" className="w-full h-full object-cover" style={{ filter: "grayscale(100%) contrast(1.05)" }} />
-                <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.35) 100%)" }} />
-                <div
-                  className="absolute left-4 sm:left-6 lg:left-12 xl:left-16 top-[42%] px-5 sm:px-7 lg:px-9 py-2.5 sm:py-3 lg:py-3.5 text-white"
-                  style={{ background: CORAL, fontWeight: 900, letterSpacing: "0.15em", fontSize: "clamp(13px, 1.6vw, 18px)", transform: "rotate(-10deg)", boxShadow: "0 8px 24px rgba(232,90,79,0.35)", borderRadius: "8px" }}
-                >
-                  СВАДЬБА
-                </div>
-                <div
-                  className="absolute right-4 sm:right-6 lg:right-12 xl:right-16 bottom-4 sm:bottom-6 lg:bottom-12 xl:bottom-16 w-32 h-32 sm:w-36 sm:h-36 lg:w-44 lg:h-44 xl:w-48 xl:h-48 rounded-full flex flex-col items-center justify-center text-white text-center"
-                  style={{ background: CORAL, fontWeight: 800, boxShadow: "0 12px 32px rgba(0,0,0,0.3)", padding: "12px" }}
-                >
-                  {(heroSettings.subtitle || "5-6 сентября 2026").split(/\s+/).map((part, index) => (
-                    <div
-                      key={`${part}-${index}`}
-                      style={{
-                        fontSize: index === 1 ? "clamp(14px, 1.5vw, 18px)" : "clamp(16px, 1.8vw, 22px)",
-                        lineHeight: index === 1 ? 1 : 1.1,
-                        marginBottom: index === 0 ? "4px" : undefined,
-                        marginTop: index === 2 ? "4px" : undefined,
-                        fontWeight: index === 1 ? 800 : 900,
-                        letterSpacing: index === 1 ? "0.05em" : undefined,
-                      }}
-                    >
-                      {part}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="lg:col-span-5 px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12 xl:px-12 xl:py-14 flex flex-col justify-center relative">
-                <Flower size={90} color={PINK_LIGHT} className="hidden lg:block absolute top-8 right-8 pointer-events-none" rotate={20} style={{ opacity: 0.7 }} />
-                <div className="relative max-w-full">
-                  <div style={{ color: CORAL, fontWeight: 800, letterSpacing: "0.2em", fontSize: "clamp(12px, 1.4vw, 15px)", lineHeight: 1.4 }}>
-                    {heroSettings.subtitle || "5-6 сентября 2026"}
-                  </div>
-                  <h1 className="mt-4 sm:mt-6 lg:mt-8" style={{ fontWeight: 900, fontSize: "clamp(44px, 5.5vw, 82px)", lineHeight: 0.95, letterSpacing: "-0.03em" }}>
-                    {coupleNames.groom}
-                  </h1>
-                  <div className="my-2 sm:my-3 lg:my-4 flex items-center gap-2 sm:gap-3 lg:gap-4">
-                    <div className="h-px flex-1" style={{ background: INK }} />
-                    <span style={{ fontWeight: 800, fontSize: "clamp(16px, 2vw, 22px)", color: CORAL }}>&amp;</span>
-                    <div className="h-px flex-1" style={{ background: INK }} />
-                  </div>
-                  <h1 style={{ fontWeight: 900, fontSize: "clamp(38px, 4.8vw, 72px)", lineHeight: 0.95, letterSpacing: "-0.03em" }}>
-                    {coupleNames.bride}
-                  </h1>
-                  <p className="mt-6 sm:mt-8 lg:mt-10" style={{ fontSize: "clamp(15px, 1.4vw, 17px)", color: "#555", lineHeight: 1.6 }}>
-                    {heroSettings.description || "Будем счастливы видеть вас в этот день рядом."}
-                  </p>
-                </div>
-              </div>
-            </div>
+          <div className="relative z-10 max-w-7xl mx-auto bg-white overflow-hidden" style={{ borderRadius: "clamp(20px, 3vw, 36px)", boxShadow: "0 30px 80px rgba(0,0,0,0.25)" }}>
 
             {/* ДОРОГИЕ ДРУЗЬЯ + МЕСТО — two columns */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 border-t" style={{ borderColor: "#F0E8E8" }}>
