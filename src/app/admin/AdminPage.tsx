@@ -25,7 +25,8 @@ import { getGiftIconByKey, giftIconOptions } from "../shared/gift-icons";
 import AdminMediaLibrary from "./AdminMediaLibrary";
 import GalleryImagesEditor from "./GalleryImagesEditor";
 import SectionImagePicker from "./SectionImagePicker";
-import { sectionImageSlots, slugifySectionId } from "./admin-utils";
+import StoryItemsEditor from "./StoryItemsEditor";
+import { parseSectionItems, sectionImageSlots, serializeSectionItems, slugifySectionId } from "./admin-utils";
 import type {
   GiftBooking,
   GiftBookingMode,
@@ -110,7 +111,7 @@ const sectionExamples: Record<SiteSectionType, string> = {
   location: "Элементы не обязательны. Адрес и подсказки лучше писать в description и note.",
   schedule: "Пример строки: 15:00 | Сбор гостей | Встречаемся, знакомимся и начинаем вечер",
   "dress-code": "Пример строки: Пудровый |  |  | #F4B6BE",
-  story: "Пример строки: Первая встреча | Весна 2021 | Тёплый текст о вашем моменте",
+  story: "Для истории используйте редактор этапов ниже — у каждого пункта своё фото.",
   gallery: "Для галереи важнее список фото, а не элементы.",
   person: "Пример строки: Иван Иванов | Ведущий | Живой формат без кринжа и пафоса",
   gifts: "Элементы не используются, блок берет данные из каталога подарков.",
@@ -191,30 +192,6 @@ function parseTravelOptions(text: string): TravelOption[] {
 
 function formatTravelOptions(options: TravelOption[]) {
   return options.map((item) => item.label || item.value).join("\n");
-}
-
-function serializeSectionItems(items: SiteSectionItem[] = []) {
-  return items
-    .map((item) => [item.title, item.subtitle || "", item.text || "", item.extra || "", item.image || ""].join(" | "))
-    .join("\n");
-}
-
-function parseSectionItems(text: string) {
-  return text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [title = "", subtitle = "", body = "", extra = "", image = ""] = line.split("|").map((part) => part.trim());
-      return {
-        title,
-        subtitle,
-        text: body,
-        extra,
-        image,
-      };
-    })
-    .filter((item) => item.title);
 }
 
 function parseGalleryImages(text: string) {
@@ -1217,17 +1194,27 @@ export default function AdminPage() {
                 {imageSlots.items ? (
                 <div>
                   <h3 className="mb-4" style={{ fontWeight: 900, fontSize: 18 }}>
-                    Элементы списка
+                    {sectionForm.type === "story" ? "История пары" : "Элементы списка"}
                   </h3>
-                <label className="block">
-                  <FieldLabel>Элементы блока</FieldLabel>
-                  <TextArea
-                    rows={6}
-                    value={sectionForm.itemsText}
-                    onChange={(event) => setSectionForm({ ...sectionForm, itemsText: event.target.value })}
-                    placeholder={sectionExamples[sectionForm.type]}
-                  />
-                </label>
+                  {sectionForm.type === "story" ? (
+                    <StoryItemsEditor
+                      itemsText={sectionForm.itemsText}
+                      onChange={(itemsText) => setSectionForm((current) => ({ ...current, itemsText }))}
+                      uploads={uploadedImages}
+                      uploadBusy={uploadBusy}
+                      onUpload={uploadImageFile}
+                    />
+                  ) : (
+                    <label className="block">
+                      <FieldLabel>Элементы блока</FieldLabel>
+                      <TextArea
+                        rows={6}
+                        value={sectionForm.itemsText}
+                        onChange={(event) => setSectionForm({ ...sectionForm, itemsText: event.target.value })}
+                        placeholder={sectionExamples[sectionForm.type]}
+                      />
+                    </label>
+                  )}
                 </div>
                 ) : null}
 
