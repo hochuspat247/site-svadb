@@ -24,6 +24,24 @@ function normalizeGuest(guest: Guest): Guest {
 
 const API_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
 
+async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+  timeoutMs = 8000,
+) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(input, {
+      ...init,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 export async function registerGuest(data: {
   name: string;
   side: string;
@@ -104,7 +122,7 @@ export async function fetchGiftCatalog(): Promise<{
 
 export async function fetchSiteSections(): Promise<SiteSection[]> {
   try {
-    const response = await fetch(`${API_URL}/site-builder?ts=${Date.now()}`, {
+    const response = await fetchWithTimeout(`${API_URL}/site-builder?ts=${Date.now()}`, {
       cache: "no-store",
     });
     const result = await response.json();

@@ -341,12 +341,11 @@ export default function App() {
   }, [giftCategories, selectedCategory]);
 
   const loadData = async () => {
-    const [guests, bookings, wishes, catalog, sections] = await Promise.all([
+    const [guests, bookings, wishes, catalog] = await Promise.all([
       fetchGuests(),
       fetchGiftBookings(),
       fetchMusicWishes(),
       fetchGiftCatalog(),
-      fetchSiteSections(),
     ]);
 
     setAllGuests(guests);
@@ -355,11 +354,13 @@ export default function App() {
     setGiftCategories(catalog.categories);
     setGiftCatalog(catalog.gifts);
 
-    if (sections.length) {
-      setSiteSections(
-        mergeSiteSections(sections).sort((a, b) => a.sortOrder - b.sortOrder),
-      );
-    }
+    void fetchSiteSections().then((sections) => {
+      if (sections.length) {
+        setSiteSections(
+          mergeSiteSections(sections).sort((a, b) => a.sortOrder - b.sortOrder),
+        );
+      }
+    });
   };
 
   const sectionMap = useMemo(
