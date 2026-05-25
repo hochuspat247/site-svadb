@@ -54,7 +54,7 @@ export function fixMojibakeText(text?: string | null): string {
     }
 
     const decoded = new TextDecoder("utf-8").decode(new Uint8Array(bytes));
-    if (decoded && !decoded.includes("\uFFFD") && decoded !== trimmed) {
+    if (decoded.trim() && !decoded.includes("\uFFFD") && decoded !== trimmed) {
       return decoded;
     }
   } catch {

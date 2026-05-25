@@ -185,10 +185,6 @@ function GuestAvatar({ name, idx, isYou = false, photo }: { name: string; idx: n
 function GuestsBlock({ guests, currentGuestId, isRegistered }: { guests: any[]; currentGuestId: string | null; isRegistered: boolean }) {
   const groom = [...GROOM_GUESTS];
   const bride = [...BRIDE_GUESTS];
-  const debugGuests = guests.map((guest) => ({
-    name: fixMojibakeText(guest.name),
-    side: fixMojibakeText(guest.side),
-  }));
 
   guests.forEach((guest) => {
     const entry = {
@@ -247,21 +243,6 @@ function GuestsBlock({ guests, currentGuestId, isRegistered }: { guests: any[]; 
           <p className="max-w-2xl mx-auto px-4" style={{ fontSize: "clamp(14px, 1.3vw, 16px)", color: "#666", lineHeight: 1.6 }}>
             Самые близкие люди, которые разделят с нами этот день.
           </p>
-          <pre
-            className="mt-4 mx-auto max-w-4xl overflow-auto rounded-2xl px-4 py-3 text-left"
-            style={{ background: "#FBF6F4", color: "#555", fontSize: 12, lineHeight: 1.5, whiteSpace: "pre-wrap" }}
-          >
-            {JSON.stringify(
-              {
-                guestsCount: guests.length,
-                groomCount: groom.length,
-                brideCount: bride.length,
-                guests: debugGuests,
-              },
-              null,
-              2,
-            )}
-          </pre>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-12 lg:gap-12 xl:gap-16 relative">
