@@ -276,6 +276,42 @@ type CatalogGiftCard = WeddingGift & {
   Icon: React.ComponentType<{ size?: number; strokeWidth?: number; style?: React.CSSProperties }>;
 };
 
+const GUEST_SESSION_KEY = "wedding_guest_session";
+
+function readStoredGuestId() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(GUEST_SESSION_KEY);
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw);
+    return typeof parsed?.guestId === "string" ? parsed.guestId : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveStoredGuestId(guestId: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify({ guestId }));
+}
+
+function clearStoredGuestId() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem(GUEST_SESSION_KEY);
+}
+
 export default function App() {
   const [form, setForm] = useState({
     name: "",
@@ -289,6 +325,7 @@ export default function App() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isRegistered, setIsRegistered] = useState(false);
   const [currentGuestId, setCurrentGuestId] = useState<string | null>(null);
+  const [storedGuestId, setStoredGuestId] = useState<string | null>(() => readStoredGuestId());
   const [allGuests, setAllGuests] = useState<Guest[]>([]);
   const [giftCategories, setGiftCategories] = useState<GiftCategory[]>([]);
   const [giftCatalog, setGiftCatalog] = useState<WeddingGift[]>([]);
@@ -339,6 +376,51 @@ export default function App() {
       setSelectedCategory("all");
     }
   }, [giftCategories, selectedCategory]);
+
+  const restoreGuestSession = (guest: Guest) => {
+    const attend =
+      guest.attendanceLabel === "Приду один/одна" ||
+      guest.attendanceLabel === "Приду с парой" ||
+      guest.attendanceLabel === "Приду с семьёй" ||
+      guest.attendanceLabel === "Не смогу"
+        ? guest.attendanceLabel
+        : guest.willAttend
+          ? "Приду один/одна"
+          : "Не смогу";
+
+    const side =
+      guest.side === "Со стороны Ивана" || guest.side === "Со стороны Анастасии"
+        ? guest.side
+        : "";
+
+    setForm({
+      name: guest.name,
+      side,
+      attend,
+      guests: guest.guestNames || "",
+      photo: null,
+      drink: guest.drink || "",
+      allergy: guest.allergy || "",
+    });
+    setPhotoPreview(guest.photo || null);
+    setCurrentGuestId(guest.id);
+    setIsRegistered(true);
+  };
+
+  useEffect(() => {
+    if (!storedGuestId || currentGuestId || !allGuests.length) {
+      return;
+    }
+
+    const guest = allGuests.find((item) => item.id === storedGuestId);
+    if (!guest) {
+      clearStoredGuestId();
+      setStoredGuestId(null);
+      return;
+    }
+
+    restoreGuestSession(guest);
+  }, [storedGuestId, currentGuestId, allGuests]);
 
   const loadData = async () => {
     const [guestsResult, bookingsResult, wishesResult, catalogResult, sectionsResult] =
@@ -536,13 +618,32 @@ export default function App() {
     setIsLoading(false);
 
     if (result.success && result.guest) {
+      saveStoredGuestId(result.guest.id);
+      setStoredGuestId(result.guest.id);
+      restoreGuestSession(result.guest);
       setIsRegistered(true);
-      setCurrentGuestId(result.guest.id);
       showToast("Регистрация подтверждена! Теперь можно бронировать подарок");
       await loadData();
     } else {
       showToast(result.error || "Ошибка регистрации");
     }
+  };
+
+  const resetGuestSession = () => {
+    clearStoredGuestId();
+    setStoredGuestId(null);
+    setCurrentGuestId(null);
+    setIsRegistered(false);
+    setPhotoPreview(null);
+    setForm({
+      name: "",
+      side: "",
+      attend: "",
+      guests: "",
+      photo: null,
+      drink: "",
+      allergy: "",
+    });
   };
 
   const scrollToRsvp = () => {
@@ -1609,9 +1710,19 @@ export default function App() {
                 </div>
 
                 {isRegistered && (
-                  <div className="mt-5 flex items-center gap-3 px-4 py-3 rounded-2xl" style={{ background: "#E8F5E9", color: "#2E7D32" }}>
-                    <Check size={20} />
-                    <span style={{ fontWeight: 700, fontSize: 13 }}>Вы зарегистрированы! Спасибо</span>
+                  <div className="mt-5 flex flex-col gap-3 rounded-2xl px-4 py-3 sm:flex-row sm:items-center sm:justify-between" style={{ background: "#E8F5E9", color: "#2E7D32" }}>
+                    <div className="flex items-center gap-3">
+                      <Check size={20} />
+                      <span style={{ fontWeight: 700, fontSize: 13 }}>Вы зарегистрированы! Спасибо</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={resetGuestSession}
+                      className="rounded-full px-4 py-2 text-sm"
+                      style={{ background: "white", color: "#2E7D32", fontWeight: 800 }}
+                    >
+                      Это не я
+                    </button>
                   </div>
                 )}
 
