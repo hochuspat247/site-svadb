@@ -599,6 +599,11 @@ export default function App() {
       return;
     }
 
+    if (!photoPreview) {
+      showToast("Пожалуйста, загрузите фото");
+      return;
+    }
+
     setIsLoading(true);
     const willAttend = form.attend !== "Не смогу";
     const guestsCount = form.attend === "Приду с семьёй" ? 3 : form.attend === "Приду с парой" ? 2 : 1;
@@ -1810,7 +1815,7 @@ export default function App() {
 
                   <div>
                     <label style={{ fontSize: 11, letterSpacing: "0.08em", fontWeight: 800, color: "#555" }}>
-                      ВАШЕ ФОТО · ПО ЖЕЛАНИЮ
+                      ВАШЕ ФОТО *
                     </label>
                     <div className="mt-2 flex items-center gap-4">
                       <label
@@ -1825,7 +1830,7 @@ export default function App() {
                         <input type="file" accept="image/*" disabled={isRegistered} onChange={(e) => onPhoto(e.target.files?.[0] || null)} className="hidden" />
                       </label>
                       <div style={{ fontSize: 13, color: "#666", lineHeight: 1.5 }}>
-                        Загрузите портрет — он украсит стену гостей на нашем празднике.
+                        Загрузите портрет. Без фото отправить анкету не получится.
                       </div>
                     </div>
                   </div>
