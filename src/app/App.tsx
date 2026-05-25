@@ -341,26 +341,37 @@ export default function App() {
   }, [giftCategories, selectedCategory]);
 
   const loadData = async () => {
-    const [guests, bookings, wishes, catalog] = await Promise.all([
-      fetchGuests(),
-      fetchGiftBookings(),
-      fetchMusicWishes(),
-      fetchGiftCatalog(),
-    ]);
+    const [guestsResult, bookingsResult, wishesResult, catalogResult, sectionsResult] =
+      await Promise.allSettled([
+        fetchGuests(),
+        fetchGiftBookings(),
+        fetchMusicWishes(),
+        fetchGiftCatalog(),
+        fetchSiteSections(),
+      ]);
 
-    setAllGuests(guests);
-    setGiftBookings(bookings);
-    setMusicWishes(wishes);
-    setGiftCategories(catalog.categories);
-    setGiftCatalog(catalog.gifts);
+    if (guestsResult.status === "fulfilled") {
+      setAllGuests(guestsResult.value);
+    }
 
-    void fetchSiteSections().then((sections) => {
-      if (sections.length) {
-        setSiteSections(
-          mergeSiteSections(sections).sort((a, b) => a.sortOrder - b.sortOrder),
-        );
-      }
-    });
+    if (bookingsResult.status === "fulfilled") {
+      setGiftBookings(bookingsResult.value);
+    }
+
+    if (wishesResult.status === "fulfilled") {
+      setMusicWishes(wishesResult.value);
+    }
+
+    if (catalogResult.status === "fulfilled") {
+      setGiftCategories(catalogResult.value.categories);
+      setGiftCatalog(catalogResult.value.gifts);
+    }
+
+    if (sectionsResult.status === "fulfilled" && sectionsResult.value.length) {
+      setSiteSections(
+        mergeSiteSections(sectionsResult.value).sort((a, b) => a.sortOrder - b.sortOrder),
+      );
+    }
   };
 
   const sectionMap = useMemo(
