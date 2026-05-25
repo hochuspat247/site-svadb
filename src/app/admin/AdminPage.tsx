@@ -1435,7 +1435,17 @@ export default function AdminPage() {
                 </label>
                 <label className="block md:col-span-2">
                   <FieldLabel>Фото гостя (URL или data URL)</FieldLabel>
-                  <TextArea rows={2} value={guestForm.photo || ""} onChange={(event) => setGuestForm({ ...guestForm, photo: event.target.value || null })} />
+                  <div className="mt-2">
+                    <SectionImagePicker
+                      label="РџРѕСЂС‚СЂРµС‚ РіРѕСЃС‚СЏ"
+                      hint="Р—Р°РіСЂСѓР·РёС‚Рµ С„РѕС‚Рѕ СЃ РєРѕРјРїСЊСЋС‚РµСЂР° РёР»Рё РІС‹Р±РµСЂРёС‚Рµ РёР· РјРµРґРёР°С‚РµРєРё. РћРЅРѕ РїРѕСЏРІРёС‚СЃСЏ РІ Р±Р»РѕРєРµ РіРѕСЃС‚РµР№ РЅР° СЃР°Р№С‚Рµ."
+                      value={guestForm.photo || ""}
+                      onChange={(photo) => setGuestForm({ ...guestForm, photo: photo || null })}
+                      uploads={uploadedImages}
+                      uploadBusy={uploadBusy}
+                      onUpload={uploadImageFile}
+                    />
+                  </div>
                 </label>
                 <label className="flex items-center gap-3 rounded-2xl border border-[#f0e8e8] px-4 py-3 md:col-span-2">
                   <input
