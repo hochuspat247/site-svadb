@@ -193,9 +193,20 @@ function GuestsBlock({ guests, currentGuestId, isRegistered }: { guests: any[]; 
       isYou: guest.id === currentGuestId,
       photo: guest.photo,
     };
-    const side = fixMojibakeText(guest.side);
-    if (side === "Со стороны Ивана") groom.push(entry as any);
-    else if (side === "Со стороны Анастасии") bride.push(entry as any);
+    const side = fixMojibakeText(guest.side)
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+
+    if (side === "со стороны ивана" || side.includes("иван") || side.includes("жених")) {
+      groom.push(entry as any);
+    } else if (
+      side === "со стороны анастасии" ||
+      side.includes("анастаси") ||
+      side.includes("невест")
+    ) {
+      bride.push(entry as any);
+    }
   });
 
   const Column = ({ title, who, list, color }: any) => (

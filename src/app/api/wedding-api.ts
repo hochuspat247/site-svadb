@@ -62,7 +62,9 @@ export async function registerGuest(data: {
 
 export async function fetchGuests(): Promise<Guest[]> {
   try {
-    const response = await fetch(`${API_URL}/guests`);
+    const response = await fetch(`${API_URL}/guests?ts=${Date.now()}`, {
+      cache: "no-store",
+    });
     const result = await response.json();
 
     if (!response.ok) {
