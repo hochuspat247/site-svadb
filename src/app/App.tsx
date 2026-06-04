@@ -340,6 +340,7 @@ export default function App() {
   const [showAllGifts, setShowAllGifts] = useState(false);
   const [giftPreviewLimit, setGiftPreviewLimit] = useState(6);
   const [siteSections, setSiteSections] = useState<SiteSection[]>(defaultSiteSections);
+  const [isInitialDataLoaded, setIsInitialDataLoaded] = useState(false);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -423,36 +424,40 @@ export default function App() {
   }, [storedGuestId, currentGuestId, allGuests]);
 
   const loadData = async () => {
-    const [guestsResult, bookingsResult, wishesResult, catalogResult, sectionsResult] =
-      await Promise.allSettled([
-        fetchGuests(),
-        fetchGiftBookings(),
-        fetchMusicWishes(),
-        fetchGiftCatalog(),
-        fetchSiteSections(),
-      ]);
+    try {
+      const [guestsResult, bookingsResult, wishesResult, catalogResult, sectionsResult] =
+        await Promise.allSettled([
+          fetchGuests(),
+          fetchGiftBookings(),
+          fetchMusicWishes(),
+          fetchGiftCatalog(),
+          fetchSiteSections(),
+        ]);
 
-    if (guestsResult.status === "fulfilled") {
-      setAllGuests(guestsResult.value);
-    }
+      if (guestsResult.status === "fulfilled") {
+        setAllGuests(guestsResult.value);
+      }
 
-    if (bookingsResult.status === "fulfilled") {
-      setGiftBookings(bookingsResult.value);
-    }
+      if (bookingsResult.status === "fulfilled") {
+        setGiftBookings(bookingsResult.value);
+      }
 
-    if (wishesResult.status === "fulfilled") {
-      setMusicWishes(wishesResult.value);
-    }
+      if (wishesResult.status === "fulfilled") {
+        setMusicWishes(wishesResult.value);
+      }
 
-    if (catalogResult.status === "fulfilled") {
-      setGiftCategories(catalogResult.value.categories);
-      setGiftCatalog(catalogResult.value.gifts);
-    }
+      if (catalogResult.status === "fulfilled") {
+        setGiftCategories(catalogResult.value.categories);
+        setGiftCatalog(catalogResult.value.gifts);
+      }
 
-    if (sectionsResult.status === "fulfilled" && sectionsResult.value.length) {
-      setSiteSections(
-        mergeSiteSections(sectionsResult.value).sort((a, b) => a.sortOrder - b.sortOrder),
-      );
+      if (sectionsResult.status === "fulfilled" && sectionsResult.value.length) {
+        setSiteSections(
+          mergeSiteSections(sectionsResult.value).sort((a, b) => a.sortOrder - b.sortOrder),
+        );
+      }
+    } finally {
+      setIsInitialDataLoaded(true);
     }
   };
 
@@ -746,6 +751,25 @@ export default function App() {
       showToast(result.error || "Ошибка отправки");
     }
   };
+
+  if (!isInitialDataLoaded) {
+    return (
+      <div
+        style={{ ...font, color: INK, background: "linear-gradient(135deg, #FFF8F5 0%, #FDF1ED 100%)" }}
+        className="min-h-screen w-full flex items-center justify-center px-6"
+      >
+        <div className="text-center max-w-sm">
+          <div className="mx-auto w-16 h-16 rounded-full border-4 border-white/90 border-t-[#E85A4F] animate-spin" />
+          <div className="mt-6" style={{ fontWeight: 900, fontSize: "clamp(24px, 6vw, 36px)", letterSpacing: "-0.03em" }}>
+            Загружаем приглашение
+          </div>
+          <p className="mt-3" style={{ color: "#6B5B57", lineHeight: 1.6, fontSize: "clamp(14px, 3.4vw, 16px)" }}>
+            Сначала дождёмся актуальных данных, чтобы страница сразу открылась в новой версии.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ ...font, color: INK }} className="min-h-screen w-full relative overflow-x-hidden">

@@ -102,7 +102,9 @@ export async function fetchGiftCatalog(): Promise<{
   gifts: WeddingGift[];
 }> {
   try {
-    const response = await fetch(`${API_URL}/gifts`);
+    const response = await fetch(`${API_URL}/gifts?ts=${Date.now()}`, {
+      cache: "no-store",
+    });
     const result = await response.json();
 
     if (!response.ok) {
@@ -171,7 +173,9 @@ export async function bookGift(data: {
 
 export async function fetchGiftBookings(): Promise<GiftBooking[]> {
   try {
-    const response = await fetch(`${API_URL}/gift-bookings`);
+    const response = await fetch(`${API_URL}/gift-bookings?ts=${Date.now()}`, {
+      cache: "no-store",
+    });
     const result = await response.json();
 
     if (!response.ok) {
@@ -216,7 +220,9 @@ export async function addMusicWish(data: {
 
 export async function fetchMusicWishes(): Promise<MusicWish[]> {
   try {
-    const response = await fetch(`${API_URL}/music`);
+    const response = await fetch(`${API_URL}/music?ts=${Date.now()}`, {
+      cache: "no-store",
+    });
     const result = await response.json();
 
     if (!response.ok) {
